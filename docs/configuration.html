@@ -1,0 +1,163 @@
+<html>
+<head>
+<title>OIOSAML.java configuration</title>
+        <style type="text/css">
+    	body {background-color: white; margin: 20px;}
+    	body, tr, td {font-family: Verdana, Helvetica, sans-serif; color: #456974;}
+    	div#pagecontainer {width: 80%;}
+    	h1, h2, h3, h4 {color: #76c2bc; border-bottom: 1px solid #76c2bc;}
+    	.monospace {font-family: monospace;}
+    	legend {font-weight: bold;}
+    	fieldset {margin-top: 10px; margin-bottom: 10px;}
+    	span.emphasis {font-weight: bold;}
+    </style>
+</head>
+<body>
+
+<h2>OIOSAML.java configuration</h2>
+
+<p>This section covers configuration of OIOSAML.java. The configuration contains these elements:</p>
+<ul>
+	<li>OIOSAML.java properties</li>
+	<li>IdP metadata</li>
+	<li>Service Provider metadata</li>
+	<li>Keystore with SP private key</li>
+</ul>
+
+<p>The files are placed in ${user.home}/.oiosaml by default. This can be overwritten with an init parameter in web.xml called oiosaml-j.home (see snippet below). The configuration dir 
+must then contain all the necessary files. If the dir is empty, autoconfiguration is possible. See the section
+on autoconfiguration below for more information.</p>
+
+<pre>
+&lt;env-entry&gt;
+    &lt;env-entry-name&gt;oiosaml-j.home&lt;/env-entry-name&gt;
+    &lt;env-entry-value&gt;/home/saml/env/&lt;/env-entry-value&gt;
+    &lt;env-entry-type&gt;java.lang.String&lt;/env-entry-type&gt;
+&lt;/env-entry&gt;
+</pre>
+
+<p>Alternatively, it is possible to configure an application name, which is appended to oiosaml-j.home or the default directory (${user.home}/.oiosaml) in case oiosaml-j.home is not specified.
+This can be useful when deploying multiple OIOSAML applications to the same container. In this case, each application must have its own configuration
+dir, but setting the oiosaml-j.home parameter can be tedious, especially when on a large project with source control. To set the application
+name, insert a env-entry in web.xml. The example below will result in a configuration dir called {oiosaml-j.home}-application1 or ${user.home}/.oiosaml-application1 if oiosaml-j.home is not specified.</p>
+
+<pre>
+&lt;env-entry&gt;
+    &lt;env-entry-name&gt;oiosaml-j.name&lt;/env-entry-name&gt;
+    &lt;env-entry-value&gt;application1&lt;/env-entry-value&gt;
+    &lt;env-entry-type&gt;java.lang.String&lt;/env-entry-type&gt;
+&lt;/env-entry&gt;
+</pre>
+
+
+<p>The structure in oiosaml-j.home looks like this:</p>
+<pre>
+oiosaml-j.home/
+  certificates/
+    keystore
+  metadata/
+    SP/
+      SPMetadata.xml
+    IdP/
+      IdPMetadata.xml
+  oiosaml-sp.properties
+  oiosaml-sp.log4j.xml
+</pre>
+
+<p>oiosaml-sp.properties contains runtime properties used by OIOSAML.java. The available properties are listed below.</p>
+<p>By default, SP metadata must be placed in metadata/SP/SPMetadata.xml, but this location can be overwritten in oiosaml-sp.properties. 
+IdP metadata files can be given any name, but must end with .xml and be placed in metadata/IdP/.</p>
+<p>The configuration files are not reloaded automatically when they are changed.</p>
+
+
+<h3>Autoconfiguration</h3>
+<p>To aid in the initial configuration of the Service Provider, OIOSAML.java provides an autoconfigure mechanism. If oiosaml-j.home points to an empty dir or a dir that does not exist, autoconfigure is enabled.
+Any requests passing through the filter will be redirected to a configuration page. This page is also accessible through saml/configure, relative to where the application is deployed.</p>
+<p>Autoconfiguration is only available when oiosaml-j.home is empty or does not exist. The mechanism automatically creates SPMetadata.xml and oiosaml-j.properties files based on
+the values entered.</p>
+<p>When the autoconfig process has finished, the configuration files will be written automatically to oiosaml-j.home. If the server process does not have access to the dir, 
+a zip file can be downloaded instead and unzipped to oiosaml-j.home. The servlet will reload the configuration automatically after the configuration process has finished.</p>  
+
+
+<h3>Configuration parameters</h3>
+<p>The following parameters are available in oiosaml-sp.properties. Not all properties are defined by default. All file paths are relative to oiosaml-j.home.</p>
+<ul>
+<li>oiosaml-sp.certificate.location: Location of the keystore containing the SP's private key</li>
+<li>oiosaml-sp.certificate.password: Password for the keystore and the private key</li>
+<li>oiosaml-sp.assurancelevel: Required assurance level. See OIOSAML for definition of valid levels. If an authenticated user has an assurance level lower than this value, access to the SP is denied. Set to 0 if assurancelevel should be ignored.</li>
+<li>oiosaml-sp.resolve.ignorecert: Set to true to ignore certificate validation errors when using a SOAP backchannel to the IdP (used for ArtifactResolve requests)</li>
+<li>oiosaml-sp.resolve.username: Username to use when using a SOAP backchannel to the IdP (used for ArtifactResolve requests)</li>
+<li>oiosaml-sp.resolve.password: Password for SOAP backchannel</li>
+<li>oiosaml-sp.http.proxy.host: Hostname or IP address of HTTP proxy.</li>
+<li>oiosaml-sp.http.proxy.port: Port number on HTTP proxy.</li>
+<li>oiosaml-sp.discovery: URL pointing to the OIOSAML discovery service. Only relevant when multiple IdPs are configured.</li>
+<li>oiosaml-sp.discovery.default: The IdP entity ID to use for SSO if none was discovered using the discovery service.</li>
+<li>oiosaml-sp.discovery.prompt: Set to false to turn off user prompting when no IdP can be discovered automatically. This is not used if oiosaml-sp.discovery.default is set</li>
+<li>oiosaml-sp.discovery.prompt.servlet: Local servlet to use when prompting user for IdP. See <a href="discovery.html">the discovery page</a> for more information.</li>  
+<li>oiosaml-sp.crl.period: How often the IdP revocation check should be activated in seconds. Set value to 0 in order to disable revocation check. Setting value to 0 should only be used in test environments in order to support self signed certificates. The default value is 600 (10 minutes). </li>
+<li>oiosaml-sp.crl.&lt;entityId&gt;: Location of the CRL for a specific IdP, specified by entityId. This overwrites the CRL from the certificate's CRLDistributionPoint extension value.</li>
+<li>oiosaml-sp.crl.truststore: Location of the truststore used for checking the CRL signature. The path is relative to oiosaml.home. If more than one IdP is used, the truststore should contain certificates for all CRL issuers.</li>
+<li>oiosaml-sp.crl.truststore.password: Password for the CRL truststore.</li>
+<li>oiosaml-sp.ocsp.ca: URL pointing to public certificate for Certificate Authority. Used for validating OCSP responses.</li>
+<li>oiosaml-sp.ocsp.responder: URL pointing to OCSP responder. Only used to validate IdP certificate.</li>
+<li>oiosaml-sp.cb.attempts.before.opening: The number of failures doing CRL or OCSP check that will be tolerated (i.e. the number of failures has to be strictly greater than this number in order to trip the breaker). For example, if the limit is 3, the fourth failure during the window (oiosaml-sp.cb.attempts.within.in.second) will cause the breaker to trip. Default value 3</li>
+<li>oiosaml-sp.cb.attempts.within.in.seconds: Length of the window in seconds. Default value: 60</li>
+<li>oiosaml-sp.cb.reset.time.in.seconds: Length of the reset period in seconds. The circuit breaker will open and reject CRL and OCSP calls when to many attempts has been made within the configured window. When reset period is ended the circuit breaker will close and again accept CRL and OCSP checks. Default value: 300</li>
+<li>oiosaml-sp.cb.delay.between.attempts.in.seconds: Delay between attempts in seconds. Default value: 5</li>
+<li>oiosaml-sp.remain.valid.period.in.seconds: Certificates that first have been validated successfully will remain valid for a configured period of time in seconds in case network errors should occur. If a successful CRL or OCSP call specifies that a certificate is revoked ... then the certificate will be marked as invalid immediately. Default value: 3600 (one hour) which corresponds to the maximum time between revocation checks in the "Certifikatpolitik for NemLog-in" version 1.2</li>
+<li>oiosaml-sp.encryption.force: Only allow encrypted assertions to be processed. If set to false, unencrypted assertions are allowed, but encrypted assertions are still supported.</li>
+<li>oiosaml-sp.nameid.policy: Value to use as NameIDPolicy format in AuthnRequests. Set to persistent or transient. Defaults to blank, ie no NameIDPolicy is sent.</li>
+<li>oiosaml-sp.nameid.allowcreate: Set to true to allow creation of new identifiers. Only relevant when NameID policy has been set.</li>
+<li>oiosaml-sp.authn.force: A comma separated list of regular expressions for urls which must have ForceAuthn set to true. The url tested is the value of <a href="http://java.sun.com/j2ee/1.4/docs/api/javax/servlet/http/HttpServletRequest.html#getPathInfo()">HttpServletRequest.getPathInfo()</a>.</li>
+<li>oiosaml-sp.passive: Set to true to enable passive mode (IsPassive). Defaults to false.</li>
+<li>oiosaml-sp.passive.user: User id used for the anonymous user when passive mode is enabled.</li>
+<li>oiosaml-sp.errors: Path to the servlet handling errors. This uses the same mechanism as POSTDispatchServlet below. Default is to use an internal error page. When the page is called, the request contains two attributes: "error" is a String containing an error message, "exception" is the exception thrown. The exception can be null.</li>
+<li>common.saml2.metadata.sp.directory: Directory containing SP metadata. Defaults to ./metadata/SP</li>
+<li>common.saml2.metadata.sp.filename: Name of the SP metadata file. Defaults to SPMetadata.xml</li>
+<li>common.saml2.metadata.idp.directory: Directory containing IdP metadata. Defaults to ./metadata/IdP</li>
+<li>POSTDispatchPath: Path to the servlet handling POST login forms. Defaults to /postlogin.jsp. This servlet is called when a user is redirected to the IdP using the HTTP POST binding. 
+The servlet receives 3 attributes in the request: SAMLRequest, action, and RelayState. With these values, it's possible to construct a POST form. The value of this property is used with 
+<a href="http://java.sun.com/j2ee/1.4/docs/api/javax/servlet/ServletRequest.html#getRequestDispatcher(java.lang.String)">ServletRequest.getRequestDispatcher()</a></li>
+<li>common.saml2.loggedinhandler.numusedassertionids: Number of assertion ids remembered for protection against replay attacks. Defaults to 1000.</li>
+<li>oiosaml-sp.servet: Path to the DispatcherServlet. Defaults to /saml. If the DispatcherServlet is mapped to another URL, this value must also be changed.</li>
+<li>oiosaml-sp.bindings: List of supported bindings to use. These will be matched against the IdP metadata to select the proper SingleSignonLocation.
+Defaults to artifact,post,redirect,soap.</li>
+<li>oiosaml-sp.assertion.validator: FQCN of a class which implements dk.itst.oiosaml.sp.model.validation.AssertionValidator. This class is then used to perform validation of received assertions. See <a href="developers.html">developer's guide</a> for more information.</li>
+<li>oiosaml-sp.sessionhandler.factory: FQCN of a class which implements dk.itst.oiosaml.sp.service.session.SessionHandlerFactory. This class is responsible for handling session state across requests and instances. See <a href="developers.html">developer's guide</a> for more information.</li>
+<li>oiosaml-sp.repost: Path to a servlet handling reposting of requests after authentication. See <a href="developers.html">developer's guide</a> for more information.</li>
+<li>oiosaml-sp.authenticationhandler: FQCN of a class implementing dk.itst.oiosaml.sp.AuthenticationHandler. This class is instantiated and invoked when a new user is authenticated (ie a valid saml assertion is received).</li>
+<li>oiosaml-sp.develmode: Enable or disable developer mode. See <a href="developers.html">developer's guide</a> for more information.</li>
+<li>oiosaml-sp.showerror: Enable or disable detailed errormessages and stacktraces shown in the browser - should ALWAYS be false in production.</li>
+<li>oiosaml-sp.signature.algorithm: Set signature algorithm. Defaults to 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256', but can be configured to 'http://www.w3.org/2000/09/xmldsig#rsa-sha1' as well.</li>
+<li>oiosaml-sp.selfsignedcertificates: Enable or disable support for self-signed certificates. Defaults to false.</li>
+<li>oiosaml-cp.crl.disable-in-oces-test: Disable revocation check on certificates from the OCES test environment (the revocation services are behind a firewall). Defaults to true.</li>
+<li>oiosaml-sp.enable.authncontextclassref.request: Enable requesting a specific profile or assurance level in the AuthnRequest. This is disabled by default, and can be enabled by setting this property to true. Note that certain IdPs (e.g. AD FS) will break if this feature is enabled.</li>
+<li>oiosaml-sp.requested.profile: To enable validation of the eid profiles (Person or Professional), set this value to either https://data.gov.dk/eid/Person or https://data.gov.dk/eid/Professional. If this value is set, and the oiosaml-sp.enable.authncontetclassref.request setting is set to true, then the AuthnRequest will also contain the requested profile. The default value is blank, that is no requested profile.</li>
+<li>oiosaml-sp.nsislevel: If this value is set, login is only allowed if the issued assertion contains at least the configured NSIS assurancelevel. This setting can be used together with oiosaml-sp.assurancelevel, in which case just one of the requirements must be met for the user to successfully login. The legal values are https://data.gov.dk/concept/core/nsis/loa/Low, https://data.gov.dk/concept/core/nsis/loa/Substantial, https://data.gov.dk/concept/core/nsis/loa/High. The default value is blank</li>
+</ul>
+
+<h3>Service Provider Metadata</h3>
+<p>OIOSAML.java uses a static metadata file placed in oiosaml-.home/metadata/SP/SPMetadata.xml. Relevant data is read from this file, and
+the file can be freely modified. Metadata can be downloaded online from the saml/metadata servlet. When downloading metadata online, the
+metadata will be signed with the SP credentials. If an unsigned version is needed, add ?unsigned=true to the url.</p>
+
+<h3>Service Provider Certificate</h3>
+<p>In case the SP certificate is needed, it is possible to access the saml/certificate servlet, which will output a Base64-encoded certificate
+which can be saved to a file.</p>
+
+<h3>Endpoint urls</h3>
+<p>The following protocol endpoints are published by the OIOSAML.java servlet:</p>
+<ul>
+<li>ArtifactResolutionService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact": /saml/SAMLAssertionConsumer</li>
+<li>SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect": /saml/LogoutServiceHTTPRedirect, responseLocation: /saml/LogoutServiceHTTPRedirectResponse</li>
+<li>SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP": /saml/LogoutServiceSOAP</li>
+<li>AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST": /saml/SAMLAssertionConsumer</li>
+<li>AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact": /saml/SAMLAssertionConsumer</li>
+<li>AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect": /saml/SAMLAssertionConsumer</li>
+</ul>
+
+<p>When requesting authentication, the AssertionConsumerService binding which has isDefault="true" is used for the AuthnRequest protocolBinding. If none has isDefault="true", the first is used. The protocol
+used for the AuthnRequest itself is selected based on the oiosaml-sp.bindings setting (see above).</p> 
+
+</body>
+</html>

@@ -1,0 +1,79 @@
+<html>
+<head>
+<title>OIOSAML.java clustering information</title>
+        <style type="text/css">
+    	body {background-color: white; margin: 20px;}
+    	body, tr, td {font-family: Verdana, Helvetica, sans-serif; color: #456974;}
+    	div#pagecontainer {width: 80%;}
+    	h1, h2, h3, h4 {color: #76c2bc; border-bottom: 1px solid #76c2bc;}
+    	.monospace {font-family: monospace;}
+    	legend {font-weight: bold;}
+    	fieldset {margin-top: 10px; margin-bottom: 10px;}
+    	span.emphasis {font-weight: bold;}
+    </style>
+</head>
+<body>
+
+<h1>OIOSAML.java Clustering</h1>
+
+<p>Part of the state required for OIOSAML.java to work is stored in static variables by default. This means that the implementation is not
+cluster safe. However, the default implementation can be changed, so it is possible to implement a safe state storage instead. The
+relevant interface is dk.itst.oiosaml.sp.service.session.SessionHandler. The concrete type which is used at runtime is controlled by the
+configuration property oiosaml-sp.sessionhandler.factory, which holds the class name of a class implementing the SessionHandlerFactory interface.
+Implementations of the Factory interface are responsible to creating new instances of SessionHandlers.
+</p>
+
+<p>The following SessionHandler implementations are available in the standard distribution:</p>
+
+<h2>SingleVMSessionHandler &amp; SingleVMSessionHandlerFactory</h2>
+<p>This handler uses static maps to save all session state. This means that it is not suited for a distributed environment. However, it's fast and 
+efficient, and should be used whenever OIOSAML.java is installed on a single server. This is the default handler which is used if nothing else is configured.</p>
+<p>To use, set oiosaml-sp.sessionhandler.factory=dk.itst.oiosaml.sp.service.session.SingleVMSessionHandlerFactory</p>
+
+<h2>JdbcSessionHandler &amp; JndiFactory</h2>
+<p>This handler uses a JDBC connection to store session state. All instances must then be configured to use the same storage. The factory
+uses JNDI to retrieve a DataSource.</p>
+
+<p>To work, a number of tables must be created. Below are example scripts for MySQL. Other databases should work too, as the schema is very simple, and 
+no complex queries are executed.</p>
+
+<p>To use this factory, set oiosaml-sp.sessionhandler.factory=dk.itst.oiosaml.sp.service.session.jdbc.JndiFactory and set oiosaml-sp.sessionfactory.jndi
+to point to the JNDI name of the DataSource.</p>
+
+<h3>MySQL</h3>
+<pre>
+create table assertions (
+    id varchar(255) not null primary key, 
+    assertion text not null, 
+    assertionid varchar(255) not null unique, 
+    sessionindex varchar(255) not null unique, 
+    timestamp timestamp not null
+);
+
+create table requestdata (
+    id varchar(255) not null primary key, 
+    data text not null, 
+    timestamp timestamp not null
+);
+
+create table requests (
+    id varchar(255) not null primary key, 
+    receiver text not null, 
+    timestamp timestamp not null
+);
+</pre>
+
+<h3>JdbcSessionHandler &amp; Jcbcfactory</h3>
+<p>Same SessionHandler as above, but with this factory, a connection is opened manually instead of going through a DataSource in JNDI. The database
+schema must be configured as above. Futhermore, the following properties must be set:</p>
+<ul>
+<li>oiosaml-sp.sessionhandler.factory=dk.itst.oiosaml.sp.service.session.jdbc.JndiFactory</li>
+<li>oiosaml-sp.sessionhandler.jdbc.url: JDBC url to use for the connetion</li>
+<li>oiosaml-sp.sessionhandler.jdbc.driver: Driver class name to use</li>
+<li>oiosaml-sp.sessionhandler.jdbc.username</li>
+<li>oiosaml-sp.sessionhandler.jdbc.password</li>
+</ul>
+
+
+</body>
+</html>

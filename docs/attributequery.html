@@ -1,0 +1,42 @@
+<html>
+<head>
+<title>OIOSAML.java Attribute Query</title>
+        <style type="text/css">
+    	body {background-color: white; margin: 20px;}
+    	body, tr, td {font-family: Verdana, Helvetica, sans-serif; color: #456974;}
+    	div#pagecontainer {width: 80%;}
+    	h1, h2, h3, h4 {color: #76c2bc; border-bottom: 1px solid #76c2bc;}
+    	.monospace {font-family: monospace;}
+    	legend {font-weight: bold;}
+    	fieldset {margin-top: 10px; margin-bottom: 10px;}
+    	span.emphasis {font-weight: bold;}
+    </style>
+</head>
+<body>
+
+<h1>OIOSAML Attribute Query</h1>
+
+<p>The Attribute Query support allows developers to query the IdP for additional attributes for a user. This is done using the class
+dk.itst.oiosaml.sp.UserAttributeQuery. This class can be instantiated without any arguments. In that case, it is assumed that
+there is an assertion set in the session, and that the query will be performed against the IdP which has issued the assertion.</p>
+
+<p>If username/password authentication is required, use the constructor which takes two strings. If the default constructor is used,
+or the username is set to null, no authentication will be performed.</p>
+
+<p>Requests are always signed, and the usual validation policy is used for the response. That means that the response must be 
+signed, and the returned assertion must be encrypted unless the property oiosaml-sp.encryption.force is set to false.</p>
+
+<h2>Performing queries</h2>
+<p>Queries are executed by calling UserAttributeQuery.query. This method takes the nameId of the principal to request 
+attributes for, and a list of attributes to retrieve.</p>
+
+<p>If the request fails validation, a ValidationException will be thrown. If the communication fails, an IOException will be thrown.
+Validation will also fail if the IdP does not respond with a Success status code - this can happen if the requested attribute does not exist,
+or if the IdP is unwilling to send the attribute value.
+</p>
+
+ 
+
+
+</body>
+</html>

@@ -1,0 +1,4 @@
+<h1>Your aplication is already configured</h1>
+
+<p>oiosaml-j.home points to $home, which either does not exist or is not empty. This means that the configuration cannot proceed.
+If you really want to configure, remove all files from $home or create it if it does not exist.</p>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!-- List of references to where properties are kept -->
+<configuration>
+  <system/>
+  <properties fileName="${oiosaml.home}/oiosaml-sp.properties"/>
+  <properties fileName="oiosaml-common.properties"/>
+   <!-- More properties (files, xml, database tables) can be added here at a later stage -->
+</configuration>

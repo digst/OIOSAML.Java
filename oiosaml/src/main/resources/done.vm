@@ -1,0 +1,21 @@
+<h1>Configuration done</h1>
+
+<strong>
+#if ($written)
+  The configuration has been written to '$home' automatically.
+#else
+  The configuration could not be written to '$home'. Please download the configuration below and unzip it in $home.
+#end
+</strong>
+
+<h2>Important</h2>
+<p>Please note that SAML requires that Service Providers are registered in the Identity Provider before SSO can take place.
+Refer to your Identity Provider for information on how to register your new Service Provider.</p>
+
+<ul>
+	<li><a href="configure?download">Download zip file with all configuration files and certificates</a></li>
+</ul>
+
+<p>
+<a href="../">Return to the main page</a>
+</p>

@@ -1,0 +1,44 @@
+<html>
+<head>
+<title>OIOSAML.java logging</title>
+        <style type="text/css">
+    	body {background-color: white; margin: 20px;}
+    	body, tr, td {font-family: Verdana, Helvetica, sans-serif; color: #456974;}
+    	div#pagecontainer {width: 80%;}
+    	h1, h2, h3, h4 {color: #76c2bc; border-bottom: 1px solid #76c2bc;}
+    	.monospace {font-family: monospace;}
+    	legend {font-weight: bold;}
+    	fieldset {margin-top: 10px; margin-bottom: 10px;}
+    	span.emphasis {font-weight: bold;}
+    </style>
+</head>
+<body>
+
+<h1>Logging in OIOSAML.java</h1>
+
+<p>Logging is handled by dk.itst.oiosaml.logging.Logger interface. The logger is initialized with a name. The name can either be a full class name (e.g. dk.itst.oiosaml.logging.LoggerFactory)
+    or 'OIOSAML_AUDIT_LOGGER'. OIOSAML.java comes with a default implementation that uses <a href="http://logging.apache.org/log4j/">Log4j</a>. The default implementation creates two types of
+    logs: The system log (all loggers starting with the name 'dk.itst.oiosaml') which logs runtime information about the processing of requests and responses, and an audit log (loggers with
+    the name 'OIOSAML_AUDIT_LOGGER')  which logs information about users.</p>
+
+<p>The system log is mostly interesting when something fails. It will contain stack traces, and if set to debug level, al requests and responses will be logged.</p>
+<p>The audit log is interesting when tracking users. It contains information about when AuthnRequests are issued, when responses are returned, and when users are logged in and out.</p>
+
+
+<h2>Configuring default logging implementation (log4j)</h2>
+
+<p>Logging is configured in ${oiosaml.j.home}/oiosaml-sp.log4j.xml. This file only contains logging configuration for OIOSAML.java itself - application logging should be kept outside.</p>
+
+<p>By default, log events are sent to the console and a file in ${oiosaml.j.home}/logs.</p>
+
+<h2>Creating your own logging implementation</h2>
+
+<p>It is possible to use your own logging implementation. The following two things must be done:</p>
+<ul>
+    <li>The implementation must implement the dk.itst.oiosaml.logging.Logger inteface</li>
+    <li>Make sure all proper initialization is done in init(String name). Be sure that the implementation is thread safe.</li>
+    <li>The META-INF\services\dk.itst.oiosaml.logging.Logger file inside oiosaml.java-XXX.jar must be updated to reference the new implementation instead of the default log4j implementation.</li>
+</ul>
+
+</body>
+</html>

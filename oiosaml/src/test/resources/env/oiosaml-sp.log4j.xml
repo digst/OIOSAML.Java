@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "http://logging.apache.org/log4j/docs/api/org/apache/log4j/xml/log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/" debug="false">
+	<!-- ================================= -->
+	<!-- Preserve messages in a local file -->
+	<!-- Modify only this appender         -->
+	<!-- ================================= -->
+
+	<!-- A time/date based rolling appender -->
+	<appender name="FILE"
+		class="org.apache.log4j.RollingFileAppender">
+		<param name="File" value="${oiosaml.home}/logs/oiosaml-sp.log" />
+		<param name="MaxFileSize" value="10MB" />
+		<param name="MaxBackupIndex" value="3" />
+		<param name="Threshold" value="DEBUG" />
+		<param name="Append" value="true" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<!-- The debug pattern: Date Priority [Thread] [LoggerName] Message -->
+			<param name="ConversionPattern"
+				value="[%d{yyyy-MM-dd HH:mm:ss,SSS}] [%-5p] [%t] [%c] %m%n" />
+		</layout>
+	</appender>
+
+	<appender name="AUDIT"
+		class="org.apache.log4j.RollingFileAppender">
+		<param name="File" value="${oiosaml.home}/logs/oiosaml-sp-audit.log" />
+		<param name="MaxFileSize" value="10MB" />
+		<param name="MaxBackupIndex" value="3" />
+		<param name="Threshold" value="DEBUG" />
+		<param name="Append" value="true" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<!-- The debug pattern: Date Priority [Thread] [LoggerName] Message -->
+			<param name="ConversionPattern"
+				value="[%d{yyyy-MM-dd HH:mm:ss,SSS}] [%-5p] [%t] [%c] %m%n" />
+		</layout>
+	</appender>
+
+	<!-- ============================== -->
+	<!-- Append messages to the console -->
+	<!-- ============================== -->
+
+	<appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+		<param name="Target" value="System.out" />
+		<param name="Threshold" value="DEBUG" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<!-- The debug pattern (very slow): Date Priority [Thread] [LoggerName] Message -->
+			<param name="ConversionPattern"
+				value="[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%-5p] [%t] [%c] %m%n" />
+		</layout>
+	</appender>
+
+
+	<logger name="dk.itst.oiosaml">
+		<level value="debug" />
+		<appender-ref ref="CONSOLE"/>
+		<appender-ref ref="FILE"/>
+	</logger>
+
+	<!-- ======================= -->
+	<!-- Setup the Root category -->
+	<!-- ======================= -->
+	<logger name="AUDIT_LOGGER">
+		<level value="info" />
+		<appender-ref ref="AUDIT" />
+	</logger>
+</log4j:configuration>

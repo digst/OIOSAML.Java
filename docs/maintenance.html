@@ -1,0 +1,65 @@
+<html>
+<head>
+<title>OIOSAML.java Maintenance</title>
+        <style type="text/css">
+    	body {background-color: white; margin: 20px;}
+    	body, tr, td {font-family: Verdana, Helvetica, sans-serif; color: #456974;}
+    	div#pagecontainer {width: 80%;}
+    	h1, h2, h3, h4 {color: #76c2bc; border-bottom: 1px solid #76c2bc;}
+    	.monospace {font-family: monospace;}
+    	legend {font-weight: bold;}
+    	fieldset {margin-top: 10px; margin-bottom: 10px;}
+    	span.emphasis {font-weight: bold;}
+    </style>
+</head>
+<body>
+
+<h2>OIOSAML.java Service Provider Maintenance</h2>
+
+<p>This page describes maintenance tasks after initial configuration and installation.</p>
+
+
+<h3>Log file rotation</h3>
+<p>If OIOSAML.java uses the default log4j implementation then log files are created in {oiosaml-j.home}/logs. These files are rotated automatically by log4j when they reach 10 MB. If this is not appropriate, this policy can be edited in ~/.oiosaml/oiosaml-sp.log4j.xml.</p>
+
+<h3>Backup</h3>
+<p>After initial configuration, a backup can be made of the ~/.oiosaml dir. All filter configuration is stored here. If necessary, periodical backups can be made of the log files.</p>
+
+
+<h3>Certificate expiration</h3>
+
+<p>Both the IdP and SP certificates can expire at some point. Currently, there is no monitoring facilities built into OIOSAML.java, so no warnings will be given.</p>
+
+<h4>Upgrading the IdP certificate</h4>
+<p>To replace the IdP certificate, simply replace the entire IdP metadata file in ~/.oiosaml/metadata/IdP and restart the application.</p>
+
+<p>OIOSAML.java also supports rolling upgrades of the IdP certificate. To do this, place the new metadata file together with the old file
+and restart the application. Then OIOSAML encounters multiple IdP metadata files for the same IdP (identified by the EntityId), it will
+collapse the files and merge the certificates. When checking signatures, all certificates for the IdP will be used for checking, and if one of
+them succeeds, the signature will be valid.</p> 
+
+<h4>Upgrading the Service Provider certificate</h4>
+<p>Upgrading the SP certificate can be problematic if the IdP cannot be controlled directly. Some IdPs makes it possible to register multiple
+ certificates for one SP. If that is the case, the upgrade process should be the following:</p>
+ <ul>
+ 	<li>Get the new certificate</li>
+ 	<li>Register it in the IdP along with the old certificate</li>
+ 	<li>When the certificate has been registered with the IdP, copy the new certificate (in PKCS12 or JKS format) to $oiosaml.home</li>
+ 	<li>Edit oiosaml-sp.properties and point oiosaml-sp.certificate.location to the new keystore, and oiosaml-sp.certificate.password 
+ 	to the password of the new certificate</li>
+ 	<li>Restart the SP application</li>
+ </ul>
+
+<p>If the IdP does not support rolling upgrades, it will be hard to avoid any downtime, as the SP restart will have to be coordinated
+with upgrading the IdP. In this case, the SP metadata must be imported in the IdP once again. In this case, the process is as follows:</p>
+<ul>
+	<li>Get the new certificate</li>
+	<li>Copy the new certificate (in PKCS12 or JKS format) to $oiosaml.home</li>
+ 	<li>Edit oiosaml-sp.properties and point oiosaml-sp.certificate.location to the new keystore, and oiosaml-sp.certificate.password 
+ 	to the password of the new certificate</li>
+ 	<li>Restart the SP application</li>
+ 	<li>Go to /saml/metadata to retrieve the new SP metadata file</li>
+ 	<li>Register the new metadata in the IdP</li>
+</ul>
+</body>
+</html>

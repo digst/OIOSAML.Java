@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="https://brs.eogs.dk/SAML/SLO/SOAP"
+  xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:tns="https://brs.eogs.dk/SAML/SLO/SOAP"
+  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+  xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol">
+  <wsdl:types>
+    <xs:schema elementFormDefault="qualified"
+      targetNamespace="https://brs.eogs.dk/SAML/SLO/SOAP">
+      <xs:import namespace="urn:oasis:names:tc:SAML:2.0:protocol"
+        schemaLocation="http://docs.oasis-open.org/security/saml/v2.0/saml-schema-protocol-2.0.xsd" />
+    </xs:schema>
+  </wsdl:types>
+  <wsdl:message name="saml2logoutRequest">
+    <wsdl:part name="parameter" element="samlp:LogoutRequest" />
+  </wsdl:message>
+  <wsdl:message name="saml2logoutResponse">
+    <wsdl:part name="return" element="samlp:LogoutResponse" />
+  </wsdl:message>
+  <wsdl:portType name="SAML2LogoutPortType">
+    <wsdl:operation name="saml2logout">
+      <wsdl:documentation>
+        Logout a given session identified by a sessionIndex
+      </wsdl:documentation>
+      <wsdl:input message="tns:saml2logoutRequest" />
+      <wsdl:output message="tns:saml2logoutResponse" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="SAML2LogoutSOAP11Binding"
+    type="tns:SAML2LogoutPortType">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http"
+      style="document" />
+    <wsdl:operation name="saml2logout">
+      <soap:operation
+        soapAction="http://www.oasis-open.org/committees/security"
+        style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="SAML2LogoutService">
+    <wsdl:port name="SAML2LogoutSOAP11port"
+      binding="tns:SAML2LogoutSOAP11Binding">
+      <soap:address location="https://www.sp1.dk/SAML/SLO/SOAP" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

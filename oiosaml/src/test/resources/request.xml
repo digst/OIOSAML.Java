@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?><samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" Destination="https://saml-idp.trifork.com:9031/idp/SSO.saml2" ForceAuthn="false" ID="_B4E9014EFFDEFDBC371207227856681" IssueInstant="2008-04-03T13:04:16.672Z" ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact" Version="2.0">
+   <saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">poc3.eogs.capgemini.dk.spref</saml:Issuer>
+</samlp:AuthnRequest> 

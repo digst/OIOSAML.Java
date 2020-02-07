@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xt:XMLTooling xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.opensaml.org/xmltooling-config ../../src/schema/xmltooling-config.xsd"
+ xmlns:soap11="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:xt="http://www.opensaml.org/xmltooling-config">
+    
+    
+</xt:XMLTooling>

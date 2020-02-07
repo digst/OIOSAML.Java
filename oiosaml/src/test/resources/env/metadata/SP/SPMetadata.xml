@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Id: SPMetadata.xml 2936 2008-05-26 08:06:46Z jre $ -->
+<md:EntityDescriptor entityID="poc3.eogs.capgemini.dk.spref" xmlns:brs="http://www.eogs.dk/2007/07/brs" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
+   <md:SPSSODescriptor AuthnRequestsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+      <md:Extensions>
+         <brs:Privilege>myPrivilege1A</brs:Privilege>
+         <brs:Privilege>myPrivilege1B</brs:Privilege>
+      </md:Extensions>
+      <md:KeyDescriptor use="signing">
+         <ds:KeyInfo>
+            <ds:X509Data>
+               <ds:X509Certificate>
+MIIFITCCBIqgAwIBAgIEQDa13zANBgkqhkiG9w0BAQUFADA/MQswCQYDVQQGEwJESzEMMAoGA1UE
+ChMDVERDMSIwIAYDVQQDExlUREMgT0NFUyBTeXN0ZW10ZXN0IENBIElJMB4XDTA3MDgyMzA3NTQy
+N1oXDTA5MDgyMzA4MjQyN1owgZcxCzAJBgNVBAYTAkRLMS4wLAYDVQQKEyVDQVBHRU1JTkkgREFO
+TUFSSyBBL1MgLy8gQ1ZSOjI1NjA2OTY1MVgwJQYDVQQFEx5DVlI6MjU2MDY5NjUtVUlEOjExODc3
+OTY2OTQzMDgwLwYDVQQDEyhDQVBHRU1JTkkgREFOTUFSSyBBL1MgLSB2aXJrLmRrIFNlcnZpY2Vz
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDJEdO77sprn42DosqrrPhrHQimVH61Q4X1JUeZ
+0WM4jz/VcKdwoEHwRI3KgPsXOEi+x3ks2ijsWAn+ar1j4J+s4OJGO/yYygN6w1ayemf0x/+uJaQG
+xS7wJ8HOljPZRyBIV4nHh0INzwXmFNtpXoMtsfcNxbRqR9OaduKlYXJLIQIDAQABo4ICzzCCAssw
+DgYDVR0PAQH/BAQDAgO4MCsGA1UdEAQkMCKADzIwMDcwODIzMDc1NDI3WoEPMjAwOTA4MjMwODI0
+MjdaMEYGCCsGAQUFBwEBBDowODA2BggrBgEFBQcwAYYqaHR0cDovL3Rlc3Qub2NzcC5jZXJ0aWZp
+a2F0LmRrL29jc3Avc3RhdHVzMIIBAwYDVR0gBIH7MIH4MIH1BgkpAQEBAQEBAQMwgecwLwYIKwYB
+BQUHAgEWI2h0dHA6Ly93d3cuY2VydGlmaWthdC5kay9yZXBvc2l0b3J5MIGzBggrBgEFBQcCAjCB
+pjAKFgNUREMwAwIBARqBl1REQyBUZXN0IENlcnRpZmlrYXRlciBmcmEgZGVubmUgQ0EgdWRzdGVk
+ZXMgdW5kZXIgT0lEIDEuMS4xLjEuMS4xLjEuMS4xLjMuIFREQyBUZXN0IENlcnRpZmljYXRlcyBm
+cm9tIHRoaXMgQ0EgYXJlIGlzc3VlZCB1bmRlciBPSUQgMS4xLjEuMS4xLjEuMS4xLjEuMy4wHAYJ
+YIZIAYb4QgENBA8WDW9yZ2FuV2ViTm9EaXIwIAYDVR0RBBkwF4EVa2ltLm1vZXNAY2FwZ2VtaW5p
+LmRrMIGWBgNVHR8EgY4wgYswVqBUoFKkUDBOMQswCQYDVQQGEwJESzEMMAoGA1UEChMDVERDMSIw
+IAYDVQQDExlUREMgT0NFUyBTeXN0ZW10ZXN0IENBIElJMQ0wCwYDVQQDEwRDUkw2MDGgL6Athito
+dHRwOi8vdGVzdC5jcmwub2Nlcy5jZXJ0aWZpa2F0LmRrL29jZXMuY3JsMB8GA1UdIwQYMBaAFByY
+CUcaTDi5EMUEKVvx9E6Aasx+MB0GA1UdDgQWBBR9SRvtsKey6yrBrSL8dX589jf8FTAJBgNVHRME
+AjAAMBkGCSqGSIb2fQdBAAQMMAobBFY3LjEDAgOoMA0GCSqGSIb3DQEBBQUAA4GBADMz+YB3oROl
+a7M21axfR8UQuEH/U1M/x9FxNhFIIJTcs545ozy24tea6KdativMj64LANkxqOsONIZ4Sf4/BmNQ
+jj3eDAsetM+mKpQPL7+lt72PDupJk9Z0F5BI94agtPugaJFKmpVpLYpCTJ2115hfeMmT9a4bS8Xk
+MuJl/rVA</ds:X509Certificate>
+            </ds:X509Data>
+         </ds:KeyInfo>
+      </md:KeyDescriptor>
+      <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="http://jre-mac.trifork.com:8080/saml/saml/LogoutServiceHTTPRedirect" ResponseLocation="http://jre-mac.trifork.com:8080/saml/saml/LogoutServiceHTTPRedirectResponse"/>
+      <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="http://jre-mac.trifork.com:8080/saml/saml/LogoutServiceSOAP"/>
+      <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact" Location="http://jre-mac.trifork.com:8080/saml/saml/SAMLAssertionConsumer" index="0"/>
+   </md:SPSSODescriptor>
+   <md:Organization>
+      <md:OrganizationName xml:lang="en">Referenceimplementering</md:OrganizationName>
+      <md:OrganizationURL xml:lang="en">http://www.refimpl.dk</md:OrganizationURL>
+   </md:Organization>
+   <md:ContactPerson>
+      <md:Company>Capgemini</md:Company>
+      <md:GivenName>Kim Kenneth</md:GivenName>
+      <md:SurName>Moes</md:SurName>
+      <md:EmailAddress>kim.moes@capgemini.dk</md:EmailAddress>
+      <md:TelephoneNumber>23736515</md:TelephoneNumber>
+   </md:ContactPerson>
+</md:EntityDescriptor>

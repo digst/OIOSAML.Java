@@ -1,0 +1,174 @@
+<html>
+<head>
+<title>OIOSAML.java developer information</title>
+        <style type="text/css">
+    	body {background-color: white; margin: 20px;}
+    	body, tr, td {font-family: Verdana, Helvetica, sans-serif; color: #456974;}
+    	div#pagecontainer {width: 80%;}
+    	h1, h2, h3, h4 {color: #76c2bc; border-bottom: 1px solid #76c2bc;}
+    	.monospace {font-family: monospace;}
+    	legend {font-weight: bold;}
+    	fieldset {margin-top: 10px; margin-bottom: 10px;}
+    	span.emphasis {font-weight: bold;}
+    </style>
+</head>
+<body>
+
+<h1>Developer information</h1>
+<p>This section contains information for developers. It contains the following parts: one about customization, accessing runtime
+information, and one about how the source code for OIOSAML.java itself is structured.</p>
+
+<h2>Runtime information</h2>
+<p>Pages protected by SPFilter can access information about the authenticated user and the associated SAML assertion in a number of ways. 
+In all cases, the SAML information is contained in a dk.itst.oiosaml.sp.UserAssertion object. Generally, only types from dk.itst.oiosaml.sp should be used from
+the application itself. Using types outside this package (including subpackages) is not supported or recommended. 
+Instances of UserAssertion can be retrieved using these methods:</p>
+<ul>
+<li>request.getSession.getAttribute("dk.itst.oiosaml.userassertion")</li>
+<li>dk.itst.oiosaml.sp.UserAssertionHolder.get()</li>
+<li>request.getRemoteUser() - this will return the subject name identifier</li>
+<li>request.getUserPrincial() - this will return a dk.itst.oiosaml.sp.OIOPrincipal</li>
+</ul>
+
+<p>If IsPassive is set (using a property in oiosaml-sp.properties), the UserAssertion will not be valid. This can be checked with assertion.isAuthenticated().
+If this method returns false, the user has not been authenticated, and should be treated as an anonymous user. To force a login, redirect the user to saml/login.</p>
+
+<h2>Developer Mode</h2>
+<p>When developing a new application, it might be an issue to get a connection to a real IdP, and it might also disturb any automated integration tests.
+To overcome this, the filter has a special developer mode where it will not issue any redirects. Instead, it will create a dummy-assertion with
+configurable user and attributes.</p>
+
+<p>To enable developer mode, simply set oiosaml-sp.develmode=true in oiosaml-sp.properties. It is not necessary to go through the configuration
+process when using this mode, so simply create the file and set the property.</p>
+
+<p>For the developer mode to work, it is necessary to configure one or more users. Do this by setting oiosaml-sp.develmode.users to a comma-separated list of usernames.
+If only one is specified, this user will be selected automatically, otherwise a simple page will be shown where the user can be chosen.</p>
+
+<p>Attributes can be defined for each user by setting oiosaml-sp.develmode.&lt;username&gt;.&lt;attributename&gt;=attributevalue.</p>
+<p>Remember that if attribute names contain ;, it must be escaped using \.</p>
+
+<p><strong>Warning:</strong> When developer mode is enabled, no checks for valid assertions are made whatsoever!</p>
+
+<h2>Force Authentication</h2>
+<p>
+    Some times it is desirable to force a user to login again even if the user already had a valid authentication session.
+    This can be accomplished by adding the query string parameter "forceAuthn=True" to the query string when requesting a page.
+</p>
+
+<h2>Attribute Query</h2>
+<p>Attribute Query must be performed programatically. How to use Attribute Query is described in <a href="attributequery.html">in the Attribute Query guide</a>.</p>
+
+<h2>Customization</h2>
+<p>A number parts of OIOSAML.java can be directly: the the page used for sending POST requests when authenticating a
+user, the error page, and other advanced parts. In the demo, the post page is called postlogin.jsp, and contains a simple POST form.</p>
+
+<p>The default page does not submit the form automatically using Javascript, it just builds a basic form which the user must submit. A
+new page can use the following request attributes to build the form (using ServletRequest.getAttribute()):</p>
+
+<ul>
+<li>SAMLRequest: Value of the SAMLRequest parameter</li>
+<li>RelayState: Vaulue of the RelayState parameter</li>
+<li>action: Action attribute for the form</li>
+</ul>
+<p>All of the values are correctly encoded, so they should be inserted into the form without further processing.</p>
+
+<p>The customized page must be accessible as a servlet in the local web application. The path to the servlet must be configured in
+oiosaml-sp.properties (see <a href="configuration.html">the configuration section</a> for more information about configuring OIOSAML.java) using 
+the property POSTDispatchPath.</p>
+
+<h3>Error Page</h3>
+<p>The error page is used whenever SAML processing  fails. Like the login page, it is a servlet, which can be configured using a property. The page receives two objects in the request:</p>
+<ul>
+<li>error: String containing an error message</li>
+<li>exception: The associated exception, if any</li>
+</ul>
+<p>By default, the error page is rendered from an internal template.</p>
+
+<h3>Assertion Validation</h3>
+<p>When assertions are received, they are automatically validated according to the OIOSAML specification. The validation code can be controlled by implementing the 
+dk.itst.oiosaml.sp.model.validation.AssertionValidator interface and injecting the class into the system using a <a href="configuration.html">configuration property</a>.</p>
+
+<h3>Re-POSTing after SSO</h3>
+<p>If the user does not have an active session (due to for example timeout) and makes a POST request to a protected page, the POST request
+will normally be lost after the SSO process has completed. However, OIOSAML.java captures information about the last request made and
+replays it after the user had been authenticated. For GET requests, this results in a 302 redirect. For POST requests, a HTML page is displayed
+with a form containing the original form data.</p>
+
+<p>By default, the form is a very simple page which displays all form fields and asks the user to either submit the request or cancel it. However,
+it is possible to customize the page.  The mechanism is the same as when customizing the error page. Set the property called oiosaml-sp.repost
+to point to a local servlet path. This servlet must then display a form for reposting the request. The servlet received two attributes in the request:
+"request" and "home". The request attribute contains a dk.itst.oiosaml.sp.service.session.Request object with all the information about the
+original request (all parameter names and values have been html encoded). The home attribute contains the address for the default home page, in 
+case the user wants to cancel the request.</p>
+ 
+<h3>State management</h3>
+<p>See the <a href="clustering.html">clustering guide</a>.</p>
+
+<h3>Authentication Hooks</h3>
+<p>It is possible to receive a notification when a user has been authenticated by the SAML filter. To do this, implement the interface
+dk.itst.oiosaml.sp.AuthenticationHandler. This interface has one method, userAuthenticated, which is called when an assertion has been
+validated without errors.</p>
+
+<p>Authentication handlers can be used to do further authentication or lookups, which should not be performed on every request.</p>
+
+<p>The userAuthenticated method returns either true or false. If false is returned, processing is aborted, and the user will not be authenticated 
+by the filter, which means that no objects are added to the session.</p>
+
+<h2>Logging</h2>
+<p>See the <a href="logging.html">separate section on logging</a>.</p>
+
+
+
+<h2>Source code structure</h2>
+<p>The source code consists of an Eclipse project with Java source code, unit tests, documentation, jar file dependencies, the demo files, and build files. <a href="http://gant.codehaus.org/">Gant</a>
+is used for building the project, and the target 'build_everything' will perform a full build. Gant will need to be installed in order to build the project</p>
+
+<p>Dependencies are managed through <a href="http://ant.apache.org/ivy/">Ivy</a>. This means that dependencies are described in ivy.xml and downloaded automatically when the project is
+built.</p>
+
+<p>No code generation is used, so the Eclipse project can be imported to Eclipse without any changes, and should be able to compile and run.</p>
+
+<p>Unit tests are located in test/ and are baed on Junit4. The tests can be run with either ant using the target 'test' or from Eclipse. To run the tests
+from Eclipse, simply right-click on the test folder and select Run As -> JUnit Test.</p>
+
+<p>Packages in use:</p>
+<ul>
+<li>dk.itst.oiosaml.sp: Contains all public types. These are the types which can safely be used outside OIOSAML.java itself</li>
+<li>dk.itst.oiosaml.sp.bindings: SAML bindings are implemented here</li>
+<li>dk.itst.oiosaml.sp.configuration: The autoconfig implementation and the Velocity templates used for autoconfig</li>
+<li>dk.itst.oiosaml.sp.metadata: Types used for metadata handling</li>
+<li>dk.itst.oiosaml.sp.model: SAML 2.0 types. These wrap OpenSAML objects to add more functionality. These wrapper types are used instead of static util methods</li>
+<li>dk.itst.oiosaml.sp.service: Classes which communicate with the IdP. SSO and SLO is implemented here.</li>
+</ul>
+
+<h3>Configuration</h3>
+<p>Configuration is done through Apache commons-configuration. The main config file is src/config.xml, which loads two config files: 
+src/oiosaml-common.properties and ${oiosaml-j.home}/oiosaml-sp.properties. The common properties file contain properties which have default
+values, and which do not normally need to be changed. These properties can be overwritten in oiosaml-sp.properties.</p>
+
+<p>It is possible to access configuration through dk.itst.oiosaml.configuration.BRSConfiguration.getSystemConfiguration().</p>
+
+
+<h3>Servlets</h3>
+<p>Only one servlet is used in OIOSAML.java, dk.itst.oiosaml.sp.service.DispatcherServlet. This servlet dispatches to a number of SAMLHandlers which act as protocol endpoints.
+DispatcherServlet has a static configuration of which urls are mapped to which handlers.</p>
+
+<h3>Protection filter</h3>
+<p>Resources can be protected with a filter: dk.itst.oiosaml.sp.service.SPFilter. This filter checks if requests have a valid session. If so, a UserAssertion is placed in UserAssertionHolder, which 
+is a ThreadLocal. If the request does not contain an authenticated session, the filter delegates to a BindingHandler, which either issues a HTTP Redirect or displays a POST form, 
+depending on the SAML binding in use. The BindingHandlers are responsible for issuing AuthnRequests.</p>
+
+<p>Responses to AuthnRequests are received by SAMLAssertionConsumer, which validates the Response and registers the assertion in the user's session.</p>
+
+<h3>Running without SPFilter</h3>
+<p>In some scenarios, it might be preferable to run without the SPFilter, but instead handle user checking manually. In that case,
+the logic from SPFilter must be duplicated. This is quite simple: SPFilter handles three tasks:</p>
+<ul>
+<li>It checks if the user is already authenticated. It does so by looking in the HTTP session to check if there is a valid assertion.</li>
+<li>It handles IdP Discovery</li>
+<li>It generated AuthnRequests using OIOAuthnRequest and delegates to a BindingHandler.</li>
+</ul>
+<p>If SPFilter is disabled, it is also necessary to start cleanup tasks manually. The tasks in question are the CRLChecker and LoggedInHandler#scheduleCleanupTasks().</p>
+
+</body>
+</html>

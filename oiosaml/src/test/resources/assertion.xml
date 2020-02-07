@@ -1,0 +1,49 @@
+<saml:Assertion Version="2.0" IssueInstant="2008-04-03T11:51:26.375Z" ID="pVQYCtN.5RD5VtkGJx3Fhecjrkd" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
+	<saml:Issuer>idp1.test.oio.dk</saml:Issuer>
+	<saml:Subject>
+		<saml:NameID
+			Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">
+			joetest
+		</saml:NameID>
+		<saml:SubjectConfirmation
+			Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
+			<saml:SubjectConfirmationData
+				InResponseTo="_B8A23F23B5E279A7C71207223483890"
+				NotOnOrAfter="2008-04-03T11:56:26.375Z"
+				Recipient="http://jre-mac.trifork.com:8080/saml/SAMLAssertionConsumer" />
+		</saml:SubjectConfirmation>
+	</saml:Subject>
+	<saml:Conditions NotOnOrAfter="2008-04-03T11:56:26.375Z"
+		NotBefore="2008-04-03T11:46:26.375Z">
+		<saml:AudienceRestriction>
+			<saml:Audience>poc3.eogs.capgemini.dk.spref</saml:Audience>
+		</saml:AudienceRestriction>
+	</saml:Conditions>
+	<saml:AuthnStatement AuthnInstant="2008-04-03T11:51:26.375Z"
+		SessionIndex="pVQYCtN.5RD5VtkGJx3Fhecjrkd">
+		<saml:AuthnContext>
+			<saml:AuthnContextClassRef>
+				urn:oasis:names:tc:SAML:2.0:ac:classes:Password
+			</saml:AuthnContextClassRef>
+		</saml:AuthnContext>
+	</saml:AuthnStatement>
+	<saml:AttributeStatement
+		xmlns:xs="http://www.w3.org/2001/XMLSchema">
+		<saml:Attribute
+			NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"
+			Name="more">
+			<saml:AttributeValue xsi:type="xs:string"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+				text
+			</saml:AttributeValue>
+		</saml:Attribute>
+		<saml:Attribute
+			NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"
+			Name="dk:gov:saml:attribute:AssuranceLevel">
+			<saml:AttributeValue xsi:type="xs:string"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+				2
+			</saml:AttributeValue>
+		</saml:Attribute>
+	</saml:AttributeStatement>
+</saml:Assertion>

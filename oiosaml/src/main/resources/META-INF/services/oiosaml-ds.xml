@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datasources>
+  <xa-datasource>
+    <jndi-name>jdbc/oiosaml.ds</jndi-name>
+    <isSameRM-override-value>false</isSameRM-override-value>
+    <xa-datasource-class>oracle.jdbc.xa.client.OracleXADataSource</xa-datasource-class>
+    <xa-datasource-property name="URL">jdbc:oracle:thin:@dev.openminds.dk:1615:OIOSAML</xa-datasource-property>
+    <xa-datasource-property name="User">ani</xa-datasource-property>
+    <xa-datasource-property name="Password">bonamass</xa-datasource-property>
+    <exception-sorter-class-name>org.jboss.resource.adapter.jdbc.vendor.OracleExceptionSorter</exception-sorter-class-name>
+    <no-tx-separate-pools/>
+  </xa-datasource>
+</datasources>

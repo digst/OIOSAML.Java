@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.4"
+	xmlns="http://java.sun.com/xml/ns/j2ee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" >
+	
+	<display-name>OIOSAML Discovery</display-name>
+
+	<servlet>
+		<servlet-name>discovery</servlet-name>
+		<servlet-class>dk.itst.oiosaml.discovery.service.DiscoveryServlet</servlet-class>
+	</servlet>
+	
+	<servlet>
+		<servlet-name>cookie</servlet-name>
+		<servlet-class>dk.itst.oiosaml.discovery.service.CookieServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>cookie.html</servlet-name>
+		<jsp-file>/cookie.html</jsp-file>
+	</servlet>
+	<servlet>
+		<servlet-name>clear</servlet-name>
+		<servlet-class>dk.itst.oiosaml.discovery.service.ClearCookieServlet</servlet-class>
+	</servlet>
+	
+	<servlet>
+		<servlet-name>DispatcherServlet</servlet-name>
+		<servlet-class>dk.itst.oiosaml.discovery.service.DispatcherServlet</servlet-class>
+	</servlet>
+	
+
+	<servlet-mapping>
+		<servlet-name>DispatcherServlet</servlet-name>
+		<url-pattern>/*</url-pattern>
+	</servlet-mapping>
+</web-app>

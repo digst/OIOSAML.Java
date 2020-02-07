@@ -1,0 +1,58 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>dk.digst</groupId>
+	<artifactId>oiosaml2-demo.java</artifactId>
+	<name>OIOSAML Demo for Java v2</name>
+	<packaging>war</packaging>
+
+	<parent>
+		<groupId>dk.digst</groupId>
+		<artifactId>oiosaml2.java-parent</artifactId>
+		<version>2.2.0</version>
+	</parent>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.tomcat.maven</groupId>
+				<artifactId>tomcat7-maven-plugin</artifactId>
+				<version>2.2</version>
+				<configuration>
+					<port>8080</port>
+					<httpsPort>8443</httpsPort>
+					<keystoreFile>${project.basedir}/ssl-keystore</keystoreFile>
+					<keystorePass>Test1234</keystorePass>
+				</configuration>
+			</plugin>
+		</plugins>
+
+		<finalName>oiosaml2-demo.java</finalName>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>dk.digst</groupId>
+			<artifactId>oiosaml2.java</artifactId>
+			<version>2.2.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.5</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-jdk14</artifactId>
+			<version>1.7.25</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+</project>

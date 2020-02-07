@@ -1,0 +1,137 @@
+<ArtifactResponse InResponseTo="_F499B815F2BA7AB15F1207741931904"
+	IssueInstant="2008-04-09T11:52:11.000Z"
+	ID="akBvEmBbYA74JbE_hIDPL.w7IWy" Version="2.0"
+	xmlns="urn:oasis:names:tc:SAML:2.0:protocol">
+	<saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
+		idp1.test.oio.dk
+	</saml:Issuer>
+	<Status>
+		<StatusCode
+			Value="urn:oasis:names:tc:SAML:2.0:status:Success" />
+	</Status>
+	<Response InResponseTo="_F499B815F2BA7AB15F1207741929643"
+		IssueInstant="2008-04-09T11:52:09.484Z"
+		ID="gf8b65pFRW3JOvrV9z8_fjCJJtO" Version="2.0" xmlns="urn:oasis:names:tc:SAML:2.0:protocol">
+		<saml:Issuer
+			xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
+			idp1.test.oio.dk
+		</saml:Issuer>
+		<Status>
+			<StatusCode
+				Value="urn:oasis:names:tc:SAML:2.0:status:Success" />
+		</Status>
+		<saml:Assertion Version="2.0"
+			IssueInstant="2008-04-09T11:52:09.500Z"
+			ID="xv5BP-.Sl_aNbpsNwMX259HTgxL"
+			xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
+			<saml:Issuer>idp1.test.oio.dk</saml:Issuer>
+			<ds:Signature
+				xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+				<ds:SignedInfo>
+					<ds:CanonicalizationMethod
+						Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+					<ds:SignatureMethod
+						Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" />
+					<ds:Reference URI="#xv5BP-.Sl_aNbpsNwMX259HTgxL">
+						<ds:Transforms>
+							<ds:Transform
+								Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+							<ds:Transform
+								Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+						</ds:Transforms>
+						<ds:DigestMethod
+							Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+						<ds:DigestValue>
+							5FJm/yfmxwKcHvv7Xd4hCrEZX4k=
+						</ds:DigestValue>
+					</ds:Reference>
+				</ds:SignedInfo>
+				<ds:SignatureValue>
+					fDkJqSw9fLB/grDeuITD0A6UCgUIx3fqAmQoEBKW5GmyokCTvaeBZ/l8ek4y6kyRSL1y62hhUei0
+					Ti1zWkjE7UbHqmgJZa7GgdOBIFZGQxLrmDtova1HrMNLNNXH9WooHEjkREUSMgQy13vqGyHOneJJ
+					gAEXJf68Agfiu+P8RUjBZtoHR1T9rVXtCRrpGRbPpko7+ipfl37ep6PjDmmSRhdV1St+EjhCtV8r
+					m1BRfjU1vm0uJbHQYIbClmQtfELkv+va8chGKF92Gxsr9SCfjHwtver4pP3TFvSHbXx0ch5G7AuN
+					EoHdm9RxPaYip2nFk6s+CUH6GoMWVRIs9gKcZA==
+				</ds:SignatureValue>
+				<KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
+					<X509Data>
+						<X509Certificate>
+							MIIDDjCCAfagAwIBAgICAPswDQYJKoZIhvcNAQEFBQAwSjELMAkGA1UEBhMCREsxHTAbBgNVBAoT
+							FElULSBvZyBUZWxlc3R5cmVsc2VuMRwwGgYDVQQDExNDb25maWcgU2lnbmluZyBDZXJ0MB4XDTA3
+							MDIxMzEyNTk1NVoXDTA4MDIxMzEyNTk1NVowSjELMAkGA1UEBhMCREsxHTAbBgNVBAoTFElULSBv
+							ZyBUZWxlc3R5cmVsc2VuMRwwGgYDVQQDExNDb25maWcgU2lnbmluZyBDZXJ0MIIBIjANBgkqhkiG
+							9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlfYRt38iCe9j/4gosgGM/74c1jNSQ7dctSOMFmnUBaSsCcuy
+							qg/mgi2YXKY/zyaJXafa1M+MZpqOVCCt1w65DAADMpYi2BJVmJurJ5WuiKbc/9AY/9zLJN4CskZ+
+							L0Am/e2G1Wh7l030XTxiAMWCG1K0gvMRG8u2puN6bSwYNvnRP1QQ3E3EOHk+bdnaLxTZvscoUsz0
+							SYPfN8CMR6S4C56spAcGfuV6XBS7FuJQsWC0wR64skOz8EcfJPurWsR8+5ouda37an9ed6CAPsPD
+							5MK/PeNa4qkRjEgQ7zPlVruwT4X5LCjGNg1Zpqn3/lh8ZJjXirys8A0OMRfhZ2ku1QIDAQABMA0G
+							CSqGSIb3DQEBBQUAA4IBAQAy+I+kW4ipadORq3V5wJejJKrDYSjBaLir/YlqwKM8n6kO1/5NI823
+							axWElRVK42MUotVkhKcy8mCKvS3vLL57xw6suop63qbFezTGbjlvVZgYxeeLZa3+1xxCyiUCrGEa
+							Sdene+hj+42QYwfbNXx0tHNiFF284QVszbBxucU/78xNQ3RT6hJqpfezXUyfVHoW9sFKsDYIg5Qo
+							oFMGoN5NihPOjkgu2WHSHoyzex0PvE1hV60Ip7LG0kMrHifrTk3OqAiuqjiUaIkMiZHpd97kJ3LW
+							M/UbL4WUxF6TIg5Kjbm/TftP+/Coo0bUrreq7QeaM7rt1JPzRB+c/NdWRlbM
+						</X509Certificate>
+					</X509Data>
+					<KeyValue>
+						<RSAKeyValue>
+							<Modulus>
+								lfYRt38iCe9j/4gosgGM/74c1jNSQ7dctSOMFmnUBaSsCcuyqg/mgi2YXKY/zyaJXafa1M+MZpqO
+								VCCt1w65DAADMpYi2BJVmJurJ5WuiKbc/9AY/9zLJN4CskZ+L0Am/e2G1Wh7l030XTxiAMWCG1K0
+								gvMRG8u2puN6bSwYNvnRP1QQ3E3EOHk+bdnaLxTZvscoUsz0SYPfN8CMR6S4C56spAcGfuV6XBS7
+								FuJQsWC0wR64skOz8EcfJPurWsR8+5ouda37an9ed6CAPsPD5MK/PeNa4qkRjEgQ7zPlVruwT4X5
+								LCjGNg1Zpqn3/lh8ZJjXirys8A0OMRfhZ2ku1Q==
+							</Modulus>
+							<Exponent>AQAB</Exponent>
+						</RSAKeyValue>
+					</KeyValue>
+				</KeyInfo>
+			</ds:Signature>
+			<saml:Subject>
+				<saml:NameID
+					Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">
+					joetest
+				</saml:NameID>
+				<saml:SubjectConfirmation
+					Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
+					<saml:SubjectConfirmationData
+						InResponseTo="_F499B815F2BA7AB15F1207741929643"
+						NotOnOrAfter="2008-04-09T11:57:09.515Z"
+						Recipient="http://rolfpc.trifork.com:8080/saml/SAMLAssertionConsumer" />
+				</saml:SubjectConfirmation>
+			</saml:Subject>
+			<saml:Conditions NotOnOrAfter="2008-04-09T11:57:09.500Z"
+				NotBefore="2008-04-09T11:47:09.500Z">
+				<saml:AudienceRestriction>
+					<saml:Audience>rolf.trifork.com</saml:Audience>
+				</saml:AudienceRestriction>
+			</saml:Conditions>
+			<saml:AuthnStatement AuthnInstant="2008-04-09T11:52:09.500Z"
+				SessionIndex="xv5BP-.Sl_aNbpsNwMX259HTgxL">
+				<saml:AuthnContext>
+					<saml:AuthnContextClassRef>
+						urn:oasis:names:tc:SAML:2.0:ac:classes:Password
+					</saml:AuthnContextClassRef>
+				</saml:AuthnContext>
+			</saml:AuthnStatement>
+			<saml:AttributeStatement
+				xmlns:xs="http://www.w3.org/2001/XMLSchema">
+				<saml:Attribute
+					NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"
+					Name="more">
+					<saml:AttributeValue xsi:type="xs:string"
+						xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+						text
+					</saml:AttributeValue>
+				</saml:Attribute>
+				<saml:Attribute
+					NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"
+					Name="dk:gov:saml:attribute:AssuranceLevel">
+					<saml:AttributeValue xsi:type="xs:string"
+						xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+						2
+					</saml:AttributeValue>
+				</saml:Attribute>
+			</saml:AttributeStatement>
+		</saml:Assertion>
+	</Response>
+</ArtifactResponse>

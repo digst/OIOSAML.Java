@@ -1,0 +1,34 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Repost request</title>
+        <style type="text/css">
+    	body {background-color: white; margin: 20px;}
+    	body, tr, td {font-family: Verdana, Helvetica, sans-serif; color: #456974;}
+    	div#pagecontainer {width: 80%;}
+    	h1, h2, h3, h4 {color: #76c2bc; border-bottom: 1px solid #76c2bc;}
+    	.monospace {font-family: monospace;}
+    	legend {font-weight: bold;}
+    	fieldset {margin-top: 10px; margin-bottom: 10px;}
+    	span.emphasis {font-weight: bold;}
+    </style>
+  </head>
+  <body>
+    <h1>A POST Request was interrupted due to Single Signon</h1>
+    <p>A POST request by you was interrupted by the Single Signon process. You can resume the request by pressing Submit below.</p>
+    <p>To abort the request, press the cancel link to return to the default page</p>
+
+	<form method="POST" action="$request.requestURI">
+		<table border="0">
+			#foreach ($e in $request.parameters.entrySet())
+				#foreach ($val in $e.value)
+					<tr><td valign="top">$e.key</td><td valign="top">$val<input type="hidden" name="$e.key" value="$val" /></td></tr>
+				#end
+			#end
+		</table>
+		
+		<input type="submit" value="Submit" /> - <a href="$home">Cancel</a>
+	</form>
+	
+  </body>
+</html>

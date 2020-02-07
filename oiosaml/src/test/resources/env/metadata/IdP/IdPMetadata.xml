@@ -1,0 +1,28 @@
+<md:EntityDescriptor entityID="idp1.test.oio.dk" ID="fRf4uUho59tbXrEeOLPlrwDXyzV" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
+  <md:IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+    <md:KeyDescriptor use="signing">
+      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:X509Data>
+          <ds:X509Certificate>MIIDDjCCAfagAwIBAgICAPswDQYJKoZIhvcNAQEFBQAwSjELMAkGA1UEBhMCREsxHTAbBgNVBAoTFElULSBvZyBUZWxlc3R5cmVsc2VuMRwwGgYDVQQDExNDb25maWcgU2lnbmluZyBDZXJ0MB4XDTA3MDIxMzEyNTk1NVoXDTA4MDIxMzEyNTk1NVowSjELMAkGA1UEBhMCREsxHTAbBgNVBAoTFElULSBvZyBUZWxlc3R5cmVsc2VuMRwwGgYDVQQDExNDb25maWcgU2lnbmluZyBDZXJ0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlfYRt38iCe9j/4gosgGM/74c1jNSQ7dctSOMFmnUBaSsCcuyqg/mgi2YXKY/zyaJXafa1M+MZpqOVCCt1w65DAADMpYi2BJVmJurJ5WuiKbc/9AY/9zLJN4CskZ+L0Am/e2G1Wh7l030XTxiAMWCG1K0gvMRG8u2puN6bSwYNvnRP1QQ3E3EOHk+bdnaLxTZvscoUsz0SYPfN8CMR6S4C56spAcGfuV6XBS7FuJQsWC0wR64skOz8EcfJPurWsR8+5ouda37an9ed6CAPsPD5MK/PeNa4qkRjEgQ7zPlVruwT4X5LCjGNg1Zpqn3/lh8ZJjXirys8A0OMRfhZ2ku1QIDAQABMA0GCSqGSIb3DQEBBQUAA4IBAQAy+I+kW4ipadORq3V5wJejJKrDYSjBaLir/YlqwKM8n6kO1/5NI823axWElRVK42MUotVkhKcy8mCKvS3vLL57xw6suop63qbFezTGbjlvVZgYxeeLZa3+1xxCyiUCrGEaSdene+hj+42QYwfbNXx0tHNiFF284QVszbBxucU/78xNQ3RT6hJqpfezXUyfVHoW9sFKsDYIg5QooFMGoN5NihPOjkgu2WHSHoyzex0PvE1hV60Ip7LG0kMrHifrTk3OqAiuqjiUaIkMiZHpd97kJ3LWM/UbL4WUxF6TIg5Kjbm/TftP+/Coo0bUrreq7QeaM7rt1JPzRB+c/NdWRlbM</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+    <md:KeyDescriptor use="encryption">
+      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:X509Data>
+          <ds:X509Certificate>MIIDDjCCAfagAwIBAgICAPswDQYJKoZIhvcNAQEFBQAwSjELMAkGA1UEBhMCREsxHTAbBgNVBAoTFElULSBvZyBUZWxlc3R5cmVsc2VuMRwwGgYDVQQDExNDb25maWcgU2lnbmluZyBDZXJ0MB4XDTA3MDIxMzEyNTk1NVoXDTA4MDIxMzEyNTk1NVowSjELMAkGA1UEBhMCREsxHTAbBgNVBAoTFElULSBvZyBUZWxlc3R5cmVsc2VuMRwwGgYDVQQDExNDb25maWcgU2lnbmluZyBDZXJ0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlfYRt38iCe9j/4gosgGM/74c1jNSQ7dctSOMFmnUBaSsCcuyqg/mgi2YXKY/zyaJXafa1M+MZpqOVCCt1w65DAADMpYi2BJVmJurJ5WuiKbc/9AY/9zLJN4CskZ+L0Am/e2G1Wh7l030XTxiAMWCG1K0gvMRG8u2puN6bSwYNvnRP1QQ3E3EOHk+bdnaLxTZvscoUsz0SYPfN8CMR6S4C56spAcGfuV6XBS7FuJQsWC0wR64skOz8EcfJPurWsR8+5ouda37an9ed6CAPsPD5MK/PeNa4qkRjEgQ7zPlVruwT4X5LCjGNg1Zpqn3/lh8ZJjXirys8A0OMRfhZ2ku1QIDAQABMA0GCSqGSIb3DQEBBQUAA4IBAQAy+I+kW4ipadORq3V5wJejJKrDYSjBaLir/YlqwKM8n6kO1/5NI823axWElRVK42MUotVkhKcy8mCKvS3vLL57xw6suop63qbFezTGbjlvVZgYxeeLZa3+1xxCyiUCrGEaSdene+hj+42QYwfbNXx0tHNiFF284QVszbBxucU/78xNQ3RT6hJqpfezXUyfVHoW9sFKsDYIg5QooFMGoN5NihPOjkgu2WHSHoyzex0PvE1hV60Ip7LG0kMrHifrTk3OqAiuqjiUaIkMiZHpd97kJ3LWM/UbL4WUxF6TIg5Kjbm/TftP+/Coo0bUrreq7QeaM7rt1JPzRB+c/NdWRlbM</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+    <md:ArtifactResolutionService isDefault="true" Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://saml-idp.trifork.com:9031/idp/ARS.ssaml2" index="0"/>
+    <md:SingleLogoutService Location="https://saml-idp.trifork.com:9031/idp/SLO.saml2" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"/>
+    <md:SingleLogoutService Location="https://saml-idp.trifork.com:9031/idp/SLO.saml2" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"/>
+    <md:SingleLogoutService Location="https://saml-idp.trifork.com:9031/idp/SLO.saml2" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact"/>
+    <md:SingleLogoutService Location="https://saml-idp.trifork.com:9031/idp/SLO.ssaml2" Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP"/>
+    <md:SingleSignOnService Location="https://saml-idp.trifork.com:9031/idp/SSO.saml2" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact"/>
+	<md:SingleSignOnService Location="https://saml-idp.trifork.com:9031/idp/SSO.saml2" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"/>
+    <md:SingleSignOnService Location="https://saml-idp.trifork.com:9031/idp/SSO.saml2" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"/>
+    <md:SingleSignOnService Location="https://saml-idp.trifork.com:9031/idp/SSO.saml2" Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP"/>
+  </md:IDPSSODescriptor>
+  <md:ContactPerson contactType="administrative"/>
+</md:EntityDescriptor>

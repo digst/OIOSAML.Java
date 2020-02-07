@@ -1,0 +1,77 @@
+<html>
+<head>
+<title>OIOSAML.java Discovery support</title>
+        <style type="text/css">
+    	body {background-color: white; margin: 20px;}
+    	body, tr, td {font-family: Verdana, Helvetica, sans-serif; color: #456974;}
+    	div#pagecontainer {width: 80%;}
+    	h1, h2, h3, h4 {color: #76c2bc; border-bottom: 1px solid #76c2bc;}
+    	.monospace {font-family: monospace;}
+    	legend {font-weight: bold;}
+    	fieldset {margin-top: 10px; margin-bottom: 10px;}
+    	span.emphasis {font-weight: bold;}
+    </style>
+</head>
+<body>
+
+<h1>OIOSAML Discovery Profile</h1>
+<p>This document explains how the Discovery profile is implemented in OIOSAML.</p>
+
+
+<p>The discovery implementation contains two parts: A discovery service, which can read the _saml_idp cookie and transport it as a request parameter, 
+and support in the SP.</p>
+
+<p>The discovery service is a simple servlet, which reads the cookie and redirects the browser back to a url given as a request parameter. The value of 
+the _saml_idp cookie is appended to the url.</p>
+
+
+<p>Discovery is initiated in SPFilter, which checks if discovery is enabled (more than one IdP metadata file is available). If so, it checks
+if _saml_idp is present in the  url, and if not, the browser is redirected to the discovery service.</p>
+
+<p>When the browser returns, SPFilter checks if the requested IdP is available and retrieves its metadata. From here, AuthnRequests are issued as
+usual.</p>
+
+
+<p>Each time a request is sent from the SP, the request id is saved in LoggedInHandler together with the destination IdP entity id. When responses
+arrive, the IdP metadata is found by using InResponseTo to find the original IdP entity id.</p>
+
+
+<p>The discovery profile has the following consequences:</p>
+<ul>
+<li>If a LogoutRequest is received, and the user has already timed out, and there is no Issuer included in the request, the process will stop, and an exception will be thrown.
+  This happens because the proper redirect url cannot be determined.</li>
+<li>If the value of _saml_idp is an unsupported IdP, an exception is thrown - however, if it's empty, the default IdP is used.</li>   
+ </ul>
+ 
+ <h3>Enabling Discovery profile</h3>
+ <p>To enable discovery profile, the following steps must be completed:</p>
+ <ul>
+ <li>Save all participating Identity Providers' metadata in metadata/IdP/ in separate files. The file names are not important, as long as they end in .xml</li>
+ <li>Deploy the discovery service on a server in the common domain, and at a secure url</li>
+ <li>Set oiosaml-sp.discovery in oiosaml-j.properties to point to the discovery service</li>
+ <li>Optionally, set oiosaml-sp.discovery.default to point to a default IdP entity id, which will be used if no _saml_idp cookie has been set in the current session. If this is not set, the first IdP metadata will be used.</li>
+ </ul>
+ 
+<p>When these steps have been completed, discovery profile will be enabled automatically.</p>
+
+
+<h2>The Discovery Service</h2>
+<p>The discovery service is a simple web application, and is bundled in the distribution file. Simply deploy oiosaml.java-discovery.*.war to a 
+servlet container. No further configuration is necessary.</p>
+
+<h2>Prompting the user for an IdP</h2>
+<p>In cases where a discovery service is not configured, or no _saml_idp cookie exists, the user will be prompted to choose an IdP. This behavoir can be
+modified in the following ways:</p>
+
+<ul>
+<li>Set oiosaml-sp.discovery.prompt to false - this will select the first IdP metadata and sign on using that. Which IdP is the first is not defined.</li>
+<li>Set oiosaml-sp.discovery.default to an IdP entity id. This IdP will then be used if no values was discovered.</li>
+<li>Set oiosaml-sp.discovery.prompt.servlet to point to a local servlet defined in web.xml. This servlet will then be called when the user is prompted instead
+of the default one. By implementing this servlet, it is possible to modify the layout and functionality of the page. The servlet receives one attribute in the 
+request: "entityIds", which is a Map&lt;String, String&gt; containing entityId -&gt; urls. The url must be used as is to select the corresponding IdP, probably
+in an a tag.</li>
+</ul>
+
+
+</body>
+</html>

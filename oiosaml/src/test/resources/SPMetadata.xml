@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Id: SPMetadata.xml 2430 2008-04-01 12:16:34Z rolf $ -->
+<md:EntityDescriptor entityID="poc3.eogs.capgemini.dk.spref" xmlns:brs="http://www.eogs.dk/2007/07/brs" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
+   <md:SPSSODescriptor AuthnRequestsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+      <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="http://localhost:8808/saml/saml/LogoutServiceHTTPRedirect" ResponseLocation="http://localhost:8808/saml/saml/LogoutServiceHTTPRedirectResponse"/>
+      <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="http://localhost:8808/saml/saml/LogoutServiceSOAP"/>
+      <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact" Location="http://localhost:8808/saml/saml/SAMLAssertionConsumer" index="0"/>
+   </md:SPSSODescriptor>
+   <md:Organization>
+      <md:OrganizationName xml:lang="en">Referenceimplementering</md:OrganizationName>
+      <md:OrganizationURL xml:lang="en">http://www.refimpl.dk</md:OrganizationURL>
+   </md:Organization>
+   <md:ContactPerson>
+      <md:Company>Capgemini</md:Company>
+      <md:GivenName>Kim Kenneth</md:GivenName>
+      <md:SurName>Moes</md:SurName>
+      <md:EmailAddress>kim.moes@capgemini.dk</md:EmailAddress>
+      <md:TelephoneNumber>23736515</md:TelephoneNumber>
+   </md:ContactPerson>
+</md:EntityDescriptor>

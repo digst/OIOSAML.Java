@@ -1,0 +1,79 @@
+<html>
+<head>
+<title>OIOSAML.java Features</title>
+        <style type="text/css">
+    	body {background-color: white; margin: 20px;}
+    	body, tr, td {font-family: Verdana, Helvetica, sans-serif; color: #456974;}
+    	div#pagecontainer {width: 80%;}
+    	h1, h2, h3, h4 {color: #76c2bc; border-bottom: 1px solid #76c2bc;}
+    	.monospace {font-family: monospace;}
+    	legend {font-weight: bold;}
+    	fieldset {margin-top: 10px; margin-bottom: 10px;}
+    	span.emphasis {font-weight: bold;}
+    </style>
+</head>
+<body>
+
+<h1>OIOSAML.java features</h1>
+<p>The main features of OIOSAML.java are:</p>
+<ul>
+<li>SAML 2.0 compliant</li>
+<li>OIOSAML compliant</li>
+<li>Implements servlet filter for automated user authentication</li>
+<li>Signatures are checked automatically</li>
+<li>Encryption of SAML assertions can be enforced</li>
+<li>Automatic CRL checking of IdP certificates</li>
+<li>Discovery profile and multiple identity providers are supported</li>
+<li>ForceAuthn can be set on selected urls</li>
+<li>NameIDPolicy can be selected using properties</li>
+<li>IsPassive can be configured. If IsPassive is set, SPFilter will allow unauthenticated requests, but the context assertion will not be valid. See <a href="developers.html">developer's guide</a>.
+<li>Supports AttributeQuery</li>
+<li>Error page can be customized</li>
+<li>Custom Assertion validators can be injected</li>
+<li>POST requests are saved if they initiate SSO process and are replayed after authentication</li>
+<li>Session state can be saved in a number of ways, thereby supporting both standalone and clustering</li>
+<li>A special developer mode which does not require a real IdP</li> 
+</ul>
+
+<h3>Supported bindings</h3>
+<p>The following SAML bindings are supported by OIOSAML.java:</p>
+<ul>
+<li>Single Logout: HTTP Redirect</li>
+<li>Single Logout: SOAP</li>
+<li>Login request: HTTP Redirect</li>
+<li>Login request: HTTP POST</li>
+<li>Login response: HTTP Artifact</li>
+<li>Login response: HTTP POST</li>
+<li>Login response: HTTP Redirect</li>
+</ul>
+
+<h3>Supported Profiles</h3>
+<p>The following SAML protocols are supported by OIOSAML.java:</p>
+<ul>
+<li>Web Single Signon</li>
+<li>Single Logout</li>
+<li><a href="discovery.html">IdP Discovery</a></li>
+<li>Artifact Resolution</li>
+<li>OIOSAML OCES Attribute profile</li>
+<li>Attribute Query</li>
+</ul>
+
+
+<h3>Signatures and encryption</h3>
+<p>OIOSAML.java requires that all requests and responses are signed with a XML digital signature. The signatures are automatically 
+validated upon reception, and OIOSAML.java will automatically insert signatures in outgoing requests.</p>
+
+<p>Encryption is only supported when receiving assertions, and only the &lt;EncryptedAssertion&gt; element is supported. This means
+that only whole assertions can be encrypted, encrypted attributes are not supported, and will be ignored. OIOSAML.java can be configured to
+allow unencrypted assertions by setting oiosaml-sp.encryption.force to false in oiosaml-j.properties.
+</p>
+
+<p>Metadata is signed automatically when downloaded through the saml/metadata servlet.</p>
+
+<h2>Limitations</h2>
+<ul>
+<li>The default configuration is not cluster safe. See the <a href="clustering.html">clustering guide</a> for more information.</li>
+</ul>
+
+</body>
+</html>
