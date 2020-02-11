@@ -87,7 +87,7 @@ public class OIOLogoutRequestTest extends AbstractServiceTests {
 			assertEquals(1, e.getErrors().size());
 		}
 		
-		lr.setNotOnOrAfter(new DateTime().minusMinutes(1));
+		lr.setNotOnOrAfter(new DateTime().minusMinutes(10));
 		try {
 			lh.validateRequest(URLDecoder.decode(Utils.getParameter("Signature", url), "UTF-8"), url.substring(url.indexOf('?') + 1), credential.getPublicKey(),location, lr.getIssuer().getValue());
 			fail("message is expired");

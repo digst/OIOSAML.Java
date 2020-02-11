@@ -37,6 +37,7 @@
         <modules>
 		<module>oiosaml</module>
 		<module>demo</module>
+		<module>idp</module>
         </modules>
 
         <repositories>

@@ -1,0 +1,120 @@
+<html>
+<head>
+<title>OIOSAML.java</title>
+        <style type="text/css">
+    	body {background-color: white; margin: 20px;}
+    	body, tr, td {font-family: Verdana, Helvetica, sans-serif; color: #456974;}
+    	div#pagecontainer {width: 80%;}
+    	h1, h2, h3, h4 {color: #76c2bc; border-bottom: 1px solid #76c2bc;}
+    	.monospace {font-family: monospace;}
+    	legend {font-weight: bold;}
+    	fieldset {margin-top: 10px; margin-bottom: 10px;}
+    	span.emphasis {font-weight: bold;}
+    </style>
+</head>
+<body>
+
+<h1>The OIOSAML 3.0 profile</h1>
+<p>
+Since OIOSAML.java version 2.2.0, the framework has supported the OIOSAML 3.0 profile, as well as the OIO-BPP 1.2 profile. This document outlines
+the steps needed to start using the OIOSAML 3.0 profile.
+</p>
+
+<p>
+Please note that the OIOSAML.java 2.2.0 framework still supports the old OIOSAML 2.0.9 profile, and that the two profiles can co-exist in a transition
+period as outlined below.
+</p>
+
+<h2>The OIOSAML 3.0 profile</h2>
+The OIOSAML 3.0 profile has a few changes that are relevant when building a SAML Service Provider (and some that are relevant when building a SAML Identity Provider, which are out of scope for this document). These are roughly grouped into these catagories
+
+<ul>
+<li>Stronger cryptograhic algorithms</li>
+<li>Updated attribute profile</li>
+<li>Personal and Professional sub-profiles</li>
+<li>NSIS 2.0 compatibility</li>
+</ul>
+
+<h3>Stronger cryptographic algorithms</h3>
+<p>
+These changes are mostly targetted against the SAML Identity Provider, as these issue signed and encrypted SAML messages, whereas the SAML Service Providers
+mostly just sign requests. The OIOSAML.java 2.2.0 framework will ensure the correct algorithms are used by default, and that it can validate and decrypt
+messages from SAML Identity Providers that use the strong cryptographic algorithms required by the OIOSAML 3.0 profile.
+</p>
+
+<h3>Updated attribute profile</h3>
+<p>
+The OIOSAML 2.2.0 framework supports all attributes included in the OIOSAML 3.0 profile, and has build-in utility classes for parsing the OIO-BPP 1.2
+attribute structure (the Privileges_intermediate attribute).
+</p>
+
+<p>
+The OIOSAML 2.2.0 framework comes with the utility class <em>dk.itst.oiosaml.oiobpp.OIOBPPUtil</em>, which expose the following method
+
+<ul>
+<li><b>PrivilegeList parse(String object)</b>. This method takes as input the raw base64-enckoded attribute value found in the Privileges_intermediate attribute, and constructs a PrivilegeList java object, containing the data found in the OIO-BPP 1.2 data structure.</li>
+</ul>
+
+<p>
+The structure of the PrivilegeList data object is illustrated below.
+</p>
+
+<pre>
+class PrivilegeList {
+  List&lt;PriviligeGroup&gt; privilegeGroup;
+}
+
+class PrivilegeGroup {
+  List&lt;String&gt; privilege;
+  List&lt;Constraint&gt; constraint;
+  String scope;
+}
+
+class Constraint {
+  String value;
+  String name;
+}
+</pre>
+
+</p>
+
+<h4>Personal and Professional sub-profiles</h4>
+<p>
+The OIOSAML 3.0 profile outlines sub-profiles for working with Personal users (citizens) and Professional users (employees). It is possible to configure
+the OIOSAML.java 2.2.0 framework to request a specific profile from the SAML Identity Provider, though this is not enabled by default, as not all
+SAML Identity Providers support this functionality. To enable it, just add one of these two configuration parameters
+</p>
+
+<pre>
+oiosaml-sp.requested.profile=https://data.gov.dk/eid/Person
+oiosaml-sp.requested.profile=https://data.gov.dk/eid/Professional
+</pre>
+
+<h3>NSIS 2.0 compatibility</h3>
+<p>
+In the OIOSAML 2.0.9 profile, the security-level of which a given user was authenticated by the SAML Identity Provider was relayed as an attribute called
+the AssuranceLevel, and the values from 1 to 4 where used, where 4 was the highest level of assurance.
+</p>
+
+<p>
+The OIOSAML 3.0 profile now supports the NSIS 2.0 assurance levels, which are split into three levels called Low, Substantial and High. From a purely
+technical point of view, these new levels work exactly as the old levels, in the sense that the SAML Identity Provider issues an attribute in the SAML
+Assertion, which contains the level that the user was authenticated under, and these levels has a natural hiearchy, so anyone with a Substantial assurance
+level, should be able to access resources that requires either Low og Substantial.
+</p>
+
+<p>
+The OIOSAML.java 2.2.0 framework supports both the old levels of assurance found in the OIOSAML 2.0.9 profile, and can be configured to require either a specific OIOSAML 2.0.9 assurance level (values 1 to 4), a specific OIOSAML 3.0 assurance level (values Low, Substantial or High), or it can be configured to require either/or.
+</p>
+
+<p>
+The last option (allowing either a OIOSAML 2.0.9 assurancen level, or a OIOSAML 3.0 assurance level), allows for an easy transition from the old levels of
+assurance, to the new levels of assurance.
+</p>
+
+<p>
+<a href="assurancelevel.html">Read more here</a>.
+</p>
+
+</body>
+</html>

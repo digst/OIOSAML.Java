@@ -1,0 +1,25 @@
+Tests can either be executed as part of the ordinary maven build (unless -Dmaven.test.skip=true is added as an argument, maven will always run tests),
+or the tests can be run from inside your IDE environment.
+
+Most of the tests are ordinary junit tests, and can run without any special setup.
+
+The tests found in LoginTests.java, requires the following to be able to run
+
+* the IdP project must be running
+* the /etc/hosts file (or windows equivalent) must contain idp/sp entries
+* Chrome version 78 or higher must be installed on the machine
+
+The IdP project found in the OIOSAML source repository can be started like this
+
+$ mvn clean install spring-boot:run
+
+the following two entries must be added to the hosts file, to ensure that the SAML metadata found in the test-cases will work
+
+127.0.0.1 sp
+127.0.0.1 idp
+
+and the chromedriver binary found in the /bin/ folder must match the installed version of Chrome on the machine. The default chromedriver
+is a 64-bit linux binary, that works with Chrome 78 or better. It is possible to download other chromedrivers here
+
+https://chromedriver.chromium.org/downloads
+

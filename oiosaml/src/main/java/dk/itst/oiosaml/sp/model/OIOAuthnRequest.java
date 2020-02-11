@@ -78,6 +78,14 @@ public class OIOAuthnRequest extends OIORequest {
 			authnRequest.setProtocolBinding(protocolBinding);
 		}
 
+		String requestedPolicy = (samlConfiguration.isConfigured()) ? samlConfiguration.getSystemConfiguration().getString(Constants.PROP_REQUESTED_NAMEID_FORMAT, "") : "";
+		if (requestedPolicy != null && requestedPolicy.length() > 0) {
+			NameIDPolicy policy = SAMLUtil.buildXMLObject(NameIDPolicy.class);
+			policy.setFormat(requestedPolicy);
+
+			authnRequest.setNameIDPolicy(policy);
+		}
+		
 		try {
 			if (log.isDebugEnabled())
 				log.debug("Validate the authnRequest...");

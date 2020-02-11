@@ -277,7 +277,6 @@ public final class Utils {
 		return null;
 	}
 
-	@SuppressWarnings("deprecation")
 	public static Object newInstance(Configuration cfg, String property) {
 		String name = cfg.getString(property);
 		if (name == null) {
@@ -293,7 +292,6 @@ public final class Utils {
 		}
 	}
 	
-	@SuppressWarnings("deprecation")
 	public static Map<String, SAMLHandler> getHandlers(Configuration config, ServletContext servletContext) {
 		Map<String, SAMLHandler> handlers = new HashMap<String, SAMLHandler>();
 		

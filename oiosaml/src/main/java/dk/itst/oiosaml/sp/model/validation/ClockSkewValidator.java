@@ -10,8 +10,12 @@ public class ClockSkewValidator {
 	private static int clockSkew;
 
 	static {
-		Configuration configuration = SAMLConfigurationFactory.getConfiguration().getSystemConfiguration();
-		clockSkew = configuration.getInt(Constants.PROP_CLOCK_SKEW, 5);
+		clockSkew = 5;
+
+		if (SAMLConfigurationFactory.getConfiguration().isConfigured()) {
+			Configuration configuration = SAMLConfigurationFactory.getConfiguration().getSystemConfiguration();
+			clockSkew = configuration.getInt(Constants.PROP_CLOCK_SKEW, 5);			
+		}
 	}
 
 	public static boolean isBeforeNow(DateTime dateTime) {

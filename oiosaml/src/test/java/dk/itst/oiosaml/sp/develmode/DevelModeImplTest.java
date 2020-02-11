@@ -54,11 +54,10 @@ import dk.itst.oiosaml.sp.service.util.Constants;
 
 public class DevelModeImplTest extends AbstractServiceTests {
 	private Map<String, String> conf = new HashMap<String, String>();
-
 	private DevelModeImpl dmi;
 	private FilterChain chain;
-
 	private Configuration cfg;
+	
 	@Before
 	public void setup() {
 		dmi = new DevelModeImpl();

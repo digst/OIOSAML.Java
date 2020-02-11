@@ -255,6 +255,20 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-java</artifactId>
+			<version>3.141.59</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>net.lightbody.bmp</groupId>
+			<artifactId>browsermob-core</artifactId>
+			<version>2.1.5</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>org.mortbay.jetty</groupId>
 			<artifactId>jsp-2.1</artifactId>
 			<version>6.1.11</version>
@@ -265,6 +279,13 @@
 			<groupId>org.mortbay.jetty</groupId>
 			<artifactId>jsp-api-2.1</artifactId>
 			<version>6.1.11</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mortbay.jetty</groupId>
+			<artifactId>jetty</artifactId>
+			<version>6.1.25</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

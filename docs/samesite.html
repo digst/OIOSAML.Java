@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>OIOSAML.java logging</title>
+<title>OIOSAML.java</title>
         <style type="text/css">
     	body {background-color: white; margin: 20px;}
     	body, tr, td {font-family: Verdana, Helvetica, sans-serif; color: #456974;}
@@ -34,7 +34,26 @@ If your application stores data on the servlet session before the user logs in, 
 </ul>
 
 <p>
-If your application does not store data on the servlet session before login, or your session cookies has the SameSite=none attribute set, then you do not need to add the SessionCopyListener servlet Listener, but if you do, add the following section to your web.xml file
+If your application does not create any data on the session before login, then you probably do not need to do anything, but if you experience any issues
+with regards to lost session data, it is very likely related to the new Chrome behaviour, and one one the solutions outlined below should solve the issue.
+</p>
+
+<h2>Setting SameSite=none in Tomcat</h2>
+Since Tomcat 9.0.21 and 8.5.42 it is possible to explicitly set the SameSite cookie attribute to a given value. One solution to the new Chrome behaviour
+is simply to set the SameSite attribute to none in the Tomcat context.xml file like this
+
+<pre>
+&lt;context&gt;
+  &lt;CookieProcesser sameSiteCookies="none" /&gt;
+&lt;/context&gt;
+</pre>
+
+<h2>Using the SessionCopyListener functionality in OIOSAML</h2>
+
+<p>
+OIOSAML comes with a SessionCopyListener "servlet listener", that can be added to the web.xml of your application as shown below. It will store the
+outgoing session when initating a SAML login or logout, and then copy the session data to the newly created session upon getting a reply from the
+SAML Identity Provider.
 </p>
 
 <pre>

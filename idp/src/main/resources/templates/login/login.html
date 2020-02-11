@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head th:replace="fragments/header :: header"/>
+<body>
+<form class="form-horizontal" method="post" action="/saml/sso">
+    <div class="container border rounded-lg" style="margin-top: 15px; border-width: 5px !important">
+        <h2 class="col-sm-12" th:text="#{html.login.title}"></h2>
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+        <div class="col-sm-12 form-group">
+            <label for="username" th:text="#{html.login.label.username}"></label>
+            <input class="form-control" type="text" id="username" name="username" th:placeholder="#{html.login.placeholder.username}" required autofocus>
+        </div>
+
+        <div class="col-sm-12 form-group">
+            <label for="password" th:text="#{html.login.label.password}"></label>
+            <input class="form-control" type="password" id="password" name="password" th:placeholder="#{html.login.placeholder.password}" required>
+        </div>
+
+        <div class="col-sm-12 form-group">
+            <button class="btn btn-lg btn-primary btn-block" id="submitButton" type="submit" th:text="#{html.login.btn}"></button>
+        </div>
+    </div>
+</form>
+<div th:replace="fragments/footer :: footer"/>
+</body>
+</html>

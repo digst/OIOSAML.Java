@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head th:fragment="header">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="_csrf" th:content="${_csrf.token}" />
+
+    <title th:text="#{html.global.title}"/>
+
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.3.1/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/webjars/font-awesome/4.7.0/css/font-awesome.min.css}" />
+
+    <style>
+        .btn-primary {
+            background-color: #4765a0;
+        }
+    </style>
+</head>
+</html>

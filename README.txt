@@ -1,4 +1,4 @@
-OIOSAML.java is distributed under the Mozilla Public License 1.1, and is based on OpenSAML 2.0, which is released under the Apache License 2.0.
+OIOSAML.java is distributed under the Mozilla Public License 1.1, and is based on OpenSAML 2.6, which is released under the Apache License 2.0.
 
 See docs/index.html for full documentation, including installation
 instructions.

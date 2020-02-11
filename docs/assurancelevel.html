@@ -54,5 +54,19 @@ oiosaml-sp.nsislevel=https://data.gov.dk/concept/core/nsis/loa/High
 </pre>
 </p>
 
+<h2>Requesting a specific AssuranceLevel</h2>
+<p>
+The OIOSAML 3.0 profile allows for requesting a specific level of assurance in the AuthnRequest send by the SAML Service Provider to the SAML Identity
+Provider. Not all Identity Providers supports this, so the feature is not enabled by default.
+</p>
+
+<p>
+By setting the following configuration parameter, the OIOSAML.java framework will request the configured level as part of the AuthnRequest.
+</p>
+
+<pre>
+oiosaml-sp.enable.authncontextclassref.request=true
+</pre>
+
 </body>
 </html>

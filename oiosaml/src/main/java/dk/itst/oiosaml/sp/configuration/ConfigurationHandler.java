@@ -227,7 +227,7 @@ public class ConfigurationHandler implements SAMLHandler {
 		else if (Boolean.valueOf(extractParameter("createkeystore", parameters))) {
 			try {
 				BasicX509Credential cred = new BasicX509Credential();
-				KeyPair kp = dk.itst.oiosaml.security.SecurityHelper.generateKeyPairFromURI("http://www.w3.org/2001/04/xmlenc#rsa-1_5", 1024);
+				KeyPair kp = dk.itst.oiosaml.security.SecurityHelper.generateKeyPairFromURI("http://www.w3.org/2001/04/xmlenc#rsa-1_5", 2048);
 				cred.setPrivateKey(kp.getPrivate());
 				cred.setPublicKey(kp.getPublic());
 				credential = cred;

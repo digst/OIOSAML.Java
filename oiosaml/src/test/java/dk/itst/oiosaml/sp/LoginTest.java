@@ -46,7 +46,7 @@ public class LoginTest extends IntegrationTests {
 		assertEquals(200, redirect.getWebResponse().getStatusCode());
 		assertTrue(refreshHandler.url.toString().startsWith(idpMetadata.getFirstMetadata().getSingleSignonServiceLocation(SAMLConstants.SAML2_REDIRECT_BINDING_URI)));
 	}
-	
+
 	@Test
 	public void testLoginResponse_IT_LOGON_1() throws Exception {
 		client.getPage(BASE + "/sp/priv1.jsp");
