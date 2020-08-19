@@ -215,11 +215,29 @@ public class UserAssertionImpl implements UserAssertion, Serializable {
 	}
 
 	public String getRIDNumber() {
+		String value = getAttributeValue(OIOSAMLConstants.ATTRIBUTE_RID_NUMBER_IDENTIFIER_NAME_EID);
+		if (value != null) {
+			return value;
+		}
+
 		return getAttributeValue(OIOSAMLConstants.ATTRIBUTE_RID_NUMBER_IDENTIFIER_NAME);
 	}
 
 	public String getPIDNumber() {
+		String value = getAttributeValue(OIOSAMLConstants.ATTRIBUTE_PID_NUMBER_IDENTIFIER_NAME_EID);
+		if (value != null) {
+			return value;
+		}
+
 		return getAttributeValue(OIOSAMLConstants.ATTRIBUTE_PID_NUMBER_IDENTIFIER_NAME);
+	}
+
+	public String getPersonUuid() {
+		return getAttributeValue(OIOSAMLConstants.ATTRIBUTE_PERSON_UUID);
+	}
+
+	public String getProfessionalUuid() {
+		return getAttributeValue(OIOSAMLConstants.ATTRIBUTE_PROFESSIONAL_UUID);
 	}
 
 	public String getPseudonym() {

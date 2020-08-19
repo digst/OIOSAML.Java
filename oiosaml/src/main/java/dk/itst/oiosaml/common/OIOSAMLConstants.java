@@ -106,10 +106,12 @@ public interface OIOSAMLConstants {
 	public static final String ATTRIBUTE_SERIAL_NUMBER_FRIENDLY_NAME = "serialNumber";
 
 	public static final String ATTRIBUTE_PID_NUMBER_IDENTIFIER_NAME = "dk:gov:saml:attribute:PidNumberIdentifier";
-
+	public static final String ATTRIBUTE_PID_NUMBER_IDENTIFIER_NAME_EID = "https://data.gov.dk/model/core/eid/person/pid";
+	
 	public static final String ATTRIBUTE_PID_NUMBER_IDENTIFIER_FRIENDLY_NAME = "PidNumberIdentifier";
 
 	public static final String ATTRIBUTE_RID_NUMBER_IDENTIFIER_NAME = "dk:gov:saml:attribute:RidNumberIdentifier";
+	public static final String ATTRIBUTE_RID_NUMBER_IDENTIFIER_NAME_EID = "https://data.gov.dk/model/core/eid/professional/rid";
 
     public static final String ATTRIBUTE_PRIVILEGES_INTERMEDIATE = "dk:gov:saml:attribute:Privileges_intermediate";
 
@@ -172,4 +174,8 @@ public interface OIOSAMLConstants {
     public static final String NSIS_RESPONSE_LEVEL_SUBSTANTIAL = "Substantial";
     
     public static final String NSIS_RESPONSE_LEVEL_HIGH = "High";
+	
+    public static final String ATTRIBUTE_PROFESSIONAL_UUID = "https://data.gov.dk/model/core/eid/professional/uuid/persistent";
+
+	public static final String ATTRIBUTE_PERSON_UUID = "https://data.gov.dk/model/core/eid/cprUuid";
 }
