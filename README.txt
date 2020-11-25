@@ -53,6 +53,3 @@ Quick start:
  - Deploy the war to a servlet container like Apache Tomcat
  - Open a browser and access the deployed application on https://localhost
  - Click on the Configure link to configure the system
-
-
-
