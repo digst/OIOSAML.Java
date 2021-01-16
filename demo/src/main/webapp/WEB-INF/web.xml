@@ -1,46 +1,96 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app id="WebApp_ID" version="2.4"
-	xmlns="http://java.sun.com/xml/ns/j2ee"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" >
-	
-	<display-name>OIOSAML-J</display-name>
-	<env-entry>
-        <env-entry-name>oiosaml-j.home</env-entry-name>
-        <env-entry-type>java.lang.String</env-entry-type>
-        <env-entry-value>oiosaml-config</env-entry-value>
-    </env-entry>
+<web-app id="WebApp_ID" version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" >
+    <display-name>OIOSAML3-Demo</display-name>
 
-	<listener>
-		<listener-class>dk.itst.oiosaml.sp.service.session.SessionDestroyListener</listener-class>
-	</listener>
+    <servlet>
+        <servlet-name>DispatcherServlet</servlet-name>
+        <servlet-class>
+            dk.gov.oio.saml.servlet.DispatcherServlet
+        </servlet-class>
 
-        <listener>
-                <listener-class>dk.itst.oiosaml.sp.service.session.SessionCopyListener</listener-class>
-        </listener>
+        <init-param>
+            <param-name>oiosaml.servlet.configurationfile</param-name>
+            <param-value>oiosaml.properties</param-value>
+        </init-param>
 
-	<servlet>
-		<servlet-name>SAMLDispatcherServlet</servlet-name>
-		<servlet-class>
-			dk.itst.oiosaml.sp.service.DispatcherServlet
-		</servlet-class>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
 
-	<servlet-mapping>
-		<servlet-name>SAMLDispatcherServlet</servlet-name>
-		<url-pattern>/saml/*</url-pattern>
-	</servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DispatcherServlet</servlet-name>
+        <url-pattern>/saml/*</url-pattern>
+    </servlet-mapping>
 
-	<filter>
-		<filter-name>LoginFilter</filter-name>
-		<filter-class>dk.itst.oiosaml.sp.service.SPFilter</filter-class>
+    <filter>
+        <filter-name>SameSiteFilter</filter-name>
+        <filter-class>dk.gov.oio.saml.filter.SameSiteFilter</filter-class>
 	</filter>
-	<filter-mapping>
-		<filter-name>LoginFilter</filter-name>
-		<url-pattern>/sp/*</url-pattern>
-	</filter-mapping>
-	<welcome-file-list>
-		<welcome-file>index.jsp</welcome-file>
-	</welcome-file-list>
+
+    <filter>
+        <filter-name>SubstantialFilter</filter-name>
+        <filter-class>dk.gov.oio.saml.filter.AuthenticatedFilter</filter-class>
+        <init-param>
+            <param-name>oiosaml.filter.nsis.required</param-name>
+            <param-value>SUBSTANTIAL</param-value>
+        </init-param>
+        <init-param>
+            <param-name>oiosaml.filter.ispassive.enabled</param-name>
+            <param-value>false</param-value>
+        </init-param>
+        <init-param>
+            <param-name>oiosaml.filter.forceauthn.enabled</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </filter>
+
+    <filter>
+        <filter-name>NoNSISFilter</filter-name>
+        <filter-class>dk.gov.oio.saml.filter.AuthenticatedFilter</filter-class>
+        <init-param>
+            <param-name>oiosaml.filter.ispassive.enabled</param-name>
+            <param-value>false</param-value>
+        </init-param>
+        <init-param>
+            <param-name>oiosaml.filter.forceauthn.enabled</param-name>
+            <param-value>false</param-value>
+        </init-param>
+    </filter>
+    
+    <filter>
+        <filter-name>LowFilter</filter-name>
+        <filter-class>dk.gov.oio.saml.filter.AuthenticatedFilter</filter-class>
+        <init-param>
+            <param-name>oiosaml.filter.nsis.required</param-name>
+            <param-value>LOW</param-value>
+        </init-param>
+        <init-param>
+            <param-name>oiosaml.filter.ispassive.enabled</param-name>
+            <param-value>false</param-value>
+        </init-param>
+        <init-param>
+            <param-name>oiosaml.filter.forceauthn.enabled</param-name>
+            <param-value>false</param-value>
+        </init-param>
+    </filter>
+
+	<!-- should be placed BEFORE the AuthenticationFilter to ensure it catches any sessions created -->
+    <filter-mapping>
+        <filter-name>SameSiteFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    
+    <filter-mapping>
+        <filter-name>SubstantialFilter</filter-name>
+        <url-pattern>/substantial/*</url-pattern>
+    </filter-mapping>
+    
+    <filter-mapping>
+        <filter-name>LowFilter</filter-name>
+        <url-pattern>/low/*</url-pattern>
+    </filter-mapping>
+    
+    <filter-mapping>
+        <filter-name>NoNSISFilter</filter-name>
+        <url-pattern>/nonsis/*</url-pattern>
+    </filter-mapping>
 </web-app>

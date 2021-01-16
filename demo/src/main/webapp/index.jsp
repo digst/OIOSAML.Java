@@ -1,21 +1,17 @@
-<!-- "$Id: index.jsp 3180 2008-07-21 11:48:20Z jre $"; -->
-<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-    <jsp:include page="head.jsp" />
-    <h1>Front page - OIOSAML.java Service Provider Demo</h1>
-    <br /><br />
+<!doctype html>
+<html>
+<head>
+    <title>OIOSAML Demo Application</title>
+</head>
+<body>
+<h3>OIOSAML Demo Application</h3>
 
-	<div style="text-align: center; float: left">
-    <a href="sp/priv1.jsp">Page requiring login</a> · <a href="configure.jsp">Runtime configuration</a><br /><br />
-
-<div>
-<p>Test form POST:</p>
-<form method="post" action="sp/post.jsp">
-<input type="text" name="testing" value="testingvalue" />
-<input type="submit" />
-</form>
-</div>    
-
-    <img src="oiosaml.gif" alt="oiosaml.java" />
-    </div>
-  </body>
+<a href="saml/metadata">Metadata link</a>
+<br/>
+<a href="low/private.jsp">Page requiring NSIS Low</a>
+<br/>
+<a href="substantial/private.jsp">Page requiring NSIS Substantial</a>
+<br/>
+<a href="nonsis/private.jsp">Page not requiring NSIS</a>
+</body>
 </html>

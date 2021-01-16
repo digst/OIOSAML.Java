@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>dk.digst</groupId>
-	<artifactId>oiosaml2.java-parent</artifactId>
-	<version>2.2.1</version>
-	<name>OIOSAML v2 for Java parent</name>
+	<artifactId>oiosaml3-parent</artifactId>
+	<version>3.0.0</version>
+	<name>OIOSAML v3 for Java</name>
 	<packaging>pom</packaging>
 
 	<properties>
@@ -37,14 +37,8 @@
         <modules>
 		<module>oiosaml</module>
 		<module>demo</module>
+		<!-- requires Java 11, enable if available
 		<module>idp</module>
-        </modules>
-
-        <repositories>
-                <repository>
-                        <id>Shibboleth</id>
-                        <name>Shibboleth</name>
-                        <url>https://build.shibboleth.net/nexus/content/repositories/releases/</url>
-                </repository>
-        </repositories>
+		-->
+	</modules>
 </project>

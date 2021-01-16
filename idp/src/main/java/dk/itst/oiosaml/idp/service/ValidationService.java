@@ -1,8 +1,12 @@
 package dk.itst.oiosaml.idp.service;
 
-import dk.itst.oiosaml.idp.util.Constants;
-import lombok.extern.log4j.Log4j2;
-import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import java.nio.charset.StandardCharsets;
+import java.security.PublicKey;
+import java.security.cert.CertificateException;
+import java.util.Base64;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.handler.MessageHandlerException;
 import org.opensaml.saml.common.SAMLObject;
@@ -15,19 +19,13 @@ import org.opensaml.xmlsec.algorithm.AlgorithmSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.security.PublicKey;
-import java.security.cert.CertificateException;
-import java.util.Base64;
+import dk.itst.oiosaml.idp.util.Constants;
+import lombok.extern.log4j.Log4j2;
+import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 
 @Log4j2
 @Service
 public class ValidationService {
-
-    @Autowired
-    private CredentialService credentialService;
 
     @Autowired
     private MetadataService metadataService;
@@ -47,7 +45,8 @@ public class ValidationService {
         }
     }
 
-    private boolean validateDestination(HttpServletRequest request, MessageContext<SAMLObject> messageContext) {
+    @SuppressWarnings("unchecked")
+	private boolean validateDestination(HttpServletRequest request, MessageContext<SAMLObject> messageContext) {
         log.debug("Started destination validation");
         ReceivedEndpointSecurityHandler endpointSecurityHandler = new ReceivedEndpointSecurityHandler();
         try {
@@ -61,7 +60,8 @@ public class ValidationService {
         return true;
     }
 
-    private boolean validateLifetime(MessageContext<SAMLObject> messageContext) {
+    @SuppressWarnings("unchecked")
+	private boolean validateLifetime(MessageContext<SAMLObject> messageContext) {
         log.debug("Started message lifetime validation");
         MessageLifetimeSecurityHandler lifetimeHandler = new MessageLifetimeSecurityHandler();
         lifetimeHandler.setClockSkew(60 * 5 * 1000);

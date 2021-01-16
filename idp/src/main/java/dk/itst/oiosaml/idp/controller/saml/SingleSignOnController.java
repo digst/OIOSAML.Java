@@ -1,16 +1,10 @@
 package dk.itst.oiosaml.idp.controller.saml;
 
-import dk.itst.oiosaml.idp.config.Session;
-import dk.itst.oiosaml.idp.config.SessionConfig;
-import dk.itst.oiosaml.idp.service.CredentialService;
-import dk.itst.oiosaml.idp.service.HTTPPostService;
-import dk.itst.oiosaml.idp.service.HTTPRedirectService;
-import dk.itst.oiosaml.idp.service.OpenSAMLHelperService;
-import dk.itst.oiosaml.idp.service.ValidationService;
-import dk.itst.oiosaml.idp.util.Constants;
-import lombok.extern.log4j.Log4j2;
-import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
-import net.shibboleth.utilities.java.support.velocity.VelocityEngine;
+import java.util.Optional;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.core.xml.io.UnmarshallingException;
 import org.opensaml.messaging.context.MessageContext;
@@ -33,9 +27,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.w3c.dom.Element;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.Optional;
+import dk.itst.oiosaml.idp.config.Session;
+import dk.itst.oiosaml.idp.config.SessionConfig;
+import dk.itst.oiosaml.idp.service.HTTPPostService;
+import dk.itst.oiosaml.idp.service.HTTPRedirectService;
+import dk.itst.oiosaml.idp.service.OpenSAMLHelperService;
+import dk.itst.oiosaml.idp.service.ValidationService;
+import dk.itst.oiosaml.idp.util.Constants;
+import lombok.extern.log4j.Log4j2;
+import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import net.shibboleth.utilities.java.support.velocity.VelocityEngine;
 
 @Log4j2
 @Controller
@@ -46,9 +47,6 @@ public class SingleSignOnController {
 
     @Autowired
     private HTTPRedirectService httpRedirectService;
-
-    @Autowired
-    private CredentialService credentialService;
 
     @Autowired
     private OpenSAMLHelperService samlBuilder;

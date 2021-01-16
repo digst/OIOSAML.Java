@@ -1,58 +1,68 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>dk.digst</groupId>
-	<artifactId>oiosaml2-demo.java</artifactId>
-	<name>OIOSAML Demo for Java v2</name>
-	<packaging>war</packaging>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <artifactId>oiosaml3-demo</artifactId>
+    <name>OIOSAML Demo for Java v3</name>
+    <modelVersion>4.0.0</modelVersion>
+    <packaging>war</packaging>
 
-	<parent>
-		<groupId>dk.digst</groupId>
-		<artifactId>oiosaml2.java-parent</artifactId>
-		<version>2.2.1</version>
-	</parent>
+    <parent>
+        <artifactId>oiosaml3-parent</artifactId>
+        <groupId>dk.digst</groupId>
+        <version>3.0.0</version>
+    </parent>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.tomcat.maven</groupId>
-				<artifactId>tomcat7-maven-plugin</artifactId>
-				<version>2.2</version>
-				<configuration>
-					<port>8080</port>
-					<httpsPort>8443</httpsPort>
-					<keystoreFile>${project.basedir}/ssl-keystore</keystoreFile>
-					<keystorePass>Test1234</keystorePass>
-				</configuration>
-			</plugin>
-		</plugins>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <port>8080</port>
+                    <httpsPort>8083</httpsPort>
+                    <keystoreFile>${project.basedir}/ssl-demo.pfx</keystoreFile>
+                    <keystorePass>Test1234</keystorePass>
+                    <httpsPort>8443</httpsPort>
+                    <keystoreFile>${project.basedir}/config/ssl-demo.pfx</keystoreFile>
+                    <keystorePass>Test1234</keystorePass>
+                </configuration>
+            </plugin>
+        </plugins>
 
-		<finalName>oiosaml2-demo.java</finalName>
-	</build>
+        <finalName>oiosaml3-demo.java</finalName>
+    </build>
 
-	<dependencies>
-		<dependency>
-			<groupId>dk.digst</groupId>
-			<artifactId>oiosaml2.java</artifactId>
-			<version>2.2.1</version>
-		</dependency>
+    <dependencies>
+        <dependency>
+            <groupId>javax.servlet.jsp.jstl</groupId>
+            <artifactId>javax.servlet.jsp.jstl-api</artifactId>
+            <version>1.2.2</version>
+        </dependency>
 
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>2.5</version>
-		</dependency>
+        <dependency>
+            <groupId>taglibs</groupId>
+            <artifactId>standard</artifactId>
+            <version>1.1.2</version>
+        </dependency>
 
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-jdk14</artifactId>
-			<version>1.7.25</version>
-		</dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.0.1</version>
+            <scope>provided</scope>
+        </dependency>
 
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>2.5</version>
-			<scope>provided</scope>
-		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>dk.digst</groupId>
+            <artifactId>oiosaml3.java</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.2</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 </project>

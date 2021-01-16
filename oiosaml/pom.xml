@@ -1,10 +1,12 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>dk.digst</groupId>
-	<artifactId>oiosaml2.java</artifactId>
-	<name>OIOSAML for Java v2</name>
+	<artifactId>oiosaml3.java</artifactId>
+	<name>OIOSAML for Java v3</name>
 	<packaging>jar</packaging>
-	<version>2.2.0</version>
+	<version>3.0.0</version>
 	<description>SAML Servlet Filter, configured to work with the danish SAML profile OIOSAML 3.0.0</description>
 	<url>https://digitaliser.dk/group/42063/resources</url>
 
@@ -25,25 +27,17 @@
 	</developers>
 
 	<scm>
-		<connection>scm:svn:https://svn.softwareborsen.dk/oiosaml.java/sp/trunk/</connection>
-		<developerConnection>scm:svn:https://svn.softwareborsen.dk/oiosaml.java/sp/trunk/</developerConnection>
-		<url>https://svn.softwareborsen.dk/oiosaml.java/sp/trunk/</url>
+		<connection>scm:git@github.com:digst/OIOSAML.Java.git</connection>
+		<developerConnection>scm:git@github.com:digst/OIOSAML.Java.git</developerConnection>
+		<url>scm:git:ssh://github.com:digst/OIOSAML.Java.git</url>
 	</scm>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java.version>1.8.0</java.version>
 	</properties>
-
+	
 	<profiles>
-		<profile>
-			<id>doclint-java8-disable</id>
-			<activation>
-				<jdk>[1.8,)</jdk>
-			</activation>
-			<properties>
-				<javadoc.opts>-Xdoclint:none</javadoc.opts>
-			</properties>
-		</profile>
                 <profile>
                         <id>sign</id>
                         <build>
@@ -68,26 +62,18 @@
                 </profile>
 	</profiles>
 
+
 	<build>
 		<plugins>
- 			<plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.18.1</version>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.3</version>
 				<configuration>
-					<reuseForks>false</reuseForks>
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
 			</plugin>
-
-                        <plugin>
-                                <groupId>org.apache.maven.plugins</groupId>
-                                <artifactId>maven-compiler-plugin</artifactId>
-                                <version>3.3</version>
-                                <configuration>
-                                        <source>1.8</source>
-                                        <target>1.8</target>
-                                </configuration>
-                        </plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -97,8 +83,8 @@
 					<downloadSources>true</downloadSources>
 					<downloadJavadocs>true</downloadJavadocs>
 				</configuration>
-                        </plugin>
-
+			</plugin>
+			
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
@@ -112,7 +98,7 @@
 					</execution>
 				</executions>
 			</plugin>
-
+			
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -133,168 +119,95 @@
 	</build>
 
 	<dependencies>
-                <dependency>
-                        <groupId>log4j</groupId>
-                        <artifactId>log4j</artifactId>
-                        <version>1.2.17</version>
-                </dependency>
-
 		<dependency>
 			<groupId>org.opensaml</groupId>
-			<artifactId>opensaml</artifactId>
-			<version>2.6.6</version>
+			<artifactId>opensaml-core</artifactId>
+			<version>3.4.5</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.opensaml</groupId>
-			<artifactId>xmltooling</artifactId>
-			<version>1.4.6</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.bouncycastle</groupId>
-					<artifactId>bcprov-jdk15</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<!-- The next four dependencies are required as we upgraded from opensaml 2.6.1, and it no longer pulls in these dependencies -->
-                <dependency>
-                        <groupId>xerces</groupId>
-                        <artifactId>xercesImpl</artifactId>
-                        <version>2.10.0</version>
-                </dependency>
-
-                <dependency>
-                        <groupId>xalan</groupId>
-                        <artifactId>serializer</artifactId>
-                        <version>2.7.1</version>
-                </dependency>
-
-                <dependency>
-                        <groupId>xml-resolver</groupId>
-                        <artifactId>xml-resolver</artifactId>
-                        <version>1.2</version>
-                </dependency>
-
-                <dependency>
-                        <groupId>xalan</groupId>
-                        <artifactId>xalan</artifactId>
-                        <version>2.7.1</version>
-                </dependency>
-		<!-- end special fix -->
-
-		<dependency>
-			<groupId>commons-configuration</groupId>
-			<artifactId>commons-configuration</artifactId>
-			<version>1.10</version>
+			<artifactId>opensaml-saml-impl</artifactId>
+			<version>3.4.5</version>
 		</dependency>
 
 		<dependency>
-			<groupId>xml-apis</groupId>
-			<artifactId>xml-apis</artifactId>
-			<version>1.4.01</version>
+			<groupId>org.opensaml</groupId>
+			<artifactId>opensaml-messaging-impl</artifactId>
+			<version>3.4.5</version>
 		</dependency>
 
 		<dependency>
-			<groupId>org.fishwife</groupId>
-			<artifactId>jrugged-core</artifactId>
-			<version>3.1.1</version>
-		</dependency>
-
-		<dependency>
-			<groupId>commons-fileupload</groupId>
-			<artifactId>commons-fileupload</artifactId>
-			<version>1.3</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15on</artifactId>
-			<version>1.49</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcpkix-jdk15on</artifactId>
-			<version>1.49</version>
+			<groupId>org.opensaml</groupId>
+			<artifactId>opensaml-security-api</artifactId>
+			<version>3.4.5</version>
 		</dependency>
 
 		<dependency>
 			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>2.5</version>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.0.1</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.4</version>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>2.3.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-core</artifactId>
+			<version>2.3.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-impl</artifactId>
+			<version>2.3.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>5.7.0</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
-			<groupId>org.jmock</groupId>
-			<artifactId>jmock-junit4</artifactId>
-			<version>2.5.0</version>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-runner</artifactId>
+			<version>1.7.0</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
-			<groupId>net.sourceforge.htmlunit</groupId>
-			<artifactId>htmlunit</artifactId>
-			<version>2.2</version>
-			<scope>test</scope>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.mortbay.jetty</groupId>
-			<artifactId>jetty-embedded</artifactId>
-			<version>6.1.11</version>
+			<groupId>org.mock-server</groupId>
+			<artifactId>mockserver-junit-jupiter</artifactId>
+			<version>5.11.2</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
-			<groupId>org.seleniumhq.selenium</groupId>
-			<artifactId>selenium-java</artifactId>
-			<version>3.141.59</version>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>3.6.28</version>
 			<scope>test</scope>
 		</dependency>
 
+		<!-- used by some of the OpenSAML classes -->
 		<dependency>
-			<groupId>net.lightbody.bmp</groupId>
-			<artifactId>browsermob-core</artifactId>
-			<version>2.1.5</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.mortbay.jetty</groupId>
-			<artifactId>jsp-2.1</artifactId>
-			<version>6.1.11</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.mortbay.jetty</groupId>
-			<artifactId>jsp-api-2.1</artifactId>
-			<version>6.1.11</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.mortbay.jetty</groupId>
-			<artifactId>jetty</artifactId>
-			<version>6.1.25</version>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.2</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
-	<repositories>
-		<repository>
-			<id>Shibboleth</id>
-			<name>Shibboleth</name>
-			<url>https://build.shibboleth.net/nexus/content/repositories/releases/</url>
-		</repository>
-	</repositories>
 </project>
