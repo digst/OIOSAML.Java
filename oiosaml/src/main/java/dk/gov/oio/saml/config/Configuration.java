@@ -38,9 +38,9 @@ public class Configuration {
 	private String nameIDFormat = "urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName";
     private boolean supportSelfSigned = false;
 
-    // CRL settings
+    // Revocation check settings
 	private boolean crlCheckEnabled = true;
-    private String ocspCaCertificate = "oces-prod-ca.pem";
+	private boolean ocspCheckEnabled = true;
 
 	private Configuration() {
 
@@ -230,12 +230,12 @@ public class Configuration {
 		this.crlCheckEnabled = crlCheckEnabled;
 	}
 
-    public String getOcspCaCertificate() {
-		return ocspCaCertificate;
+	public boolean isOcspCheckEnabled() {
+		return ocspCheckEnabled;
 	}
 
-	public void setOcspCaCertificate(String ocspCaCertificate) {
-		this.ocspCaCertificate = ocspCaCertificate;
+	public void setOcspCheckEnabled(boolean ocspCheckEnabled) {
+		this.ocspCheckEnabled = ocspCheckEnabled;
 	}
 
 	// Configuration builder for mandatory fields

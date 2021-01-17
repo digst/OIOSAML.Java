@@ -77,14 +77,14 @@ public class DispatcherServlet extends HttpServlet {
             configuration.setSupportSelfSigned("true".equals(value));
         }
         
-        value = config.get(Constants.REVOCATION_CHECK_ENABLED);
+        value = config.get(Constants.CRL_CHECK_ENABLED);
         if (value != null && value.length() > 0) {
             configuration.setCRLCheckEnabled("true".equals(value));
         }
         
-        value = config.get(Constants.REVOCATION_CHECK_OCSP_CA);
+        value = config.get(Constants.OCSP_CHECK_ENABLED);
         if (value != null && value.length() > 0) {
-            configuration.setOcspCaCertificate(value);
+            configuration.setOcspCheckEnabled("true".equals(value));
         }
 
         value = config.get(Constants.METADATA_NAMEID_FORMAT);

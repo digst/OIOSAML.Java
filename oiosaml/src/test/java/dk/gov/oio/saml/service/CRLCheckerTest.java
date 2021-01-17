@@ -20,8 +20,8 @@ public class CRLCheckerTest extends BaseServiceTest {
 	@DisplayName("Test revocation check on valid certificate using OCSP")
 	@Test
 	public void testOcspCheckOnValidCertificate() throws Exception {
-		OIOSAML3Service.getConfig().setCRLCheckEnabled(true);
-		OIOSAML3Service.getConfig().setOcspCaCertificate("intermediate-oces-ca.pem");
+		OIOSAML3Service.getConfig().setCRLCheckEnabled(false);
+		OIOSAML3Service.getConfig().setOcspCheckEnabled(true);
 
 		byte[] validCert = Base64.getDecoder().decode(TestConstants.VALID_CERTIFICATE.getBytes(Charset.forName("UTF-8")));
 		
@@ -39,8 +39,7 @@ public class CRLCheckerTest extends BaseServiceTest {
 	@Test
 	public void testCrlCheckOnValidCertificate() throws Exception {
 		OIOSAML3Service.getConfig().setCRLCheckEnabled(true);
-		// default configuration points to PROD, causing OCSP to fail, and fallback to CRL checking
-		//OIOSAML3Service.getConfig().setOcspCaCertificate("intermediate-oces-ca.pem");
+		OIOSAML3Service.getConfig().setOcspCheckEnabled(false);
 		
 		byte[] validCert = Base64.getDecoder().decode(TestConstants.VALID_CERTIFICATE.getBytes(Charset.forName("UTF-8")));
 		
@@ -57,8 +56,8 @@ public class CRLCheckerTest extends BaseServiceTest {
 	@DisplayName("Test revocation check on revoked certificate using OCSP")
 	@Test
 	public void testOcspCheckOnRevokedCertificate() throws Exception {
-		OIOSAML3Service.getConfig().setCRLCheckEnabled(true);
-		OIOSAML3Service.getConfig().setOcspCaCertificate("intermediate-oces-ca.pem");
+		OIOSAML3Service.getConfig().setCRLCheckEnabled(false);
+		OIOSAML3Service.getConfig().setOcspCheckEnabled(true);
 
 		byte[] validCert = Base64.getDecoder().decode(TestConstants.REVOKED_CERTIFICATE.getBytes(Charset.forName("UTF-8")));
 		
@@ -77,8 +76,7 @@ public class CRLCheckerTest extends BaseServiceTest {
 	@Test
 	public void testCrlCheckOnRevokedCertificate() throws Exception {
 		OIOSAML3Service.getConfig().setCRLCheckEnabled(true);
-		// default configuration points to PROD, causing OCSP to fail, and fallback to CRL checking
-		//OIOSAML3Service.getConfig().setOcspCaCertificate("intermediate-oces-ca.pem");
+		OIOSAML3Service.getConfig().setOcspCheckEnabled(false);
 
 		byte[] validCert = Base64.getDecoder().decode(TestConstants.REVOKED_CERTIFICATE.getBytes(Charset.forName("UTF-8")));
 		
