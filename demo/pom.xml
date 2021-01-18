@@ -19,12 +19,10 @@
                 <version>2.2</version>
                 <configuration>
                     <port>8080</port>
-                    <httpsPort>8083</httpsPort>
-                    <keystoreFile>${project.basedir}/ssl-demo.pfx</keystoreFile>
-                    <keystorePass>Test1234</keystorePass>
                     <httpsPort>8443</httpsPort>
                     <keystoreFile>${project.basedir}/config/ssl-demo.pfx</keystoreFile>
                     <keystorePass>Test1234</keystorePass>
+                    <path>/oiosaml2-demo.java</path>
                 </configuration>
             </plugin>
         </plugins>

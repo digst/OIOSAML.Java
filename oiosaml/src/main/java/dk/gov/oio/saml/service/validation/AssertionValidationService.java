@@ -375,7 +375,7 @@ public class AssertionValidationService {
         }
 
         Configuration config = OIOSAML3Service.getConfig();
-        if ((config.getBaseUrl() + "/saml/SAMLAssertionConsumer").equals(subjectConfirmationData.getRecipient())) {
+        if ((config.getBaseUrl() + "/saml/assertionConsumer").equals(subjectConfirmationData.getRecipient())) {
             throw new AssertionValidationException("The SubjectConfirmationData element MUST contain a recipient attribute containing the SP's assertion consumer service URL");
         }
 

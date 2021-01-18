@@ -82,7 +82,7 @@ public class MetadataService {
                 return entityDescriptor;
             }
         } catch (ResolverException | ComponentInitializationException e) {
-            e.printStackTrace();
+        	log.error("Failed to retrieve metadata by URL", e);
         }
 
         return null;
@@ -138,7 +138,7 @@ public class MetadataService {
             return resourceResolver.resolveSingle(criteriaSet);
 
         } catch (ResolverException | ComponentInitializationException e) {
-            e.printStackTrace();
+        	log.error("Failed to retrieve metadata", e);
         }
 
         return null;
