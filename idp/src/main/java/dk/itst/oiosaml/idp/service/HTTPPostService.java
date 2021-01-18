@@ -1,10 +1,12 @@
 package dk.itst.oiosaml.idp.service;
 
-import dk.itst.oiosaml.idp.config.Session;
-import dk.itst.oiosaml.idp.dao.model.enums.AttributeProfile;
-import dk.itst.oiosaml.idp.util.Constants;
-import lombok.extern.log4j.Log4j2;
-import net.shibboleth.utilities.java.support.security.RandomIdentifierGenerationStrategy;
+import java.io.ByteArrayInputStream;
+import java.security.cert.CertificateFactory;
+import java.util.List;
+import java.util.Optional;
+
+import javax.xml.crypto.dsig.CanonicalizationMethod;
+
 import org.apache.xml.security.utils.EncryptionConstants;
 import org.bouncycastle.util.encoders.Base64;
 import org.joda.time.DateTime;
@@ -50,21 +52,15 @@ import org.opensaml.xmlsec.signature.support.Signer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.xml.crypto.dsig.CanonicalizationMethod;
-import java.io.ByteArrayInputStream;
-import java.security.cert.CertificateFactory;
-import java.util.List;
-import java.util.Optional;
+import dk.itst.oiosaml.idp.config.Session;
+import dk.itst.oiosaml.idp.dao.model.enums.AttributeProfile;
+import dk.itst.oiosaml.idp.util.Constants;
+import lombok.extern.log4j.Log4j2;
+import net.shibboleth.utilities.java.support.security.RandomIdentifierGenerationStrategy;
 
 @Service
 @Log4j2
 public class HTTPPostService {
-
-    @Autowired
-    private ValidationService validationService;
-
-    @Autowired
-    private HTTPRedirectService httpRedirectService;
 
     @Autowired
     private CredentialService credentialService;
@@ -86,7 +82,6 @@ public class HTTPPostService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
 
         Response response = samlBuilder.buildSAMLObject(Response.class);
         response.setDestination(authnRequest.getAssertionConsumerServiceURL());
@@ -224,13 +219,11 @@ public class HTTPPostService {
 
         assertion.getAttributeStatements().add(attributeStatement);
 
-
         //Issuer
         Issuer issuer = samlBuilder.buildSAMLObject(Issuer.class);
         issuer.setFormat("urn:oasis:names:tc:SAML:2.0:nameid-format:entity");
         issuer.setValue("https://localhost:7080");
         assertion.setIssuer(issuer);
-
 
         //Subject
         Subject subject = samlBuilder.buildSAMLObject(Subject.class);

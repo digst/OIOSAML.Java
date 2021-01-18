@@ -1,8 +1,15 @@
 package dk.itst.oiosaml.idp.controller.saml;
 
-import dk.itst.oiosaml.idp.service.CredentialService;
-import dk.itst.oiosaml.idp.service.OpenSAMLHelperService;
-import lombok.extern.log4j.Log4j2;
+import java.io.StringWriter;
+
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.saml2.metadata.ContactPerson;
@@ -22,16 +29,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.w3c.dom.Element;
 
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.StringWriter;
+import dk.itst.oiosaml.idp.service.CredentialService;
+import dk.itst.oiosaml.idp.service.OpenSAMLHelperService;
 
-@Log4j2
 @RestController
 public class MetadataController {
 
@@ -45,6 +45,7 @@ public class MetadataController {
     @ResponseBody
     public String metadataEndpoint() {
         EntityDescriptor entityDescriptor = samlHelper.buildSAMLObject(EntityDescriptor.class);
+        entityDescriptor.setEntityID("https://localhost:7080");
 
         IDPSSODescriptor idpssoDescriptor = samlHelper.buildSAMLObject(IDPSSODescriptor.class);
         idpssoDescriptor.addSupportedProtocol(SAMLConstants.SAML20P_NS);
@@ -54,16 +55,13 @@ public class MetadataController {
         KeyDescriptor signingKeyDescriptor = samlHelper.buildSAMLObject(KeyDescriptor.class);
         signingKeyDescriptor.setUse(UsageType.SIGNING);
         signingKeyDescriptor.setKeyInfo(credentialService.getPublicKeyInfo());
-
         idpssoDescriptor.getKeyDescriptors().add(signingKeyDescriptor);
 
         //Signing cert
         KeyDescriptor encryptionKeyDescriptor = samlHelper.buildSAMLObject(KeyDescriptor.class);
-        signingKeyDescriptor.setUse(UsageType.ENCRYPTION);
-        signingKeyDescriptor.setKeyInfo(credentialService.getPublicKeyInfo());
-
+        encryptionKeyDescriptor.setUse(UsageType.ENCRYPTION);
+        encryptionKeyDescriptor.setKeyInfo(credentialService.getPublicKeyInfo());
         idpssoDescriptor.getKeyDescriptors().add(encryptionKeyDescriptor);
-
 
         //Single Sign-On endpoint
         SingleSignOnService singleSignOnMetadata = samlHelper.buildSAMLObject(SingleSignOnService.class);
