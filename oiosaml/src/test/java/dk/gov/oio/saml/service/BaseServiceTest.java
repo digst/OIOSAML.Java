@@ -29,6 +29,7 @@ public class BaseServiceTest {
 				.build();
 
 		configuration.setCRLCheckEnabled(false);
+		configuration.setOcspCheckEnabled(false);
 		OIOSAML3Service.init(configuration);
 	}
 }

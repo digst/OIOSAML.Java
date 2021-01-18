@@ -55,7 +55,7 @@
         <dependency>
             <groupId>dk.digst</groupId>
             <artifactId>oiosaml3.java</artifactId>
-            <version>3.0.0</version>
+            <version>3.0.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>

@@ -40,9 +40,9 @@ public class Constants {
     public static final String LOGIN_PAGE = "oiosaml.servlet.secondary.page.login";
     public static final String SUPPORT_SELF_SIGNED = "oiosaml.servlet.trust.selfsigned.certs";
 
-    // Configuration constants for CRL settings
-    public static final String REVOCATION_CHECK_ENABLED = "oiosaml.servlet.revocation.check.enabled";
-    public static final String REVOCATION_CHECK_OCSP_CA = "oiosaml.servlet.revocation.check.ocsp.ca";
+    // Configuration constants for revocation check settings
+    public static final String CRL_CHECK_ENABLED = "oiosaml.servlet.revocation.crl.check.enabled";
+    public static final String OCSP_CHECK_ENABLED = "oiosaml.servlet.revocation.ocsp.check.enabled";
 
     // Configuration constants for AuthenticationFilter
 	public static final String IS_PASSIVE = "oiosaml.filter.ispassive.enabled";

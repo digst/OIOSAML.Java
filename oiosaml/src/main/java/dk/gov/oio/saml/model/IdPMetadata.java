@@ -100,7 +100,7 @@ public class IdPMetadata {
     }
 
     public X509Certificate getValidX509Certificate(UsageType usageType) throws InternalException, ExternalException {
-        doCRLCheck();
+    	doRevocationCheck();
 
         X509Certificate result = null;
         if (UsageType.ENCRYPTION.equals(usageType)) {
@@ -188,10 +188,11 @@ public class IdPMetadata {
         return lastCRLCheck;
     }
 
-	private void doCRLCheck() throws ExternalException, InternalException {
+	private void doRevocationCheck() throws ExternalException, InternalException {
         Configuration config = OIOSAML3Service.getConfig();
-        if (config.isCRLCheckEnabled()) {
+        if (config.isCRLCheckEnabled() || config.isOcspCheckEnabled()) {
             DateTime lastUpdate = resolver.getLastUpdate();
+
             if (lastCRLCheck == null || (lastUpdate != null && lastUpdate.isAfter(lastCRLCheck))) {
                 try {
                     // Encryption
@@ -230,7 +231,7 @@ public class IdPMetadata {
             }
         }
         else {
-            // If CRLCheck is disabled, all certificates from the metadata is treated as valid
+            // If revocation is disabled, all certificates from the metadata is treated as valid
             validEncryptionCertificates = getAllX509CertificatesWithUsageType(UsageType.ENCRYPTION);
             validSigningCertificates = getAllX509CertificatesWithUsageType(UsageType.SIGNING);
 

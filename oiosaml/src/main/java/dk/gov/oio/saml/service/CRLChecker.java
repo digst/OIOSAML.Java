@@ -1,28 +1,3 @@
-/*
- * The contents of this file are subject to the Mozilla Public 
- * License Version 1.1 (the "License"); you may not use this 
- * file except in compliance with the License. You may obtain 
- * a copy of the License at http://www.mozilla.org/MPL/
- * 
- * Software distributed under the License is distributed on an 
- * "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express 
- * or implied. See the License for the specific language governing
- * rights and limitations under the License.
- *
- *
- * The Original Code is OIOSAML Java Service Provider.
- * 
- * The Initial Developer of the Original Code is Trifork A/S. Portions 
- * created by Trifork A/S are Copyright (C) 2008 Danish National IT 
- * and Telecom Agency (http://www.itst.dk). All Rights Reserved.
- * 
- * Contributor(s):
- *   Joakim Recht <jre@trifork.com>
- *   Rolf Njor Jensen <rolf@trifork.com>
- *   Aage Nielsen <ani@openminds.dk>
- *   Carsten Larsen <cas@schultz.dk>
- *   Kasper Vestergaard Møller<kvm@schultz.dk>
- */
 package dk.gov.oio.saml.service;
 
 import java.io.IOException;
@@ -97,37 +72,39 @@ public class CRLChecker {
 		return result;
 	}
 
+	// OCSP first if configured, with fallback to CRL if configured
 	private static boolean checkCertificate(X509Certificate certificate) {
 		boolean validated = false;
 
-		try {
-			log.debug("Checking if certificate with the following subject is revoked using OCSP: " + certificate.getSubjectDN());
-
-			validated = doOCSPCheck(certificate);
-			if (validated) {
-				log.info("Certificate with the following subject IS NOT marked as revoked using OCSP: " + certificate.getSubjectDN());
+		Configuration config = OIOSAML3Service.getConfig();
+		if (config.isOcspCheckEnabled()) {
+			try {
+				validated = doOCSPCheck(certificate);
 			}
-			else {
-				log.warn("Certificate with the following subject IS revoked using OCSP: " + certificate.getSubjectDN());
+			catch (Exception e) {
+				log.warn("Unexpected error while validating certificate using OCSP.", e);
+
+				if (config.isCRLCheckEnabled()) {
+					try {
+						validated = doCRLCheck(certificate);
+					}
+					catch (Exception ex) {
+						log.warn("Unexpected error while validating certificate using CRL.", ex);
+					}				
+				}
 			}
 		}
-		catch (Exception e) {
-			log.warn("Unexpected error while validating certificate using OCSP.", e);
-
+		else if (config.isCRLCheckEnabled()) {
 			try {
-				log.debug("Checking if certificate with the following subject is revoked using CRL: " + certificate.getSubjectDN());
-
 				validated = doCRLCheck(certificate);
-				if (validated) {
-					log.info("Certificate with the following subject IS NOT marked as revoked using CRL: " + certificate.getSubjectDN());
-				}
-				else {
-					log.warn("Certificate with the following subject IS revoked using CRL: " + certificate.getSubjectDN());
-				}
 			}
 			catch (Exception ex) {
 				log.warn("Unexpected error while validating certificate using CRL.", ex);
-			}
+			}				
+		}
+		else {
+			log.warn("checkCertificate called, but both OCSP and CRL checking is disabled");
+			validated = true;
 		}
 
 		return validated;
@@ -141,19 +118,14 @@ public class CRLChecker {
 			throw new RuntimeException("No OCSP access location could be found");
 		}
 
-		X509Certificate ca = getCertificateCA();
-		if (ca == null) {
+		// try to retrieve issuing OCES CA certificate
+		X509Certificate issuer = getIssuingCertificate(certificate);
+		if (issuer == null) {
 			throw new RuntimeException("CA Certificate for OCSP check could not be retrieved!");
 		}
 
 		List<X509Certificate> certList = new ArrayList<X509Certificate>();
 		certList.add(certificate);
-
-		// try to retrieve intermediate OCES CA certificate
-		X509Certificate intermediate = getIntermediateCertificate(certificate);
-		if (intermediate != null && !intermediate.getSubjectDN().getName().equals(ca.getSubjectDN().getName())) {
-			certList.add(intermediate);	
-		}
 
 		CertificateFactory cf = CertificateFactory.getInstance("X.509");
 		CertPath cp = cf.generateCertPath(certList);
@@ -163,7 +135,7 @@ public class CRLChecker {
 
 		boolean revoked;
 		try {
-			TrustAnchor anchor = new TrustAnchor(ca, null);
+			TrustAnchor anchor = new TrustAnchor(issuer, null);
 			PKIXParameters params = new PKIXParameters(Collections.singleton(anchor));
 			params.setRevocationEnabled(true);
 
@@ -175,13 +147,6 @@ public class CRLChecker {
 			revoked = false;
 		}
 		catch (CertPathValidatorException cpve) {
-			// TODO: there appears to be a special case where Java does not believe the intermediate CA
-			// is allowed to sign OCSP responses. The only workaround found is to configure the intermediate
-			// CA as the "root" CA, but that does not scale well, so OCSP might be broken for Java/OCES setup,
-			// because intermediate CA's are used
-			//
-			// java.security.cert.CertPathValidatorException: Responder's certificate is not authorized to sign OCSP responses
-			//
 			if (cpve.getMessage() != null && cpve.getMessage().contains("Certificate has been revoked")) {
 				revoked = true;
 				log.info("Certificate revoked, cert[" + cpve.getIndex() + "] :" + cpve.getMessage());
@@ -195,33 +160,8 @@ public class CRLChecker {
 		return (!revoked);
 	}
 
-	private static X509Certificate getCertificateCA() throws CertificateException {
-		CertificateFactory cf = CertificateFactory.getInstance("X.509");
-		X509Certificate ca = null;
-
-		Configuration config = OIOSAML3Service.getConfig();
-		String caCertificate = config.getOcspCaCertificate();
-
-		try {
-			if (caCertificate == null) {
-				log.debug("CA certificate path is not configured");
-				return null;
-			}
-
-			try (InputStream caCertificateStream = CRLChecker.class.getClassLoader().getResourceAsStream(caCertificate)) {
-				ca = (X509Certificate) cf.generateCertificate(caCertificateStream);
-			}
-		}
-		catch (Exception e) {
-			log.error("Unexpected error while reading CA certficate from: " + caCertificate, e);
-			return null;
-		}
-
-		return ca;
-	}
-
-	private static X509Certificate getIntermediateCertificate(X509Certificate certificate) {
-		log.debug("Attempting to extract intermediate ca certifcate from certificate " + certificate.getSubjectDN());
+	private static X509Certificate getIssuingCertificate(X509Certificate certificate) {
+		log.debug("Attempting to extract issuing ca certifcate from certificate " + certificate.getSubjectDN());
 
 		AuthorityInformationAccess authInfoAcc = null;
 
