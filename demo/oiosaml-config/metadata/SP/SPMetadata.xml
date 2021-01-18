@@ -68,12 +68,12 @@ OvmXaznJ+9dOJH2waZR8PVsNeUKKhHbjVyQvyP9Pi5AVrunUpy8qkRxBLJGu</ds:X509Certificate
             </ds:X509Data>
          </ds:KeyInfo>
       </md:KeyDescriptor>
-      <md:ArtifactResolutionService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact" Location="https://localhost:8443/oiosaml2-demo.java/saml/SAMLAssertionConsumer" index="0" isDefault="true"/>
-      <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://localhost:8443/oiosaml2-demo.java/saml/LogoutServiceHTTPRedirect" ResponseLocation="https://localhost:8443/oiosaml2-demo.java/saml/LogoutServiceHTTPRedirectResponse"/>
-      <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://localhost:8443/oiosaml2-demo.java/saml/LogoutServiceSOAP"/>
-      <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://localhost:8443/oiosaml2-demo.java/saml/LogoutServiceHTTPPost" ResponseLocation="https://localhost:8443/oiosaml2-demo.java/saml/LogoutServiceHTTPRedirectResponse"/>
+      <md:ArtifactResolutionService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact" Location="https://sp:8443/oiosaml2-demo.java/saml/SAMLAssertionConsumer" index="0" isDefault="true"/>
+      <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://sp:8443/oiosaml2-demo.java/saml/LogoutServiceHTTPRedirect" ResponseLocation="https://sp:8443/oiosaml2-demo.java/saml/LogoutServiceHTTPRedirectResponse"/>
+      <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://sp:8443/oiosaml2-demo.java/saml/LogoutServiceSOAP"/>
+      <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://sp:8443/oiosaml2-demo.java/saml/LogoutServiceHTTPPost" ResponseLocation="https://sp:8443/oiosaml2-demo.java/saml/LogoutServiceHTTPRedirectResponse"/>
       <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName</md:NameIDFormat>
-      <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://localhost:8443/oiosaml2-demo.java/saml/SAMLAssertionConsumer" index="0" isDefault="true"/>
+      <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://sp:8443/oiosaml2-demo.java/saml/SAMLAssertionConsumer" index="0" isDefault="true"/>
       <md:AttributeConsumingService index="0" isDefault="true">
          <md:ServiceName xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">https://saml.oiosaml-demo-app</md:ServiceName>
          <md:RequestedAttribute Name="urn:oid:2.5.4.4" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" isRequired="true"/>
