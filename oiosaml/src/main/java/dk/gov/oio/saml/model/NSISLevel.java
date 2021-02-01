@@ -3,15 +3,21 @@ package dk.gov.oio.saml.model;
 import dk.gov.oio.saml.util.Constants;
 
 public enum NSISLevel {
-    NONE(0),
-    LOW(1),
-    SUBSTANTIAL(2),
-    HIGH(3);
+    NONE(0, 0),
+    LOW(1, 2),
+    SUBSTANTIAL(2, 3),
+    HIGH(3, 3);
 
     private int level;
+    private int assuranceLevel;
 
-    private NSISLevel(int level) {
+    private NSISLevel(int level, int assuranceLevel) {
         this.level = level;
+        this.assuranceLevel = assuranceLevel;
+    }
+
+    public int getAssuranceLevel() {
+        return assuranceLevel;
     }
 
     public boolean equalOrLesser(NSISLevel other) {

@@ -10,6 +10,8 @@ public class Configuration {
     private String spEntityID; // This SP's EntityID
     private String baseUrl; // The URL endpoint that the DispatcherServlet is working on
     private boolean validationEnabled = true;
+    private boolean isAssuranceLevelAllowed = false;
+    private int minimumAssuranceLevel = 3;
     private String contactEmail;
 
     // Metadata configuration
@@ -35,7 +37,7 @@ public class Configuration {
     private String errorPage;
     private String logoutPage;
     private String loginPage;
-	private String nameIDFormat = "urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName";
+	private String nameIDFormat = "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent";
     private boolean supportSelfSigned = false;
 
     // Revocation check settings
@@ -60,6 +62,22 @@ public class Configuration {
 
 	public void setValidationEnabled(boolean validationEnabled) {
 		this.validationEnabled = validationEnabled;
+	}
+
+	public boolean isAssuranceLevelAllowed() {
+		return isAssuranceLevelAllowed;
+	}
+
+	public void setAssuranceLevelAllowed(boolean isAssuranceLevelThreeAllowed) {
+		this.isAssuranceLevelAllowed = isAssuranceLevelThreeAllowed;
+	}
+
+	public int getMinimumAssuranceLevel() {
+		return minimumAssuranceLevel;
+	}
+
+	public void setMinimumAssuranceLevel(int minimumAssuranceLevel) {
+		this.minimumAssuranceLevel = minimumAssuranceLevel;
 	}
 
 	public String getContactEmail() {
@@ -333,4 +351,19 @@ public class Configuration {
             return this;
         }
     }
+
+    public boolean isAssuranceLevelSufficient(String value) {
+		if(value == null || value.length() < 1 || !isAssuranceLevelAllowed) {
+			return false;
+		}
+
+		Integer i;
+		try {
+			i = Integer.parseInt(value);
+		} catch (Exception ex) {
+			return false;
+		}
+
+		return i >= minimumAssuranceLevel;
+	}
 }

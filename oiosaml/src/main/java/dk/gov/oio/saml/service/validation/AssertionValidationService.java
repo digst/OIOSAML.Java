@@ -1,5 +1,6 @@
 package dk.gov.oio.saml.service.validation;
 
+import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
@@ -179,15 +180,63 @@ public class AssertionValidationService {
         }
 
         Map<String, String> attributeValues = SamlHelper.extractAttributeValues(attributeStatements.get(0));
-        if (config.isValidationEnabled()) {
-	        // The AttributeStatement sub-element MUST conform to one of the attribute profiles for natural persons or professionals
-	        String nameIDValue = assertion.getSubject().getNameID().getValue();
-	        validateAttributeStatment(attributeValues, nameIDValue.startsWith("https://data.gov.dk/model/core/eid/professional"));
+        if (!config.isValidationEnabled()) {
+            return;
+        }
 
-	        // The Assertion within the response MUST be directly signed
-	        if (!assertion.isSigned()) {
-	            throw new AssertionValidationException("The Assertion within the response MUST be directly signed");
-	        }
+        // The AttributeStatement sub-element MUST conform to one of the attribute profiles for natural persons or professionals
+        String nameIDValue = assertion.getSubject().getNameID().getValue();
+        validateAttributeStatment(attributeValues, nameIDValue.startsWith("https://data.gov.dk/model/core/eid/professional"));
+        validateAssurance(attributeValues, authnRequest);
+
+        // The Assertion within the response MUST be directly signed
+        if (!assertion.isSigned()) {
+            throw new AssertionValidationException("The Assertion within the response MUST be directly signed");
+        }
+    }
+
+    private void validateAttributeStatment(Map<String, String> attributes, boolean isProfessional) throws AssertionValidationException {
+        // SpecVer
+        String specVersion = attributes.get(Constants.SPEC_VER);
+        if (!Constants.SPEC_VER_VAL.equals(specVersion)) {
+            throw new AssertionValidationException("specVersion Was: " + specVersion + " Expected: " + Constants.SPEC_VER_VAL);
+        }
+
+        // Professional
+        if (isProfessional) {
+            String cvr = attributes.get(Constants.CVR_NUMBER);
+            if (cvr == null || !cvr.matches("^\\d{8}$")) {
+                throw new AssertionValidationException("CVR should be present and should be an 8-digit number");
+            }
+
+            String orgName = attributes.get(Constants.ORGANIZATION_NAME);
+            if (orgName == null || orgName.isEmpty()) {
+                throw new AssertionValidationException("Organization Name should be present");
+            }
+        }
+
+    }
+
+    private void validateAssurance(Map<String, String> attributes, AuthnRequestWrapper authnRequest) throws AssertionValidationException {
+        Configuration configuration = OIOSAML3Service.getConfig();
+        String assuranceLevel = attributes.get(Constants.ASSURANCE_LEVEL);
+        if(configuration.isAssuranceLevelSufficient(assuranceLevel)) {
+            log.info("Assurance level of " + assuranceLevel + " accepted instead of NSIS LoA");
+            return;
+        }
+
+        // LOA
+        String loa = attributes.get(Constants.LOA);
+        if (loa == null) {
+            throw new AssertionValidationException("Must Contain Level of assurance");
+        }
+        switch (loa) {
+            case Constants.LOA_LOW:
+            case Constants.LOA_SUBSTANTIAL:
+            case Constants.LOA_HIGH:
+                break;
+            default:
+                throw new AssertionValidationException("Level of assurance was not correct value. Was: " + loa);
         }
 
         // SPs MUST check the specified [NSIS]level of assurance regardless of any LoA was set in the request
@@ -200,50 +249,10 @@ public class AssertionValidationService {
             }
         }
 
-        String actualLevelStr = attributeValues.get(Constants.LOA);
-        NSISLevel actualLevel = NSISLevel.getNSISLevelFromLOA(actualLevelStr, NSISLevel.NONE);
-
+        NSISLevel actualLevel = NSISLevel.getNSISLevelFromLOA(loa, NSISLevel.NONE);
         if (requestedLevel.isGreater(actualLevel)) {
             throw new AssertionValidationException("Assertion NSIS Level not sufficient. Was: '" + actualLevel + "' Expected: '" + requestedLevel + "'");
         }
-    }
-
-    private void validateAttributeStatment(Map<String, String> attributes, boolean isProfessional) throws AssertionValidationException {
-        // SpecVer
-        String specVersion = attributes.get(Constants.SPEC_VER);
-        if (!Constants.SPEC_VER_VAL.equals(specVersion)) {
-            throw new AssertionValidationException("specVersion Was: " + specVersion + " Expected: " + Constants.SPEC_VER_VAL);
-        }
-
-        // LOA
-        String loa = attributes.get(Constants.LOA);
-        if (loa == null) {
-            throw new AssertionValidationException("Must Contain Level of assurance");
-        }
-        switch (loa) {
-            case Constants.LOA_LOW:
-                break;
-            case Constants.LOA_SUBSTANTIAL:
-                break;
-            case Constants.LOA_HIGH:
-                break;
-            default:
-                throw new AssertionValidationException("Level of assurance was not correct value. Was: " + loa);
-        }
-
-        // Professional
-        if (isProfessional) {
-            String cvr = attributes.get(Constants.CVR_NUMBER);
-            if (cvr == null || cvr.matches("^\\d{8}$")) {
-                throw new AssertionValidationException("CVR should be present and should be an 8-digit number");
-            }
-
-            String orgName = attributes.get(Constants.ORGANIZATION_NAME);
-            if (orgName == null || orgName.isEmpty()) {
-                throw new AssertionValidationException("Organization Name should be present");
-            }
-        }
-
     }
 
     private void validateStatus(Response response) throws AssertionValidationException {

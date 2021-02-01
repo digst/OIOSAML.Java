@@ -22,7 +22,7 @@
                     <httpsPort>8443</httpsPort>
                     <keystoreFile>${project.basedir}/config/ssl-demo.pfx</keystoreFile>
                     <keystorePass>Test1234</keystorePass>
-                    <path>/oiosaml2-demo.java</path>
+                    <path>/oiosaml3-demo.java</path>
                 </configuration>
             </plugin>
         </plugins>
