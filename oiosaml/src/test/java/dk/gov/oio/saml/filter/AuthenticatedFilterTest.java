@@ -111,7 +111,7 @@ public class AuthenticatedFilterTest {
 
 		boolean foundSubstantialRequest = false;
 		for (String authnContextClassRef : authnRequest.getAuthnContextClassRefValues()) {
-			if (Constants.LOA_SUBSTANTIAL.equals(authnContextClassRef)) {
+			if (Constants.LOA_SUBSTANTIAL_URL.equals(authnContextClassRef)) {
 				foundSubstantialRequest = true;
 				break;
 			}
@@ -160,7 +160,7 @@ public class AuthenticatedFilterTest {
 
 		boolean foundSubstantialRequest = false;
 		for (String authnContextClassRef : authnRequest.getAuthnContextClassRefValues()) {
-			if (Constants.LOA_SUBSTANTIAL.equals(authnContextClassRef)) {
+			if (Constants.LOA_SUBSTANTIAL_URL.equals(authnContextClassRef)) {
 				foundSubstantialRequest = true;
 				break;
 			}

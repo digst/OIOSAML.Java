@@ -150,13 +150,13 @@ public class AuthnRequestService {
 
             switch (requiredNsisLevel) {
                 case HIGH:
-                    authnContextClassRef.setAuthnContextClassRef(Constants.LOA_HIGH);
+                    authnContextClassRef.setAuthnContextClassRef(Constants.LOA_HIGH_URL);
                     break;
                 case SUBSTANTIAL:
-                    authnContextClassRef.setAuthnContextClassRef(Constants.LOA_SUBSTANTIAL);
+                    authnContextClassRef.setAuthnContextClassRef(Constants.LOA_SUBSTANTIAL_URL);
                     break;
                 case LOW:
-                    authnContextClassRef.setAuthnContextClassRef(Constants.LOA_LOW);
+                    authnContextClassRef.setAuthnContextClassRef(Constants.LOA_LOW_URL);
                     break;
                 case NONE:
                 	// will not happen, but makes IDE happy

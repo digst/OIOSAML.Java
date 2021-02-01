@@ -326,7 +326,7 @@ public class IdpUtil {
         List<Attribute> attributes = attributeStatement.getAttributes();
 
         attributes.add(createSimpleAttribute("https://data.gov.dk/model/core/specVersion", "OIO-SAML-3.0"));
-        attributes.add(createSimpleAttribute("https://data.gov.dk/concept/core/nsis/loa", Constants.LOA_SUBSTANTIAL));
+        attributes.add(createSimpleAttribute("https://data.gov.dk/concept/core/nsis/loa", Constants.LOA_SUBSTANTIAL_VALUE));
         assertion.getAttributeStatements().add(attributeStatement);
 
         Issuer issuer = buildSAMLObject(Issuer.class);

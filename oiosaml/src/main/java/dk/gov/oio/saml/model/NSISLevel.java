@@ -43,13 +43,13 @@ public enum NSISLevel {
         }
 
         switch (loa) {
-            case Constants.LOA_LOW:
+            case Constants.LOA_LOW_VALUE:
                 nsisLevel = NSISLevel.LOW;
                 break;
-            case Constants.LOA_SUBSTANTIAL:
+            case Constants.LOA_SUBSTANTIAL_VALUE:
                 nsisLevel = NSISLevel.SUBSTANTIAL;
                 break;
-            case Constants.LOA_HIGH:
+            case Constants.LOA_HIGH_VALUE:
                 nsisLevel = NSISLevel.HIGH;
                 break;
         }

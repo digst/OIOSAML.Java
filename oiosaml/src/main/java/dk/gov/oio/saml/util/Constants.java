@@ -63,9 +63,12 @@ public class Constants {
     public static final String SPEC_VER_VAL = "OIO-SAML-3.0";
     public static final String PRIVILEGE_ATTRIBUTE = "https://data.gov.dk/model/core/eid/privilegesIntermediate";
     public static final String LOA = "https://data.gov.dk/concept/core/nsis/loa";
-    public static final String LOA_LOW = "https://data.gov.dk/concept/core/nsis/loa/Low";
-    public static final String LOA_SUBSTANTIAL = "https://data.gov.dk/concept/core/nsis/loa/Substantial";
-    public static final String LOA_HIGH = "https://data.gov.dk/concept/core/nsis/loa/High";
+    public static final String LOA_LOW_URL = "https://data.gov.dk/concept/core/nsis/loa/Low";
+    public static final String LOA_SUBSTANTIAL_URL = "https://data.gov.dk/concept/core/nsis/loa/Substantial";
+    public static final String LOA_HIGH_URL = "https://data.gov.dk/concept/core/nsis/loa/High";
+    public static final String LOA_LOW_VALUE = "Low";
+    public static final String LOA_SUBSTANTIAL_VALUE = "Substantial";
+    public static final String LOA_HIGH_VALUE = "High";
     public static final String CVR_NUMBER = "https://data.gov.dk/model/core/eid/professional/cvr";
     public static final String ORGANIZATION_NAME = "https://data.gov.dk/model/core/eid/professional/orgName";
     public static final String ASSURANCE_LEVEL = "dk:gov:saml:attribute:AssuranceLevel";

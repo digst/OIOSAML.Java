@@ -230,10 +230,12 @@ public class AssertionValidationService {
         if (loa == null) {
             throw new AssertionValidationException("Must Contain Level of assurance");
         }
+
+        // Attribute value is not URL, but only name
         switch (loa) {
-            case Constants.LOA_LOW:
-            case Constants.LOA_SUBSTANTIAL:
-            case Constants.LOA_HIGH:
+            case Constants.LOA_LOW_VALUE:
+            case Constants.LOA_SUBSTANTIAL_VALUE:
+            case Constants.LOA_HIGH_VALUE:
                 break;
             default:
                 throw new AssertionValidationException("Level of assurance was not correct value. Was: " + loa);
