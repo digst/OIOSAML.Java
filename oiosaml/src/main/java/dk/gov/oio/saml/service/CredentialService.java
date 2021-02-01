@@ -101,10 +101,7 @@ public class CredentialService {
 	private KeyStore keyStore(String location, char[] password) throws InternalException {
 		try {
 			KeyStore keyStore = KeyStore.getInstance("PKCS12");
-
-			File key = new File(location);
-
-			InputStream in = new FileInputStream(key);
+			InputStream in = getClass().getClassLoader().getResourceAsStream(location);
 			keyStore.load(in, password);
 			return keyStore;
 		}
