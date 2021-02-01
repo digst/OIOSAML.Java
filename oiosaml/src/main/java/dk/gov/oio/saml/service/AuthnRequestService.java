@@ -20,6 +20,7 @@ import org.opensaml.saml.common.messaging.context.SAMLPeerEntityContext;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.saml2.binding.decoding.impl.HTTPRedirectDeflateDecoder;
 import org.opensaml.saml.saml2.core.AuthnContextClassRef;
+import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.Issuer;
 import org.opensaml.saml.saml2.core.RequestedAuthnContext;
@@ -176,6 +177,11 @@ public class AuthnRequestService {
         // If any AuthnContextClassRefs were created, add them to AuthnRequest
         if (!authnContextClassRefs.isEmpty()) {
             RequestedAuthnContext requestedAuthnContext = SamlHelper.build(RequestedAuthnContext.class);
+            // OIO-SP-06
+            if(requiredNsisLevel != null && requiredNsisLevel != NSISLevel.NONE) {
+                requestedAuthnContext.setComparison(AuthnContextComparisonTypeEnumeration.MINIMUM);
+            }
+
             requestedAuthnContext.getAuthnContextClassRefs().addAll(authnContextClassRefs);
             authnRequest.setRequestedAuthnContext(requestedAuthnContext);
         }
