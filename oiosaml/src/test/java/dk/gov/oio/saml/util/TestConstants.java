@@ -3,7 +3,7 @@ package dk.gov.oio.saml.util;
 public class TestConstants {
 	public static final String SP_ENTITY_ID = "http://sp.localhost";
 	public static final String SP_BASE_URL = "http://localhost:8080";
-	public static final String SP_ASSERTION_CONSUMER_URL = "http://localhost:8080/saml/sso";
+	public static final String SP_ASSERTION_CONSUMER_URL = "http://localhost:8080/saml/assertionConsumer";
 	public static final String SP_LOGOUT_REQUEST_URL = "http://localhost:8080/saml/logout";
 	public static final String SP_LOGOUT_RESPONSE_URL = "http://localhost:8080/saml/logout/response";
 
