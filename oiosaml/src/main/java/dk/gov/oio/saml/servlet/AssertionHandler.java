@@ -84,7 +84,7 @@ public class AssertionHandler extends SAMLHandler {
         Map<String, String> attributeMap = SamlHelper.extractAttributeValues(assertion.getAttributeStatements().get(0));
         String loa = attributeMap.get(Constants.LOA);
         String assuranceLevel = attributeMap.get(Constants.ASSURANCE_LEVEL);
-        NSISLevel nsisLevel = NSISLevel.getNSISLevelFromLOA(loa, NSISLevel.NONE);
+        NSISLevel nsisLevel = NSISLevel.getNSISLevelFromAttributeValue(loa, NSISLevel.NONE);
 
         session.setAttribute(Constants.SESSION_NSIS_LEVEL, nsisLevel);
         if(assuranceLevel != null) {

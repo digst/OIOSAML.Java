@@ -58,9 +58,8 @@ public class AssertionWrapper implements Serializable {
 	public AssertionWrapper(Assertion assertion) throws InternalException {
 		// getAssertion()
 		AssertionMarshaller marshaller = new AssertionMarshaller();
-		Element element = null;
 		try {
-			element = marshaller.marshall(assertion);
+			Element element = marshaller.marshall(assertion);
 			this.assertion = elementToString(element);
 		}
 		catch (MarshallingException e) {
@@ -78,12 +77,10 @@ public class AssertionWrapper implements Serializable {
 		NSISLevel level = NSISLevel.NONE;
 		if (attributeValues != null) {
 			String value = attributeValues.get(Constants.LOA);
-			level = NSISLevel.getNSISLevelFromLOA(value, NSISLevel.NONE);
+			level = NSISLevel.getNSISLevelFromAttributeValue(value, NSISLevel.NONE);
+			this.assuranceLevel = attributeValues.get(Constants.ASSURANCE_LEVEL); // NULL is acceptable
 		}
 		this.nsisLevel = level;
-
-		// getAssuranceLevel()
-		this.assuranceLevel = attributeValues.get(Constants.ASSURANCE_LEVEL);
 
 		// getIssuer()
 		Issuer issuerObj = assertion.getIssuer();

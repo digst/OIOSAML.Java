@@ -147,22 +147,7 @@ public class AuthnRequestService {
         // Set Requested LOA if supplied
         if (requiredNsisLevel != null && requiredNsisLevel != NSISLevel.NONE) {
             AuthnContextClassRef authnContextClassRef = SamlHelper.build(AuthnContextClassRef.class);
-
-            switch (requiredNsisLevel) {
-                case HIGH:
-                    authnContextClassRef.setAuthnContextClassRef(Constants.LOA_HIGH_URL);
-                    break;
-                case SUBSTANTIAL:
-                    authnContextClassRef.setAuthnContextClassRef(Constants.LOA_SUBSTANTIAL_URL);
-                    break;
-                case LOW:
-                    authnContextClassRef.setAuthnContextClassRef(Constants.LOA_LOW_URL);
-                    break;
-                case NONE:
-                	// will not happen, but makes IDE happy
-                	break;
-            }
-
+            authnContextClassRef.setAuthnContextClassRef(requiredNsisLevel.getUrl());
             authnContextClassRefs.add(authnContextClassRef);
         }
 

@@ -1,6 +1,5 @@
 package dk.gov.oio.saml.service.validation;
 
-import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
@@ -232,26 +231,21 @@ public class AssertionValidationService {
         }
 
         // Attribute value is not URL, but only name
-        switch (loa) {
-            case Constants.LOA_LOW_VALUE:
-            case Constants.LOA_SUBSTANTIAL_VALUE:
-            case Constants.LOA_HIGH_VALUE:
-                break;
-            default:
-                throw new AssertionValidationException("Level of assurance was not correct value. Was: " + loa);
+        NSISLevel actualLevel = NSISLevel.getNSISLevelFromAttributeValue(loa, null);
+        if(actualLevel == null) {
+            throw new AssertionValidationException("Level of assurance was not correct value. Was: " + loa);
         }
 
         // SPs MUST check the specified [NSIS]level of assurance regardless of any LoA was set in the request
         NSISLevel requestedLevel = NSISLevel.NONE;
         for (String authnContextClassRef : authnRequest.getAuthnContextClassRefValues()) {
-            NSISLevel nsisLevelFromLOA = NSISLevel.getNSISLevelFromLOA(authnContextClassRef, null);
+            NSISLevel nsisLevelFromLOA = NSISLevel.getNSISLevelFromUrl(authnContextClassRef, null);
 
             if (nsisLevelFromLOA != null) {
                 requestedLevel = nsisLevelFromLOA;
             }
         }
 
-        NSISLevel actualLevel = NSISLevel.getNSISLevelFromLOA(loa, NSISLevel.NONE);
         if (requestedLevel.isGreater(actualLevel)) {
             throw new AssertionValidationException("Assertion NSIS Level not sufficient. Was: '" + actualLevel + "' Expected: '" + requestedLevel + "'");
         }

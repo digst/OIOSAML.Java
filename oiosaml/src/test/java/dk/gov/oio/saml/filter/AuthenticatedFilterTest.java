@@ -108,7 +108,7 @@ public class AuthenticatedFilterTest {
 
 		boolean foundSubstantialRequest = false;
 		for (String authnContextClassRef : authnRequest.getAuthnContextClassRefValues()) {
-			if (Constants.LOA_SUBSTANTIAL_URL.equals(authnContextClassRef)) {
+			if (NSISLevel.SUBSTANTIAL.getUrl().equals(authnContextClassRef)) {
 				foundSubstantialRequest = true;
 				break;
 			}
@@ -157,7 +157,7 @@ public class AuthenticatedFilterTest {
 
 		boolean foundSubstantialRequest = false;
 		for (String authnContextClassRef : authnRequest.getAuthnContextClassRefValues()) {
-			if (Constants.LOA_SUBSTANTIAL_URL.equals(authnContextClassRef)) {
+			if (NSISLevel.SUBSTANTIAL.getUrl().equals(authnContextClassRef)) {
 				foundSubstantialRequest = true;
 				break;
 			}
@@ -350,7 +350,7 @@ public class AuthenticatedFilterTest {
 
 				return Collections.enumeration(keys);
 			}
-			
+
 			@Override
 			public String getInitParameter(String name) {
 				switch (name) {
@@ -364,12 +364,12 @@ public class AuthenticatedFilterTest {
 
 				return null;
 			}
-			
+
 			@Override
 			public String getFilterName() {
 				return "TestConfig";
 			}
-			
+
 			@Override
 			public ServletContext getServletContext() {
 				return null;
