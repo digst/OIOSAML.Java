@@ -20,7 +20,7 @@
                 <configuration>
                     <port>8080</port>
                     <httpsPort>8443</httpsPort>
-                    <keystoreFile>${project.basedir}/config/ssl-demo.pfx</keystoreFile>
+                    <keystoreFile>${project.basedir}/../misc/ssl-demo.pfx</keystoreFile>
                     <keystorePass>Test1234</keystorePass>
                     <path>/oiosaml3-demo.java</path>
                 </configuration>
