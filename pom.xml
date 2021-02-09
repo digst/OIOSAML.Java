@@ -37,6 +37,7 @@
         <modules>
 		<module>oiosaml</module>
 		<module>demo</module>
+		<module>integrationtest</module>
 		<!-- requires Java 11, enable if available
 		<module>idp</module>
 		-->
