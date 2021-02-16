@@ -71,6 +71,22 @@ public class DispatcherServlet extends HttpServlet {
         if (value != null && value.length() > 0) {
             configuration.setValidationEnabled("true".equals(value));
         }
+
+        value = config.get(Constants.OIOSAML_ASSURANCE_LEVEL_ALLOWED);
+        if(value != null && value.length() > 0) {
+            configuration.setAssuranceLevelAllowed("true".equals(value));
+        }
+
+        value = config.get(Constants.OIOSAML_ASSURANCE_LEVEL_MINIMUM);
+        if (value != null && value.length() > 0) {
+            try {
+                Integer i = Integer.parseInt(value);
+                configuration.setMinimumAssuranceLevel(i);
+            }
+            catch (Exception ex) {
+                log.error("Invalid value " + Constants.OIOSAML_ASSURANCE_LEVEL_MINIMUM + " = " + value, ex);
+            }
+        }
         
         value = config.get(Constants.SUPPORT_SELF_SIGNED);
         if (value != null && value.length() > 0) {

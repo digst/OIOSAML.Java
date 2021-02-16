@@ -8,7 +8,7 @@
     <parent>
         <artifactId>oiosaml3-parent</artifactId>
         <groupId>dk.digst</groupId>
-        <version>3.0.0</version>
+        <version>3.0.1-SNAPSHOT</version>
     </parent>
 
     <build>
@@ -20,9 +20,9 @@
                 <configuration>
                     <port>8080</port>
                     <httpsPort>8443</httpsPort>
-                    <keystoreFile>${project.basedir}/config/ssl-demo.pfx</keystoreFile>
+                    <keystoreFile>${project.basedir}/../misc/ssl-demo.pfx</keystoreFile>
                     <keystorePass>Test1234</keystorePass>
-                    <path>/oiosaml2-demo.java</path>
+                    <path>/oiosaml3-demo.java</path>
                 </configuration>
             </plugin>
         </plugins>

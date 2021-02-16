@@ -11,6 +11,7 @@ import java.util.Map;
 import javax.xml.crypto.dsig.CanonicalizationMethod;
 import javax.xml.namespace.QName;
 
+import dk.gov.oio.saml.model.NSISLevel;
 import org.apache.xml.security.utils.EncryptionConstants;
 import org.joda.time.DateTime;
 import org.opensaml.core.config.InitializationException;
@@ -326,7 +327,7 @@ public class IdpUtil {
         List<Attribute> attributes = attributeStatement.getAttributes();
 
         attributes.add(createSimpleAttribute("https://data.gov.dk/model/core/specVersion", "OIO-SAML-3.0"));
-        attributes.add(createSimpleAttribute("https://data.gov.dk/concept/core/nsis/loa", Constants.LOA_SUBSTANTIAL));
+        attributes.add(createSimpleAttribute("https://data.gov.dk/concept/core/nsis/loa", NSISLevel.SUBSTANTIAL.getName()));
         assertion.getAttributeStatements().add(attributeStatement);
 
         Issuer issuer = buildSAMLObject(Issuer.class);

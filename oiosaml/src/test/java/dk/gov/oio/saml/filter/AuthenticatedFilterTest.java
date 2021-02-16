@@ -41,15 +41,12 @@ public class AuthenticatedFilterTest {
 
 	@BeforeAll
 	public static void beforeAll(MockServerClient idp) throws Exception {
-        ClassLoader classLoader = AssertionServiceTest.class.getClassLoader();
-        String keystoreLocation = classLoader.getResource("sp.pfx").getFile();
-
-		Configuration configuration = new Configuration.Builder()
+        Configuration configuration = new Configuration.Builder()
 				.setSpEntityID(TestConstants.SP_ENTITY_ID)
 				.setBaseUrl(TestConstants.SP_BASE_URL)
 				.setIdpEntityID(TestConstants.IDP_ENTITY_ID)
 				.setIdpMetadataUrl(TestConstants.IDP_METADATA_URL)
-				.setKeystoreLocation(keystoreLocation)
+				.setKeystoreLocation("sp.pfx")
 				.setKeystorePassword("Test1234")
 				.setKeyAlias("1")
 				.build();
@@ -111,7 +108,7 @@ public class AuthenticatedFilterTest {
 
 		boolean foundSubstantialRequest = false;
 		for (String authnContextClassRef : authnRequest.getAuthnContextClassRefValues()) {
-			if (Constants.LOA_SUBSTANTIAL.equals(authnContextClassRef)) {
+			if (NSISLevel.SUBSTANTIAL.getUrl().equals(authnContextClassRef)) {
 				foundSubstantialRequest = true;
 				break;
 			}
@@ -160,7 +157,7 @@ public class AuthenticatedFilterTest {
 
 		boolean foundSubstantialRequest = false;
 		for (String authnContextClassRef : authnRequest.getAuthnContextClassRefValues()) {
-			if (Constants.LOA_SUBSTANTIAL.equals(authnContextClassRef)) {
+			if (NSISLevel.SUBSTANTIAL.getUrl().equals(authnContextClassRef)) {
 				foundSubstantialRequest = true;
 				break;
 			}
@@ -353,7 +350,7 @@ public class AuthenticatedFilterTest {
 
 				return Collections.enumeration(keys);
 			}
-			
+
 			@Override
 			public String getInitParameter(String name) {
 				switch (name) {
@@ -367,12 +364,12 @@ public class AuthenticatedFilterTest {
 
 				return null;
 			}
-			
+
 			@Override
 			public String getFilterName() {
 				return "TestConfig";
 			}
-			
+
 			@Override
 			public ServletContext getServletContext() {
 				return null;

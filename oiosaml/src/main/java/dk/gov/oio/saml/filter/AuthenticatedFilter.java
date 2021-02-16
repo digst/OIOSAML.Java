@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import dk.gov.oio.saml.config.Configuration;
+import dk.gov.oio.saml.service.OIOSAML3Service;
 import org.apache.log4j.Logger;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.encoder.MessageEncodingException;
@@ -81,22 +83,13 @@ public class AuthenticatedFilter implements Filter {
         try {
             // default: not logged in, and no authenticated NSIS level
             boolean authenticated = false;
-            NSISLevel authenticatedNsisLevel = NSISLevel.NONE;
+            NSISLevel authenticatedNsisLevel = tryExtractNSISLevel(session, NSISLevel.NONE);
+            String authenticatedAssuranceLevel = tryExtractAssuranceLevel(session);
 
             // Get current authenticated and NSIS level states from session
             Object attribute = session.getAttribute(Constants.SESSION_AUTHENTICATED);
             if (attribute != null && "true".equals(attribute)) {
-            	authenticated = true;
-            }
-
-            attribute = session.getAttribute(Constants.SESSION_NSIS_LEVEL);
-            if (attribute != null) {
-            	try {
-            		authenticatedNsisLevel = (NSISLevel) attribute;
-            	}
-            	catch (Exception ex) {
-            		log.warn("Unknown NSIS level on session: " + attribute);
-            	}
+                authenticated = true;
             }
 
             if (log.isDebugEnabled()) {
@@ -104,7 +97,7 @@ public class AuthenticatedFilter implements Filter {
             }
 
             // Is the user authenticated, and at the required level?
-            if (!authenticated || requiredNsisLevel.isGreater(authenticatedNsisLevel)) {
+            if (!authenticated || !isAssuranceSufficient(requiredNsisLevel, authenticatedNsisLevel, authenticatedAssuranceLevel)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Filter config: isPassive: " + isPassive + ", forceAuthn: " + forceAuthn);
                 }
@@ -133,7 +126,48 @@ public class AuthenticatedFilter implements Filter {
 			throw new ServletException(e);
 		}
     }
-    
+
+    private NSISLevel tryExtractNSISLevel(HttpSession session, NSISLevel defaultValue) {
+        NSISLevel authenticatedNsisLevel = defaultValue;
+
+        Object attribute = session.getAttribute(Constants.SESSION_NSIS_LEVEL);
+        if (attribute != null) {
+            try {
+                authenticatedNsisLevel = (NSISLevel) attribute;
+            }
+            catch (Exception ex) {
+                log.warn("Unknown NSIS level on session: " + attribute);
+            }
+        }
+
+        return authenticatedNsisLevel;
+    }
+
+    private String tryExtractAssuranceLevel(HttpSession session) {
+        Object attribute = session.getAttribute(Constants.SESSION_ASSURANCE_LEVEL);
+        if(!(attribute instanceof String)) {
+            return null;
+        }
+
+        return (String) attribute;
+    }
+
+    private boolean isAssuranceSufficient(NSISLevel requiredNsisLevel, NSISLevel authenticatedNsisLevel, String authenticatedAssuranceLevel) {
+        Configuration configuration = OIOSAML3Service.getConfig();
+        // We do not have anything but the old AssuranceLevel
+        if(configuration.isAssuranceLevelAllowed() && authenticatedAssuranceLevel != null) {
+            Integer i;
+            try {
+                i = Integer.parseInt(authenticatedAssuranceLevel);
+            } catch (Exception ex) {
+                return false;
+            }
+
+            return requiredNsisLevel.getAssuranceLevel() <= i;
+        }
+
+        return requiredNsisLevel.equalOrLesser(authenticatedNsisLevel);
+    }
 
 	@Override
     public void destroy() {

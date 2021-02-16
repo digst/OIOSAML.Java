@@ -179,62 +179,32 @@ public class AssertionValidationService {
         }
 
         Map<String, String> attributeValues = SamlHelper.extractAttributeValues(attributeStatements.get(0));
-        if (config.isValidationEnabled()) {
-	        // The AttributeStatement sub-element MUST conform to one of the attribute profiles for natural persons or professionals
-	        String nameIDValue = assertion.getSubject().getNameID().getValue();
-	        validateAttributeStatment(attributeValues, nameIDValue.startsWith("https://data.gov.dk/model/core/eid/professional"));
-
-	        // The Assertion within the response MUST be directly signed
-	        if (!assertion.isSigned()) {
-	            throw new AssertionValidationException("The Assertion within the response MUST be directly signed");
-	        }
+        if (!config.isValidationEnabled()) {
+            return;
         }
 
-        // SPs MUST check the specified [NSIS]level of assurance regardless of any LoA was set in the request
-        NSISLevel requestedLevel = NSISLevel.NONE;
-        for (String authnContextClassRef : authnRequest.getAuthnContextClassRefValues()) {
-            NSISLevel nsisLevelFromLOA = NSISLevel.getNSISLevelFromLOA(authnContextClassRef, null);
+        // The AttributeStatement sub-element MUST conform to one of the attribute profiles for natural persons or professionals
+        String nameIDValue = assertion.getSubject().getNameID().getValue();
+        validateAttributeStatement(attributeValues, nameIDValue.startsWith("https://data.gov.dk/model/core/eid/professional"));
+        validateAssurance(attributeValues, authnRequest);
 
-            if (nsisLevelFromLOA != null) {
-                requestedLevel = nsisLevelFromLOA;
-            }
-        }
-
-        String actualLevelStr = attributeValues.get(Constants.LOA);
-        NSISLevel actualLevel = NSISLevel.getNSISLevelFromLOA(actualLevelStr, NSISLevel.NONE);
-
-        if (requestedLevel.isGreater(actualLevel)) {
-            throw new AssertionValidationException("Assertion NSIS Level not sufficient. Was: '" + actualLevel + "' Expected: '" + requestedLevel + "'");
+        // The Assertion within the response MUST be directly signed
+        if (!assertion.isSigned()) {
+            throw new AssertionValidationException("The Assertion within the response MUST be directly signed");
         }
     }
 
-    private void validateAttributeStatment(Map<String, String> attributes, boolean isProfessional) throws AssertionValidationException {
+    private void validateAttributeStatement(Map<String, String> attributes, boolean isProfessional) throws AssertionValidationException {
         // SpecVer
         String specVersion = attributes.get(Constants.SPEC_VER);
         if (!Constants.SPEC_VER_VAL.equals(specVersion)) {
             throw new AssertionValidationException("specVersion Was: " + specVersion + " Expected: " + Constants.SPEC_VER_VAL);
         }
 
-        // LOA
-        String loa = attributes.get(Constants.LOA);
-        if (loa == null) {
-            throw new AssertionValidationException("Must Contain Level of assurance");
-        }
-        switch (loa) {
-            case Constants.LOA_LOW:
-                break;
-            case Constants.LOA_SUBSTANTIAL:
-                break;
-            case Constants.LOA_HIGH:
-                break;
-            default:
-                throw new AssertionValidationException("Level of assurance was not correct value. Was: " + loa);
-        }
-
         // Professional
         if (isProfessional) {
             String cvr = attributes.get(Constants.CVR_NUMBER);
-            if (cvr == null || cvr.matches("^\\d{8}$")) {
+            if (cvr == null || !cvr.matches("^\\d{8}$")) {
                 throw new AssertionValidationException("CVR should be present and should be an 8-digit number");
             }
 
@@ -244,6 +214,41 @@ public class AssertionValidationService {
             }
         }
 
+    }
+
+    private void validateAssurance(Map<String, String> attributes, AuthnRequestWrapper authnRequest) throws AssertionValidationException {
+        Configuration configuration = OIOSAML3Service.getConfig();
+        String assuranceLevel = attributes.get(Constants.ASSURANCE_LEVEL);
+        if(configuration.isAssuranceLevelSufficient(assuranceLevel)) {
+            log.info("Assurance level of " + assuranceLevel + " accepted instead of NSIS LoA");
+            return;
+        }
+
+        // LOA
+        String loa = attributes.get(Constants.LOA);
+        if (loa == null) {
+            throw new AssertionValidationException("Must Contain Level of assurance");
+        }
+
+        // Attribute value is not URL, but only name
+        NSISLevel actualLevel = NSISLevel.getNSISLevelFromAttributeValue(loa, null);
+        if(actualLevel == null) {
+            throw new AssertionValidationException("Level of assurance was not correct value. Was: " + loa);
+        }
+
+        // SPs MUST check the specified [NSIS]level of assurance regardless of any LoA was set in the request
+        NSISLevel requestedLevel = NSISLevel.NONE;
+        for (String authnContextClassRef : authnRequest.getAuthnContextClassRefValues()) {
+            NSISLevel nsisLevelFromLOA = NSISLevel.getNSISLevelFromUrl(authnContextClassRef, null);
+
+            if (nsisLevelFromLOA != null) {
+                requestedLevel = nsisLevelFromLOA;
+            }
+        }
+
+        if (requestedLevel.isGreater(actualLevel)) {
+            throw new AssertionValidationException("Assertion NSIS Level not sufficient. Was: '" + actualLevel + "' Expected: '" + requestedLevel + "'");
+        }
     }
 
     private void validateStatus(Response response) throws AssertionValidationException {
@@ -375,7 +380,7 @@ public class AssertionValidationService {
         }
 
         Configuration config = OIOSAML3Service.getConfig();
-        if ((config.getBaseUrl() + "/saml/assertionConsumer").equals(subjectConfirmationData.getRecipient())) {
+        if (!(config.getBaseUrl() + "/saml/assertionConsumer").equals(subjectConfirmationData.getRecipient())) {
             throw new AssertionValidationException("The SubjectConfirmationData element MUST contain a recipient attribute containing the SP's assertion consumer service URL");
         }
 

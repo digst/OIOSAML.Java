@@ -44,6 +44,7 @@ public class AssertionWrapper implements Serializable {
 	private String issuer;
 	private String sessionIndex;
 	private NSISLevel nsisLevel;
+	private String assuranceLevel;
 	private String subjectNameId;
 	private List<String> audiences;
 	private String authnContextClassRef;
@@ -57,9 +58,8 @@ public class AssertionWrapper implements Serializable {
 	public AssertionWrapper(Assertion assertion) throws InternalException {
 		// getAssertion()
 		AssertionMarshaller marshaller = new AssertionMarshaller();
-		Element element = null;
 		try {
-			element = marshaller.marshall(assertion);
+			Element element = marshaller.marshall(assertion);
 			this.assertion = elementToString(element);
 		}
 		catch (MarshallingException e) {
@@ -77,7 +77,8 @@ public class AssertionWrapper implements Serializable {
 		NSISLevel level = NSISLevel.NONE;
 		if (attributeValues != null) {
 			String value = attributeValues.get(Constants.LOA);
-			level = NSISLevel.getNSISLevelFromLOA(value, NSISLevel.NONE);
+			level = NSISLevel.getNSISLevelFromAttributeValue(value, NSISLevel.NONE);
+			this.assuranceLevel = attributeValues.get(Constants.ASSURANCE_LEVEL); // NULL is acceptable
 		}
 		this.nsisLevel = level;
 
@@ -223,6 +224,10 @@ public class AssertionWrapper implements Serializable {
 	
 	public NSISLevel getNsisLevel() {
 		return nsisLevel;
+	}
+
+	public String getAssuranceLevel() {
+		return assuranceLevel;
 	}
 
 	public String getID() {

@@ -17,6 +17,7 @@
 Issue = <%= wrapper.getIssuer() %>
 Subject/NameID = <%= wrapper.getSubjectNameId() %>
 NSIS Level = <%= wrapper.getNsisLevel() %>
+AssuranceLevel = <%= wrapper.getAssuranceLevel() %>
 
 Attributes = <%= wrapper.getAttributeValues() %>
 </pre>

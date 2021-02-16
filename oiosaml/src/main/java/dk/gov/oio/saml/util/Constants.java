@@ -6,6 +6,7 @@ public class Constants {
     public static final String SESSION_NAME_ID = "oiosaml.nameid.value";
     public static final String SESSION_NAME_ID_FORMAT = "oiosaml.nameid.format";
     public static final String SESSION_NSIS_LEVEL = "oiosaml.nsis.level";
+    public static final String SESSION_ASSURANCE_LEVEL = "oiosaml.assurance.level";
     public static final String SESSION_REQUESTED_PATH = "oiosaml.request.path";
     public static final String SESSION_AUTHN_REQUEST = "oiosaml.authn.request";
     public static final String SESSION_AUTHENTICATED = "oiosaml.authenticated";
@@ -27,6 +28,8 @@ public class Constants {
     // Configuration constants for DispatcherServlet (optional, has default values)
 	public static final String EXTERNAL_CONFIGURATION_FILE = "oiosaml.servlet.configurationfile";
     public static final String OIOSAML_VALIDATION_ENABLED = "oiosaml.servlet.profile.validation.enabled";
+    public static final String OIOSAML_ASSURANCE_LEVEL_ALLOWED = "oiosaml.servlet.profile.validation.assurancelevel.allowed";
+    public static final String OIOSAML_ASSURANCE_LEVEL_MINIMUM = "oiosaml.servlet.profile.validation.assurancelevel.minimum";
     public static final String METADATA_NAMEID_FORMAT = "oiosaml.servlet.metadata.nameid.format";
     public static final String METADATA_CONTACT_EMAIL = "oiosaml.servlet.metadata.contact.email";
     public static final String IDP_METADATA_MIN_REFRESH = "oiosaml.servlet.idp.metadata.refresh.min";
@@ -60,9 +63,7 @@ public class Constants {
     public static final String SPEC_VER_VAL = "OIO-SAML-3.0";
     public static final String PRIVILEGE_ATTRIBUTE = "https://data.gov.dk/model/core/eid/privilegesIntermediate";
     public static final String LOA = "https://data.gov.dk/concept/core/nsis/loa";
-    public static final String LOA_LOW = "https://data.gov.dk/concept/core/nsis/loa/Low";
-    public static final String LOA_SUBSTANTIAL = "https://data.gov.dk/concept/core/nsis/loa/Substantial";
-    public static final String LOA_HIGH = "https://data.gov.dk/concept/core/nsis/loa/High";
     public static final String CVR_NUMBER = "https://data.gov.dk/model/core/eid/professional/cvr";
     public static final String ORGANIZATION_NAME = "https://data.gov.dk/model/core/eid/professional/orgName";
+    public static final String ASSURANCE_LEVEL = "dk:gov:saml:attribute:AssuranceLevel";
 }
