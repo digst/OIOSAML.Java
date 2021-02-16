@@ -30,7 +30,7 @@ public class IntegrationTest {
 
     @Before
     public void setUpWebDriver() {
-        System.setProperty("webdriver.chrome.driver", "bin/chromedriver.exe");
+        System.setProperty("webdriver.chrome.driver", "C:\\tools\\chromedriver.exe");
 
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.addArguments(

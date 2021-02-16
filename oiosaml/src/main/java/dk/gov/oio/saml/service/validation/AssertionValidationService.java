@@ -185,7 +185,7 @@ public class AssertionValidationService {
 
         // The AttributeStatement sub-element MUST conform to one of the attribute profiles for natural persons or professionals
         String nameIDValue = assertion.getSubject().getNameID().getValue();
-        validateAttributeStatment(attributeValues, nameIDValue.startsWith("https://data.gov.dk/model/core/eid/professional"));
+        validateAttributeStatement(attributeValues, nameIDValue.startsWith("https://data.gov.dk/model/core/eid/professional"));
         validateAssurance(attributeValues, authnRequest);
 
         // The Assertion within the response MUST be directly signed
@@ -194,7 +194,7 @@ public class AssertionValidationService {
         }
     }
 
-    private void validateAttributeStatment(Map<String, String> attributes, boolean isProfessional) throws AssertionValidationException {
+    private void validateAttributeStatement(Map<String, String> attributes, boolean isProfessional) throws AssertionValidationException {
         // SpecVer
         String specVersion = attributes.get(Constants.SPEC_VER);
         if (!Constants.SPEC_VER_VAL.equals(specVersion)) {

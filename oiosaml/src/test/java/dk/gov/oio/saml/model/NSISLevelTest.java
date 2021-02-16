@@ -25,7 +25,7 @@ public class NSISLevelTest {
     @DisplayName("Test unknown input for getNSISLevelFromAttributeValue")
     @Test
     public void testDefaultIsReturnedForUnknownInputWhenAttributeValue() {
-        Assertions.assertEquals(NSISLevel.HIGH, NSISLevel.getNSISLevelFromUrl("unknown", NSISLevel.HIGH));
+        Assertions.assertEquals(NSISLevel.HIGH, NSISLevel.getNSISLevelFromAttributeValue("unknown", NSISLevel.HIGH));
     }
 
     @DisplayName("Test null input for getNSISLevelFromAttributeValue")
