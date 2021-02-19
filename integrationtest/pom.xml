@@ -3,7 +3,6 @@
     <artifactId>oiosaml3-integrationtest</artifactId>
     <name>OIOSAML Integrationtest Java v3</name>
     <modelVersion>4.0.0</modelVersion>
-    <packaging>war</packaging>
 
     <parent>
         <artifactId>oiosaml3-parent</artifactId>
