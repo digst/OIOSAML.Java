@@ -17,7 +17,7 @@ public class IntegrationTest {
         //Navigate to login page
         driver.get("https://localhost:8443/oiosaml3-demo.java/index.jsp");
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText("Page requiring NSIS Substantial"))).click();
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#Repeater2_LoginMenuItem_3 > div.btn-slice2"))).click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("[href*='/login.aspx/mitidsim']"))).click();
 
         //Log in
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("ContentPlaceHolder_MitIdSimulatorControl_txtUsername"))).sendKeys("Morten");
@@ -34,7 +34,8 @@ public class IntegrationTest {
 
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.addArguments(
-                "--headless"
+                "--headless",
+                "--allow-insecure-localhost"
                 );
 
         driver = new ChromeDriver(chromeOptions);
