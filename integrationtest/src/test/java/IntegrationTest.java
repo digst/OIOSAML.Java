@@ -1,5 +1,6 @@
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -11,6 +12,7 @@ public class IntegrationTest {
     private ChromeDriver driver;
     private WebDriverWait wait;
 
+    @Ignore("Awaiting DevTest4 metadata")
     @Test
     public void integrationTest() {
 
