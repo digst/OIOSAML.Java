@@ -83,23 +83,27 @@ public class SPMetadataService {
 		AttributeConsumingService attributeConsumingService = SamlHelper.build(AttributeConsumingService.class);
 		attributeConsumingService.setIsDefault(true);
 		attributeConsumingService.getNames().add(serviceName);
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("urn:oid:2.5.4.4", true));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("urn:oid:2.5.4.3", true));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("urn:oid:0.9.2342.19200300.100.1.1", true));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("urn:oid:0.9.2342.19200300.100.1.3", true));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("dk:gov:saml:attribute:AssuranceLevel", true));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("dk:gov:saml:attribute:SpecVer", true));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("urn:oid:2.5.4.5", true));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("dk:gov:saml:attribute:IsYouthCert", true));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("urn:oid:2.5.29.29", true));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("dk:gov:saml:attribute:PidNumberIdentifier", true));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("dk:gov:saml:attribute:CvrNumberIdentifier", false));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("urn:oid:2.5.4.10", false));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("urn:oid:2.5.4.65", false));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("urn:oid:1.3.6.1.4.1.1466.115.121.1.8", true));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("dk:gov:saml:attribute:RidNumberIdentifier", false));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("dk:gov:saml:attribute:CprNumberIdentifier", true));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("urn:liberty:disco:2006-08:DiscoveryEPR", true));
+		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/specVersion", true));
+		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/bootstrapToken", false));
+		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/privilegesIntermediate", false));
+		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/concept/core/nsis/loa", true));
+		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/concept/core/nsis/ial", false));
+		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/concept/core/nsis/aal", false));
+		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/fullName", false));
+		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/firstName", false));
+		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/lastName", false));
+		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/email", false));
+		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/cprNumber", false));
+		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/age", false));
+		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/cprUuid", false));
+		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/dateOfBirth", false));
+		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/person/pid", false));
+		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/uuid/persistent", false));
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/rid", false));
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/cvr", true));
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/orgName", true));
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/productionUnit", false));
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/seNumber", false));
 	      
 		spssoDescriptor.getAttributeConsumingServices().add(attributeConsumingService);
 		
@@ -151,7 +155,7 @@ public class SPMetadataService {
 		RequestedAttribute requestedAttribute = SamlHelper.build(RequestedAttribute.class);
 		requestedAttribute.setName(attribute);
 		requestedAttribute.setFriendlyName("");
-		requestedAttribute.setNameFormat("urn:oasis:names:tc:SAML:2.0:attrname-format:basic");
+		requestedAttribute.setNameFormat("urn:oasis:names:tc:SAML:2.0:attrname-format:uri");
 		requestedAttribute.setIsRequired(required);
 
 		return requestedAttribute;
