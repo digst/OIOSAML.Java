@@ -99,11 +99,11 @@ public class SPMetadataService {
 		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/dateOfBirth", false));
 		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/person/pid", false));
 		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/uuid/persistent", false));
-        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/rid", false));
-        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/cvr", true));
-        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/orgName", true));
-        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/productionUnit", false));
-        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/seNumber", false));
+		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/rid", false));
+		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/cvr", true));
+		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/orgName", true));
+		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/productionUnit", false));
+		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/seNumber", false));
 	      
 		spssoDescriptor.getAttributeConsumingServices().add(attributeConsumingService);
 		
