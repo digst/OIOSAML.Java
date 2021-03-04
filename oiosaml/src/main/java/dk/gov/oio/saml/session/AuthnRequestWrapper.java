@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import dk.gov.oio.saml.model.NSISLevel;
 import org.opensaml.saml.saml2.core.AuthnContextClassRef;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 
@@ -14,9 +15,10 @@ public class AuthnRequestWrapper implements Serializable {
 	private String id;
 	private boolean forceAuthn;
 	private boolean passive;
+	private NSISLevel requestedNsisLevel;
 	private List<String> authnContextClassRefValues;
 
-	public AuthnRequestWrapper(AuthnRequest authnRequest) throws InternalException {
+	public AuthnRequestWrapper(AuthnRequest authnRequest, NSISLevel requestedNsisLevel) throws InternalException {
 		// get ContextClassRefs
 		authnContextClassRefValues = new ArrayList<String>();
         if (authnRequest.getRequestedAuthnContext() != null) {
@@ -33,6 +35,7 @@ public class AuthnRequestWrapper implements Serializable {
         // get passive/forceAuthn
         passive = authnRequest.isPassive();
         forceAuthn = authnRequest.isForceAuthn();
+        this.requestedNsisLevel = requestedNsisLevel;
 
 		// get id
 		this.id = authnRequest.getID();
@@ -52,5 +55,9 @@ public class AuthnRequestWrapper implements Serializable {
 
 	public boolean isPassive() {
 		return passive;
+	}
+
+	public NSISLevel getRequestedNsisLevel() {
+		return requestedNsisLevel;
 	}
 }

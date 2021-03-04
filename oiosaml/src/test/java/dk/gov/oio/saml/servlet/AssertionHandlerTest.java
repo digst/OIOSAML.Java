@@ -42,7 +42,7 @@ public class AssertionHandlerTest {
 		MessageContext<SAMLObject> authnRequestMessageContext = authnRequestService.createMessageWithAuthnRequest(false, false, NSISLevel.SUBSTANTIAL, null);
 		AuthnRequest authnRequest = (AuthnRequest) authnRequestMessageContext.getMessage();
 		authnRequest.setID(inResponseToId);
-		AuthnRequestWrapper wrapper = new AuthnRequestWrapper(authnRequest);
+		AuthnRequestWrapper wrapper = new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL);
 
 		// mock session with state: not logged in at any NSIS level
 		HttpSession session = Mockito.mock(HttpSession.class);
@@ -86,7 +86,7 @@ public class AssertionHandlerTest {
 		MessageContext<SAMLObject> authnRequestMessageContext = authnRequestService.createMessageWithAuthnRequest(false, false, NSISLevel.SUBSTANTIAL, null);
 		AuthnRequest authnRequest = (AuthnRequest) authnRequestMessageContext.getMessage();
 		authnRequest.setID(inResponseToId);
-		AuthnRequestWrapper wrapper = new AuthnRequestWrapper(authnRequest);
+		AuthnRequestWrapper wrapper = new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL);
 
 		// mock session with state: not logged in at any NSIS level
 		HttpSession session = Mockito.mock(HttpSession.class);
