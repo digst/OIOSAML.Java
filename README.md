@@ -4,4 +4,4 @@ Run the script 'misc/setup_prerequisites.ps1' from an elevated PowerShell. This 
 
 ## Running the Integration test
 
-To run the IntegrationTest you need to have a `chromedriver.exe` exutable in the folder C:\tools\
+To run the IntegrationTest you need to have a `chromedriver.exe` executable in the folder C:\tools\
