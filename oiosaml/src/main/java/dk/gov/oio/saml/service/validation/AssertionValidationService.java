@@ -228,8 +228,8 @@ public class AssertionValidationService {
             throw new AssertionValidationException("NSIS LoA required, but received AssuranceLevel");
         }
 
-        if(configuration.isAssuranceLevelAllowed() && assuranceLevel != null) {
-            log.info("Assurance level of " + assuranceLevel + " received instead of NSIS LoA");
+        if(configuration.isAssuranceLevelSufficient(assuranceLevel)) {
+            log.info("Assurance level of " + assuranceLevel + " received instead of NSIS LoA. Accepted because of configuration");
             return;
         }
 
