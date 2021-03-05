@@ -219,8 +219,17 @@ public class AssertionValidationService {
     private void validateAssurance(Map<String, String> attributes, AuthnRequestWrapper authnRequest) throws AssertionValidationException {
         Configuration configuration = OIOSAML3Service.getConfig();
         String assuranceLevel = attributes.get(Constants.ASSURANCE_LEVEL);
+        if(authnRequest.getRequestedNsisLevel() == NSISLevel.NONE && assuranceLevel != null) {
+            log.info("Assurance level of " + assuranceLevel + " received. Accepting, requested NSIS LoA was NONE");
+            return;
+        }
+
+        if(!configuration.isAssuranceLevelAllowed() && assuranceLevel != null) {
+            throw new AssertionValidationException("NSIS LoA required, but received AssuranceLevel");
+        }
+
         if(configuration.isAssuranceLevelSufficient(assuranceLevel)) {
-            log.info("Assurance level of " + assuranceLevel + " accepted instead of NSIS LoA");
+            log.info("Assurance level of " + assuranceLevel + " received instead of NSIS LoA. Accepted because of configuration");
             return;
         }
 

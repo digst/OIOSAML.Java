@@ -106,7 +106,7 @@ public class AuthenticatedFilter implements Filter {
 
                 req.getSession().setAttribute(Constants.SESSION_REQUESTED_PATH, req.getRequestURI());
                 MessageContext<SAMLObject> authnRequest = authnRequestService.createMessageWithAuthnRequest(isPassive, forceAuthn, requiredNsisLevel, attributeProfile);
-                sendAuthnRequest(req, res, authnRequest);
+                sendAuthnRequest(req, res, authnRequest, requiredNsisLevel);
 			}
 			else {
 				try {
@@ -192,14 +192,14 @@ public class AuthenticatedFilter implements Filter {
         }
 	}
 
-    private void sendAuthnRequest(HttpServletRequest req, HttpServletResponse res, MessageContext<SAMLObject> authnRequest) throws InternalException {
+    private void sendAuthnRequest(HttpServletRequest req, HttpServletResponse res, MessageContext<SAMLObject> authnRequest, NSISLevel requestedNsisLevel) throws InternalException {
         if (log.isDebugEnabled()) {
             LoggingUtil.logAuthnRequest((AuthnRequest) authnRequest.getMessage());
         }
 
         // Save authnRequest on session
         HttpSession session = req.getSession();
-        session.setAttribute(Constants.SESSION_AUTHN_REQUEST, new AuthnRequestWrapper((AuthnRequest) authnRequest.getMessage()));
+        session.setAttribute(Constants.SESSION_AUTHN_REQUEST, new AuthnRequestWrapper((AuthnRequest) authnRequest.getMessage(), requiredNsisLevel));
 
         // Deflating and sending the message
         HTTPRedirectDeflateEncoder encoder = new HTTPRedirectDeflateEncoder();

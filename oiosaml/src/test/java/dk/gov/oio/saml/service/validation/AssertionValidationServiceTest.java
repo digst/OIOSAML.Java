@@ -54,7 +54,7 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
 		Assertion assertion = assertionService.getAssertion(response);
 
 		// Validate
-		validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest));
+		validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL));
 	}
 
 	@DisplayName("Test that validator will fail an assertion with the wrong destination")
@@ -82,7 +82,7 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
 
 		// Validate, should fail, destination incorrect
 		Assertions.assertThrows(ExternalException.class , () -> {
-			validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest));
+			validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL));
 		});
 	}
 	
@@ -113,7 +113,7 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
 
 		// Validate, should fail
 		Assertions.assertThrows(AssertionValidationException.class , () -> {
-			validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest));
+			validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL));
 		});
 	}
 	
@@ -141,7 +141,7 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
 
 		// Validate, should fail, encrypted = false
 		Assertions.assertThrows(AssertionValidationException.class , () -> {
-			validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest));
+			validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL));
 		});
 	}
 	
@@ -171,7 +171,7 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
 		response.getAssertions().add(SamlHelper.build(Assertion.class));
 
 		Assertions.assertThrows(AssertionValidationException.class , () -> {
-			validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest));
+			validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL));
 		});
 
 		// Test with 2 Encrypted
@@ -184,7 +184,7 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
 		response.getEncryptedAssertions().add(copy);
 
 		Assertions.assertThrows(AssertionValidationException.class , () -> {
-			validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest));
+			validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL));
 		});
 
 		// Test with 2 Plaintext
@@ -193,7 +193,7 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
 		response.getAssertions().add(SamlHelper.build(Assertion.class));
 
 		Assertions.assertThrows(AssertionValidationException.class , () -> {
-			validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest));
+			validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL));
 		});
 	}
 	
@@ -227,7 +227,7 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
 
 		// Validate, should fail "Issuer does not match IdP EntityID from metadata"
 		Assertions.assertThrows(AssertionValidationException.class , () -> {
-			validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest));
+			validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL));
 		});
 	}
 	
@@ -255,7 +255,7 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
 
 		// Validate, should fail "Could not validate assertion signature"
 		Assertions.assertThrows(AssertionValidationException.class , () -> {
-			validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest));
+			validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL));
 		});
 	}
 	
@@ -293,7 +293,7 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
 
 		// Validate, should fail "The assertion MUST contain an AudienceRestriction including the ServiceProvider's unique identifier as an Audience"
 		Assertions.assertThrows(AssertionValidationException.class , () -> {
-			validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest));
+			validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL));
 		});
 	}
 	
@@ -321,7 +321,7 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
 
 		// Validate, should fail "Subject NameID should be based on a UUID"
 		Assertions.assertThrows(AssertionValidationException.class , () -> {
-			validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest));
+			validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL));
 		});
 	}
 }

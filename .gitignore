@@ -5,3 +5,4 @@ target/
 .idea/
 *.iml
 velocity.log
+.DS_Store
