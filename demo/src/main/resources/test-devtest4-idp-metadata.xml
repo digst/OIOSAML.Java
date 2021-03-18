@@ -29,15 +29,7 @@
         <a:RequestedAttribute Name="https://data.gov.dk/model/core/eid/professional/orgName" FriendlyName="OrganizationName" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" isRequired="true"/>
         <a:RequestedAttribute Name="https://data.gov.dk/model/core/eid/professional/productionUnit" FriendlyName="ProductionUnit" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" isRequired="true"/>
         <a:RequestedAttribute Name="https://data.gov.dk/model/core/eid/professional/seNumber" FriendlyName="SeNumber" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" isRequired="true"/>
-        <a:RequestedAttribute Name="dk:gov:saml:attribute:AuthorizedToRepresent" FriendlyName="AuthorizedToRepresent" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" isRequired="true"/>
-        <a:RequestedAttribute Name="https://data.gov.dk/model/core/signing/certificatePolicyQualifier" FriendlyName="CertificatePolicyQualifier" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
-        <a:RequestedAttribute Name="https://data.gov.dk/model/core/signing/certificateSSNPersistenceLevel" FriendlyName="CertificateSsnPersistenceLevel" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
-        <a:RequestedAttribute Name="https://data.gov.dk/model/core/signing/certificateHolderIdentifier" FriendlyName="CertificateHolderIdentifier" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
-        <a:RequestedAttribute Name="https://data.gov.dk/model/core/signing/certificateCommonName" FriendlyName="CommonName" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
-        <a:RequestedAttribute Name="https://data.gov.dk/model/core/signing/anonymizedSigner" FriendlyName="AnonymizedSigner" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
-        <a:RequestedAttribute Name="https://data.gov.dk/model/core/signing/referenceText" FriendlyName="ReferenceText" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
-        <a:RequestedAttribute Name="https://data.gov.dk/model/core/signing/securityCode" FriendlyName="SecurityCode" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
-        <a:RequestedAttribute Name="https://data.gov.dk/model/core/signing/requesterID" FriendlyName="RequesterId" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+        <a:RequestedAttribute Name="https://data.gov.dk/model/core/eid/professional/authorizedToRepresent" FriendlyName="AuthorizedToRepresent" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" isRequired="true"/>
     </IDPSSODescriptor>
     <AttributeAuthorityDescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
         <KeyDescriptor use="signing">
@@ -67,15 +59,7 @@
         <a:RequestedAttribute Name="https://data.gov.dk/model/core/eid/professional/orgName" FriendlyName="OrganizationName" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" isRequired="true"/>
         <a:RequestedAttribute Name="https://data.gov.dk/model/core/eid/professional/productionUnit" FriendlyName="ProductionUnit" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" isRequired="true"/>
         <a:RequestedAttribute Name="https://data.gov.dk/model/core/eid/professional/seNumber" FriendlyName="SeNumber" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" isRequired="true"/>
-        <a:RequestedAttribute Name="dk:gov:saml:attribute:AuthorizedToRepresent" FriendlyName="AuthorizedToRepresent" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" isRequired="true"/>
-        <a:RequestedAttribute Name="https://data.gov.dk/model/core/signing/certificatePolicyQualifier" FriendlyName="CertificatePolicyQualifier" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
-        <a:RequestedAttribute Name="https://data.gov.dk/model/core/signing/certificateSSNPersistenceLevel" FriendlyName="CertificateSsnPersistenceLevel" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
-        <a:RequestedAttribute Name="https://data.gov.dk/model/core/signing/certificateHolderIdentifier" FriendlyName="CertificateHolderIdentifier" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
-        <a:RequestedAttribute Name="https://data.gov.dk/model/core/signing/certificateCommonName" FriendlyName="CommonName" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
-        <a:RequestedAttribute Name="https://data.gov.dk/model/core/signing/anonymizedSigner" FriendlyName="AnonymizedSigner" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
-        <a:RequestedAttribute Name="https://data.gov.dk/model/core/signing/referenceText" FriendlyName="ReferenceText" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
-        <a:RequestedAttribute Name="https://data.gov.dk/model/core/signing/securityCode" FriendlyName="SecurityCode" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
-        <a:RequestedAttribute Name="https://data.gov.dk/model/core/signing/requesterID" FriendlyName="RequesterId" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+        <a:RequestedAttribute Name="https://data.gov.dk/model/core/eid/professional/authorizedToRepresent" FriendlyName="AuthorizedToRepresent" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" isRequired="true"/>
     </AttributeAuthorityDescriptor>
     <ContactPerson contactType="administrative">
         <Company>NemLog-in</Company>
