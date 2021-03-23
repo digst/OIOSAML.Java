@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>dk.digst</groupId>
 	<artifactId>oiosaml3-parent</artifactId>
-	<version>3.0.1</version>
+	<version>3.0.1-SNAPSHOT</version>
 	<name>OIOSAML v3 for Java</name>
 	<packaging>pom</packaging>
 
@@ -45,12 +45,13 @@
 	</modules>
 
 	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
 		<repository>
-			<uniqueVersion>false</uniqueVersion>
-			<id>maven</id>
-			<name>Maven Repository</name>
-			<url>https://mvnrepository.com/artifact/dk.digst/oiosaml3.java</url>
-			<layout>default</layout>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 		</repository>
 	</distributionManagement>
 
