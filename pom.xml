@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>dk.digst</groupId>
 	<artifactId>oiosaml3-parent</artifactId>
-	<version>3.0.1</version>
+	<version>3.0.1-SNAPSHOT</version>
 	<name>OIOSAML v3 for Java</name>
 	<packaging>pom</packaging>
 
@@ -42,5 +42,15 @@
 		<module>idp</module>
 		-->
 	</modules>
+
+	<distributionManagement>
+		<repository>
+			<uniqueVersion>false</uniqueVersion>
+			<id>maven</id>
+			<name>Maven Repository</name>
+			<url>https://mvnrepository.com/artifact/dk.digst/oiosaml3.java</url>
+			<layout>default</layout>
+		</repository>
+	</distributionManagement>
 
 </project>
