@@ -46,11 +46,8 @@
 
 	<distributionManagement>
 		<repository>
-			<uniqueVersion>false</uniqueVersion>
-			<id>maven</id>
-			<name>Maven Repository</name>
-			<url>https://mvnrepository.com/artifact/dk.digst/oiosaml3.java</url>
-			<layout>default</layout>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 		</repository>
 	</distributionManagement>
 
