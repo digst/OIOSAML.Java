@@ -35,13 +35,13 @@ public class IntegrationTest {
 
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.addArguments(
-                "--headless",
+                //"--headless",
                 "--allow-insecure-localhost"
                 );
 
         driver = new ChromeDriver(chromeOptions);
 
-        wait = new WebDriverWait(driver, 10);
+        wait = new WebDriverWait(driver, 15);
     }
 
     @After
