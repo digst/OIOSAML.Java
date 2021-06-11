@@ -175,7 +175,7 @@ public class IdPMetadata {
         for (SingleLogoutService singleLogoutService : idpssoDescriptor.getSingleLogoutServices()) {
             if (SAMLConstants.SAML2_REDIRECT_BINDING_URI.equals(singleLogoutService.getBinding())) {
                 String responseLocation = singleLogoutService.getResponseLocation();
-                if (!responseLocation.isEmpty()) {
+                if (responseLocation != null && !responseLocation.isEmpty()) {
                     return responseLocation;
                 }
                 return singleLogoutService.getLocation();

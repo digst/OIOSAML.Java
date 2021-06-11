@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<md:EntityDescriptor ID="077ae9ba-e94a-3ced-89a7-ddf7638bccf5" entityID="http://mockidp.localhost" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
+<md:EntityDescriptor ID="_077ae9ba-e94a-3ced-89a7-ddf7638bccf5" entityID="http://mockidp.localhost" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
 	<md:IDPSSODescriptor WantAuthnRequestsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
 		<md:KeyDescriptor use="signing">
 			<ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
