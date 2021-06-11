@@ -11,7 +11,7 @@ public class TestConstants {
 	public static final String IDP_METADATA_URL = "http://localhost:8081/saml/metadata";
 	public static final String IDP_LOGOUT_REQUEST_URL = "http://localhost:8081/saml/logout";
 
-	public static final String IDP_METADATA = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><md:EntityDescriptor xmlns:md=\"urn:oasis:names:tc:SAML:2.0:metadata\" ID=\"077ae9ba-e94a-3ced-89a7-ddf7638bccf5\" entityID=\"http://mockidp.localhost\">\n" +
+	public static final String IDP_METADATA = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><md:EntityDescriptor xmlns:md=\"urn:oasis:names:tc:SAML:2.0:metadata\" ID=\"_077ae9ba-e94a-3ced-89a7-ddf7638bccf5\" entityID=\"http://mockidp.localhost\">\n" +
 			"    <md:IDPSSODescriptor WantAuthnRequestsSigned=\"true\" protocolSupportEnumeration=\"urn:oasis:names:tc:SAML:2.0:protocol\">\n" +
 			"        <md:KeyDescriptor use=\"signing\">\n" +
 			"            <ds:KeyInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
@@ -74,7 +74,7 @@ public class TestConstants {
 			"    </md:IDPSSODescriptor>\n" +
 			"</md:EntityDescriptor>";
 
-	public static final String BAD_IDP_METADATA = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><md:EntityDescriptor xmlns:md=\"urn:oasis:names:tc:SAML:2.0:metadata\" ID=\"077ae9ba-e94a-3ced-89a7-ddf7638bccf5\" entityID=\"http://notmockidp.localhost\">\n" +
+	public static final String BAD_IDP_METADATA = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><md:EntityDescriptor xmlns:md=\"urn:oasis:names:tc:SAML:2.0:metadata\" ID=\"_077ae9ba-e94a-3ced-89a7-ddf7638bccf5\" entityID=\"http://notmockidp.localhost\">\n" +
 			"    <md:IDPSSODescriptor WantAuthnRequestsSigned=\"true\" protocolSupportEnumeration=\"urn:oasis:names:tc:SAML:2.0:protocol\">\n" +
 			"        <md:KeyDescriptor use=\"signing\">\n" +
 			"            <ds:KeyInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
