@@ -71,7 +71,6 @@ public class ConfigurationHandlerTest extends AbstractServiceTests {
 		assertTrue(handler.isConfigured());
 	}
 	
-	@SuppressWarnings("serial")
 	@Test
 	public void testRender() {
 		String res = handler.renderTemplate("alreadyConfigured.vm", new HashMap<String, Object>() {{
@@ -196,6 +195,5 @@ public class ConfigurationHandlerTest extends AbstractServiceTests {
 		assertNotNull(f.getEntry("metadata/IdP/IdPMetadata.xml"));
 		assertNotNull(f.getEntry("certificate/keystore"));
 		assertNotNull(f.getEntry("oiosaml-sp.log4j.xml"));
-		f.close();
 	}
 }

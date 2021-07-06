@@ -40,12 +40,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.configuration.Configuration;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.Attribute;
-import org.opensaml.saml2.core.AttributeStatement;
 import org.opensaml.xml.security.BasicSecurityConfiguration;
 
-import dk.itst.oiosaml.common.OIOSAMLConstants;
 import dk.itst.oiosaml.configuration.OIOSAMLBootstrap;
 import dk.itst.oiosaml.configuration.SAMLConfiguration;
 import dk.itst.oiosaml.configuration.SAMLConfigurationFactory;
@@ -195,125 +191,30 @@ public class SPFilter implements Filter {
 
 		// Is the user logged in?
 		if (sessionHandler.isLoggedIn(session.getId()) && session.getAttribute(Constants.SESSION_USER_ASSERTION) != null && !forceAuthn) {
-			
-			// enforce configured minimum Assurance/NSIS level
-			validateAssuranceLevel(sessionHandler, session);
-
-			// validate chosen profile
-			validateProfile(sessionHandler, session);
-			
-			UserAssertion ua = (UserAssertion) session.getAttribute(Constants.SESSION_USER_ASSERTION);
-			if (log.isDebugEnabled()) {
-				log.debug("Everything is ok... Assertion: " + ua);
+			int actualAssuranceLevel = sessionHandler.getAssertion(session.getId()).getAssuranceLevel();
+			int assuranceLevel = conf.getSystemConfiguration().getInt(Constants.PROP_ASSURANCE_LEVEL);
+			if ((assuranceLevel > 0) && (actualAssuranceLevel < assuranceLevel)) {
+				sessionHandler.logOut(session);
+				log.warn("Assurance level too low: " + actualAssuranceLevel + ", required: " + assuranceLevel);
+				throw new RuntimeException("Assurance level too low: " + actualAssuranceLevel + ", required: " + assuranceLevel);
 			}
-
+			UserAssertion ua = (UserAssertion) session.getAttribute(Constants.SESSION_USER_ASSERTION);
+			if (log.isDebugEnabled())
+				log.debug("Everything is ok... Assertion: " + ua);
 			Audit.log(Operation.ACCESS, servletRequest.getRequestURI());
-
-			// perform actual request
 			try {
 				UserAssertionHolder.set(ua);
-				
 				HttpServletRequestWrapper requestWrap = new SAMLHttpServletRequest(servletRequest, ua, hostname);
 				chain.doFilter(requestWrap, response);
-
 				return;
-			}
-			finally {
+			} finally {
 				UserAssertionHolder.set(null);
 			}
 		}
-
-		// perform login action
+		
 		session.removeAttribute(Constants.SESSION_USER_ASSERTION);
 		UserAssertionHolder.set(null);
 		saveRequestAndGotoLogin((HttpServletResponse) response, servletRequest);
-	}
-	
-	private void validateProfile(SessionHandler sessionHandler, HttpSession session) {
-		String profile = conf.getSystemConfiguration().getString(Constants.PROP_REQUESTED_PROFILE, null);
-		if (profile != null) {
-			if (OIOSAMLConstants.PROFILE_PERSON.equals(profile)) {
-				; // no validation required
-			}
-			else if (OIOSAMLConstants.PROFILE_PROFESSIONAL.equals(profile)) {
-				boolean foundCvr = false, foundOrgName = false;
-				
-				Assertion assertion = sessionHandler.getAssertion(session.getId()).getAssertion();
-		    	for (AttributeStatement attributeStatement : assertion.getAttributeStatements()) {
-		    		for (Attribute attribute : attributeStatement.getAttributes()) {
-						if (OIOSAMLConstants.ATTRIBUTE_EID_PROFESSIONAL_CVR.equals(attribute.getName())) {
-							foundCvr = true;
-						}
-						else if (OIOSAMLConstants.ATTRIBUTE_EID_PROFESSIONAL_ORGNAME.equals(attribute.getName())) {
-							foundOrgName = true;
-						}
-					}
-		    	}
-		    	
-		    	if (!foundCvr || !foundOrgName) {
-					sessionHandler.logOut(session);
-
-					throw new RuntimeException("Mandatory attributes for professional profile not present: " + ((!foundCvr) ? OIOSAMLConstants.ATTRIBUTE_EID_PROFESSIONAL_CVR : "") + " " + ((!foundOrgName) ? OIOSAMLConstants.ATTRIBUTE_EID_PROFESSIONAL_ORGNAME : ""));
-		    	}
-			}
-			else {
-				log.warn("Unknown profile: " + profile);
-			}
-		}
-	}
-
-	private void validateAssuranceLevel(SessionHandler sessionHandler, HttpSession session) {
-		int actualAssuranceLevel = sessionHandler.getAssertion(session.getId()).getAssuranceLevel();
-		String actualNSISLevel = sessionHandler.getAssertion(session.getId()).getNSISLevel();
-		
-		int requiredAssuranceLevel = conf.getSystemConfiguration().getInt(Constants.PROP_ASSURANCE_LEVEL, 0);
-		String requiredNSISLevel = conf.getSystemConfiguration().getString(Constants.PROP_NSIS_LEVEL, null);
-
-		boolean valid = false;
-		if (requiredAssuranceLevel == 0 && requiredNSISLevel == null) {
-			valid = true;
-		}
-		else if (requiredAssuranceLevel > 0 && actualAssuranceLevel >= requiredAssuranceLevel) {
-			valid = true;
-		}
-		else if (requiredNSISLevel != null && actualNSISLevel != null) {
-			if (requiredNSISLevel.equals(OIOSAMLConstants.NSIS_REQUEST_LEVEL_HIGH)) {
-				if (actualNSISLevel.equals(OIOSAMLConstants.NSIS_RESPONSE_LEVEL_HIGH)) {
-					valid = true;
-				}
-			}
-			else if (requiredNSISLevel.equals(OIOSAMLConstants.NSIS_REQUEST_LEVEL_SUBSTANTIAL)) {
-				if (actualNSISLevel.equals(OIOSAMLConstants.NSIS_RESPONSE_LEVEL_HIGH) ||
-					actualNSISLevel.equals(OIOSAMLConstants.NSIS_RESPONSE_LEVEL_SUBSTANTIAL)) {
-					valid = true;
-				}
-			}
-			else if (requiredNSISLevel.equals(OIOSAMLConstants.NSIS_REQUEST_LEVEL_LOW)) {
-				if (actualNSISLevel.equals(OIOSAMLConstants.NSIS_RESPONSE_LEVEL_HIGH) ||
-					actualNSISLevel.equals(OIOSAMLConstants.NSIS_RESPONSE_LEVEL_SUBSTANTIAL) ||
-					actualNSISLevel.equals(OIOSAMLConstants.NSIS_RESPONSE_LEVEL_LOW)) {
-					valid = true;
-				}
-			}
-		}
-		
-		if (!valid) {
-			sessionHandler.logOut(session);
-			
-			String msg;
-			if (requiredNSISLevel != null && requiredAssuranceLevel == 0) {
-				msg = "NSIS level too low: " + actualNSISLevel + ", required: " + requiredNSISLevel;
-			}
-			else if (requiredNSISLevel == null && requiredAssuranceLevel > 0) {
-				msg = "Assurance level too low: " + actualAssuranceLevel + ", required: " + requiredAssuranceLevel;
-			}
-			else {
-				msg = "Both NSIS level and Assurance level where too low: " + actualAssuranceLevel + " / " + actualNSISLevel + ", required: " + requiredAssuranceLevel + " / " + requiredNSISLevel;
-			}
-			
-			log.warn(msg);
-			throw new RuntimeException(msg);
-		}
 	}
 
 	protected void saveRequestAndGotoLogin(HttpServletResponse response, HttpServletRequest request) throws ServletException, IOException {

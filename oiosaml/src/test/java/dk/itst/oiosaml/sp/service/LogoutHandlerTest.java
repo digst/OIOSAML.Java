@@ -19,7 +19,6 @@ public class LogoutHandlerTest extends AbstractServiceTests {
 
 	private Configuration configuration;
 
-	@SuppressWarnings("serial")
 	@Test
 	public void testLogout() throws Exception {
 		LogoutHandler servlet = new LogoutHandler();

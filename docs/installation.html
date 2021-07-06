@@ -16,37 +16,25 @@
 
 <h2>OIOSAML.java installation</h2>
 
-<p>Installation of OIOSAML.java consists of adding a dependency too a web application, editing web.xml, and configuring OIOSAML.java. 
+<p>Installation of OIOSAML.java consists of adding jar files to a web application, editing web.xml, and configuring OIOSAML.java. 
 For configuration, see <a href="configuration.html">the configuration guide</a>.</p>
 
-<p>The OIOSAML.java library is published as a Maven dependency here:</p>
-
-<a href="https://mvnrepository.com/artifact/dk.digst/oiosaml2.java">OIOSAML.java Maven Repository</a>.
-
-<p>The demo application shows how to use the framework, and the source for the demo application is bundled with the source for OIOSAML here:</p>
-
-<a href="https://github.com/digst/OIOSAML.Java">OIOSAML.java source code</a>.
+<p>The distribution file contains both the necessary jar files and a demo application. The demo application is a simple web application with OIOSAML.java configured to protect 
+selected resources.</p>
 
 <h3>Demo installation</h3>
-<p>
-The demo application can be compiled and executed using Maven, and the build-in tomcat maven plugin like this
-</p>
+<p>Before deploying the demo war file to a web container, web.xml must be edited to set <a href="configuration.html">oiosaml-j.home to point to a valid configuration dir</a>. If this is 
+not done, configuration will be placed in ${user.home}/.oiosaml. Edit the file by opening the war file (as a zip file) and editing WEB-INF/web.xml. 
+When this is done, simply deploy the war file to a servlet container such as 
+<a href="http://tomcat.apache.org">Tomcat</a>.</p> 
 
-<pre>
-$ mvn clean install tomcat7:run-war
-</pre>
-
-<p>
-The demo application is pre-configured to run, and can be accessed here:</p>
-
-<pre>
-https://localhost:8443/oiosaml2-demo.java
-</pre>
+<p>When the application is accessed using a browser, OIOSAML.java will see that the application has not yet been configured, 
+and there will be a link to the autoconfigure feature. Use this link to configure the system.</p>
 
 <h3>Real installation</h3>
 <p>To install OIOSAML.java in your own web application, do the following: </p>
 <ol>
-<li>Add the oiosaml dependency</li>
+<li>Copy lib/* from the distribution file to your web application's WEB-INF/lib</li>
 <li>Edit your web.xml and add the following: 
 <pre>
 &lt;env-entry&gt;
@@ -56,7 +44,7 @@ https://localhost:8443/oiosaml2-demo.java
 &lt;/env-entry&gt;
 
 &lt;listener&gt;
-	&lt;listener-class&gt;dk.itst.oiosaml.sp.service.session.SessionDestroyListener&lt;/listener-class&gt;
+	%lt;listener-class&gt;dk.itst.oiosaml.sp.service.session.SessionDestroyListener&lt;/listener-class&gt;
 &lt;/listener&gt;
 
 &lt;servlet&gt;
@@ -80,7 +68,7 @@ https://localhost:8443/oiosaml2-demo.java
 </pre>
 </ol>
 
-<p>This defines a servlet which handles all SAML related requests, such as Single Logout, Login Responses, and so on. /saml/ is the recommended prefix for this servlet.
+<p>This defines a servlet which handles all SAML related requests, such as Single Logout, Login Responses, and so on. /saml/ is the recommended prefix for this servlet. 
 Furthermore, a protection filter is defined. This filter handles user authentication, and only allows access to the protected resources if the user is authenticated correctly. The filter can
 cover the SAML servlet, this does not make any difference. The listener makes sure assertions are cleaned up as soon sessions are expired. The listener is not strictly necessary, but it is good practice to include it.</p> 
 

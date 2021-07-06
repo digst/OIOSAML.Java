@@ -17,7 +17,7 @@ public class ArtifactBindingHandlerTest extends AbstractServiceTests {
 	public void setUp() throws Exception {
 		artifactBindingHandler = new ArtifactBindingHandler();
 		
-		request = OIOAuthnRequest.buildAuthnRequest("http://ssoServiceLocation", "spEntityId", SAMLConstants.SAML2_ARTIFACT_BINDING_URI, handler, "state", "http://localhost", null);
+		request = OIOAuthnRequest.buildAuthnRequest("http://ssoServiceLocation", "spEntityId", SAMLConstants.SAML2_ARTIFACT_BINDING_URI, handler, "state", "http://localhost");
 	}
 
 	@Test

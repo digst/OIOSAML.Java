@@ -36,6 +36,7 @@ import dk.itst.oiosaml.logging.LoggerFactory;
 import dk.itst.oiosaml.logging.Operation;
 import dk.itst.oiosaml.sp.metadata.IdpMetadata.Metadata;
 import dk.itst.oiosaml.sp.model.OIOLogoutResponse;
+import dk.itst.oiosaml.sp.service.session.SessionCopyListener;
 import dk.itst.oiosaml.sp.service.util.Constants;
 
 /**

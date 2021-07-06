@@ -53,8 +53,6 @@ public interface Constants {
 	static final String PROP_RESOLVE_USERNAME = "oiosaml-sp.resolve.username";
 	static final String PROP_RESOLVE_PASSWORD = "oiosaml-sp.resolve.password";
 	static final String PROP_ASSURANCE_LEVEL = "oiosaml-sp.assurancelevel";
-	static final String PROP_NSIS_LEVEL = "oiosaml-sp.nsislevel";
-	static final String PROP_AUTHNCONTEXTCLASSREF_REQUEST = "oiosaml-sp.enable.authncontextclassref.request";
 	static final String PROP_HTTP_PROXY_HOST = "oiosaml-sp.http.proxy.host";
 	static final String PROP_HTTP_PROXY_PORT = "oiosaml-sp.http.proxy.port";
 
@@ -247,9 +245,4 @@ public interface Constants {
 	 * Set this value to implement a custom SameSiteSessionSynchronizer
 	 */
 	static final String PROP_SAME_SITE_SESSION_SYNCHRONIZER = "oiosaml-sp.samesite.handler";
-
-	/**
-	 * Set this value to either "Person" or "Professional" to request those specific EID profiles
-	 */
-	static final String PROP_REQUESTED_PROFILE = "oiosaml-sp.requested.profile";
 }

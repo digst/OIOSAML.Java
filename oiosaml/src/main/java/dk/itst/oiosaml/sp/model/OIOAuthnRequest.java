@@ -23,13 +23,10 @@
  */
 package dk.itst.oiosaml.sp.model;
 
-import java.util.List;
-
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.core.NameIDPolicy;
-import org.opensaml.saml2.core.RequestedAuthnContext;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.validation.ValidationException;
@@ -48,7 +45,9 @@ import dk.itst.oiosaml.sp.service.util.Utils;
 
 public class OIOAuthnRequest extends OIORequest {
 	private static final Logger log = LoggerFactory.getLogger(OIOAuthnRequest.class);
+
 	private final AuthnRequest request;
+
 	private final String relayState;
 
 	public OIOAuthnRequest(AuthnRequest request, String relayState) {
@@ -57,7 +56,7 @@ public class OIOAuthnRequest extends OIORequest {
 		this.relayState = relayState;
 	}
 		
-	public static OIOAuthnRequest buildAuthnRequest(String ssoServiceLocation, String spEntityId, String protocolBinding, SessionHandler handler, String relayState, String assertionConsumerUrl, List<String> authnContextClassRefs) {
+	public static OIOAuthnRequest buildAuthnRequest(String ssoServiceLocation, String spEntityId, String protocolBinding, SessionHandler handler, String relayState, String assertionConsumerUrl) {
 		AuthnRequest authnRequest = SAMLUtil.buildXMLObject(AuthnRequest.class);
 
 		authnRequest.setIssuer(SAMLUtil.createIssuer(spEntityId));
@@ -65,12 +64,6 @@ public class OIOAuthnRequest extends OIORequest {
 		authnRequest.setForceAuthn(Boolean.FALSE);
 		authnRequest.setIssueInstant(new DateTime(DateTimeZone.UTC));
 		authnRequest.setDestination(ssoServiceLocation);
-		
-		if (authnContextClassRefs != null && authnContextClassRefs.size() > 0) {
-			RequestedAuthnContext requestedAuthnContext = SAMLUtil.createRequestedAuthnContext(authnContextClassRefs);
-
-			authnRequest.setRequestedAuthnContext(requestedAuthnContext);
-		}
 
 		SAMLConfiguration samlConfiguration = SAMLConfigurationFactory.getConfiguration();
 		if (!samlConfiguration.isConfigured() || !samlConfiguration.getSystemConfiguration().getBoolean(Constants.PROP_EID_COMPATIBLE, false)) {

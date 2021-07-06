@@ -1,0 +1,284 @@
+<html>
+<head>
+<title>OIOSAML.java Patches information</title>
+<style type="text/css">
+body {
+	background-color: white;
+	margin: 20px;
+}
+
+table {
+	border-width: 1px;
+	border-spacing: 2px;
+	border-style: solid;
+	border-color: #538783;
+	border-collapse: collapse;
+	background-color: white;
+}
+
+table tbody tr td {
+	border-width: thin;
+	border-color: #A2B1B1;
+	border-style: solid;
+}
+
+thead {
+	background-color: #76c2bc;
+}
+
+body,tr,td {
+	font-family: Verdana, Helvetica, sans-serif;
+	color: #456974;
+	padding: 3px;
+}
+
+.info {
+	border: 1px solid #76c2bc;
+	background-color: #CDFEFB;
+	margin: 20px;
+	padding: 0px 6px;
+}
+
+div#pagecontainer {
+	width: 80%;
+}
+
+h1,h2,h3,h4 {
+	color: #76c2bc;
+	border-bottom: 1px solid #76c2bc;
+}
+
+.monospace {
+	font-family: monospace;
+}
+
+legend {
+	font-weight: bold;
+}
+
+fieldset {
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+span.emphasis {
+	font-weight: bold;
+}
+</style>
+</head>
+<body>
+
+	<h1>Multiple IdPs (patch)</h1>
+	<p>Description of the patch work.</p>
+	<p>Configuration wise, some changes has been made. The default implementation is filebased, eg. IDP and
+		SP metadata, keystore and log configuration files are located in files. To change the implementation just
+		change ..META-INF/services/dk.itst.oiosaml.configuration.SAMLConfiguration file.</p>
+	<p>The filebased configuration do now contain to major ways of configuring OIOSAML:
+	<ul>
+		<li>Load one file per IDP and SP</li>
+		<li>Load more IDP's and SP's</li>
+	</ul>
+	Loading one file just apply "common.saml2.metadata.sp.filename" and "common.saml2.metadata.idp.filename" to
+	the configuration file. If more files files are needed, apply "common.saml2.metadata.sp.directory" and
+	"common.saml2.metadata.idp.directory".
+	</p>
+	<p>The configuration part has a minor change. Applying the context-param "oiosaml-j.file" in the
+		webapplication is a path to a specific configuration file, exam.</p>
+	<div class="info">
+		<code>
+			<pre>
+            &lt;env-entry&gt;
+                &lt;env-entry-name&gt;oiosaml-j.file&lt;/env-entry-name&gt;
+                &lt;env-entry-value&gt;/websrv/jboss/jboss51/server/justica/deploy/oio-sp-con.properties&lt;/env-entry-value&gt;
+                &lt;env-entry-type&gt;java.lang.String&lt;/env-entry-type&gt;
+            &lt;/env-entry&gt;
+		</pre>
+		</code>
+	</div>
+	<p>
+		The databasebased configuration uses a JDBC based database for IDP'S, the SP, the keystore and the log4j
+		file. Replace the content of ..META-INF/services/dk.itst.oiosaml.configuration.SAMLConfiguration with
+		'dk.itst.oiosaml.configuration.DatabaseConfiguration' and place a standard datasource file in the same
+		folder. If the datasouce is JNDI based the resource is being looked up.</br> The necessary SQL files are
+		provided in the 'dk.itst.oiosaml.configuration' package and the 'dk.itst.oiosaml.configuration.util'
+		package contains basic java applications to save the configuration parts in the database and reverse.
+	</p>
+
+	<p>
+		The autoconfiguration part in configurationhandler do only apply for the
+		filebased configuration (default).
+	</p>
+	<h2>Class changes</h2>
+
+	<p>These classes have been changed.</p>
+
+	<table>
+		<thead>
+			<tr>
+				<td>Class</td>
+				<td>Issue</td>
+				<td>Solution</td>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>dk.itst.oiosaml.logging.Audit</td>
+				<td>Filereference to log4jfile</td>
+				<td>Getting stream trough SAMLConfiguration</td>
+			</tr>
+			<tr>
+				<td>dk.itst.oiosaml.configuration.FileConfiguration</td>
+				<td>The getStringPrefixedWithBRSHome method</td>
+				<td>Refactored, implementation of SAMLConfiguration</td>
+			</tr>
+			<tr>
+				<td>dk.itst.oiosaml.sp.UserAttributeQuery</td>
+				<td>The getStringPrefixedWithBRSHome method</td>
+				<td>Refactored</td>
+			</tr>
+			<tr>
+				<td>dk.itst.oiosaml.security.CredentialRepository</td>
+				<td>Filereference to keystore</td>
+				<td>Getting stream trough SAMLConfiguration</td>
+			</tr>
+			<tr>
+				<td>dk.itst.oiosaml.sp.service.SPFilter</td>
+				<td>The getStringPrefixedWithBRSHome method</td>
+				<td>Refactored</td>
+			</tr>
+			<tr>
+				<td>dk.itst.oiosaml.sp.service.DispatcherServlet</td>
+				<td>The getStringPrefixedWithBRSHome method</td>
+				<td>Refactored</td>
+			</tr>
+
+			<tr>
+				<td>dk.itst.oiosaml.sp.metadata.CRLChecker</td>
+				<td>The getStringPrefixedWithBRSHome method</td>
+				<td>Refactored</td>
+			</tr>
+
+			<tr>
+				<td>dk.itst.oiosaml.sp.service.util.Constants</td>
+				<td>Refactor</td>
+				<td>Added fileconstants</td>
+			</tr>
+			<tr>
+				<td>dk.itst.oiosaml.sp.metadata.SPMetadata</td>
+				<td>Unmarshal from file</td>
+				<td>Unmarshal trough SAMLConfiguration</td>
+			</tr>
+			<tr>
+				<td>dk.itst.oiosaml.sp.metadata.IDPMetadata</td>
+				<td>Unmarshal from file</td>
+				<td>Unmarshal trough SAMLConfiguration</td>
+			</tr>
+			<tr>
+				<td>dk.itst.oiosaml.sp.metadata.ConfigurationHandler</td>
+				<td>Runtime exception when keystore load</td>
+				<td>Catching and logging exception</td>
+			</tr>
+			<tr>
+				<td>dk.itst.oiosaml.sp.bindings.PostBindingHandler</td>
+				<td>Property lookup</td>
+				<td>Refactored</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<h2>Test classes</h2>
+	<table>
+		<thead>
+			<tr>
+				<td>Class</td>
+				<td>Issue</td>
+				<td>Solution</td>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>dk.itst.oiosaml.sp.service.util.UtilsTest</td>
+				<td>Filereference</td>
+				<td>Streamreference</td>
+			</tr>
+			<tr>
+				<td>dk.itst.oiosaml.sp.model.OIOAttributeQueryTest</td>
+				<td>Filereference</td>
+				<td>Streamreference</td>
+			</tr>
+
+			<tr>
+				<td>dk.itst.oiosaml.configuration.SAMLConfigurationTest</td>
+				<td>The getStringPrefixedWithBRSHome method</td>
+				<td>Refactored</td>
+			</tr>
+
+			<tr>
+				<td>dk.itst.oiosaml.configuration.SPFilterTest</td>
+				<td>The getStringPrefixedWithBRSHome method</td>
+				<td>Refactored</td>
+			</tr>
+			<tr>
+				<td>dk.itst.oiosaml.sp.UserAttributeQueryTest</td>
+				<td>The getStringPrefixedWithBRSHome method</td>
+				<td>Refactored</td>
+			</tr>
+			<tr>
+				<td>dk.itst.oiosaml.sp.IntegrationTests</td>
+				<td>Setup webapp to use oiosaml-j.file parameter</td>
+				<td>Fixed</td>
+			</tr>
+
+
+		</tbody>
+	</table>
+
+	<h2>New classes</h2>
+
+	<table>
+		<thead>
+			<tr>
+				<td>Class</td>
+				<td>Purpose</td>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>dk.itst.oiosaml.configuration.SAMLConfigurationFactory</td>
+				<td>Factory (ServiceLoader) to retrieve the configuration</td>
+			</tr>
+			<tr>
+				<td>dk.itst.oiosaml.configuration.SAMLConfiguration</td>
+				<td>Configuration interface</td>
+			</tr>
+			<tr>
+				<td>dk.itst.oiosaml.configuration.DatabaseConfiguration</td>
+				<td>Implementation of SAMLConfiguration</td>
+			</tr>
+			<tr>
+				<td>dk.itst.oiosaml.configuration.jdbc.JdbcConfiguration</td>
+				<td>Handle connection to database</td>
+			</tr>
+			<tr>
+				<td>dk.itst.oiosaml.configuration.jdbc.JdbcConfigurationTest</td>
+				<td>Test class</td>
+			</tr>
+			<tr>
+				<td>dk.itst.oiosaml.configuration.util.FileToDatabaseConfiguration</td>
+				<td>Utility to import/export configurations</td>
+			</tr>
+			<tr>
+				<td>dk.itst.oiosaml.configuration.util.FileToDatabaseMetadata</td>
+				<td>Utility to import/export metadata</td>
+			</tr>
+			<tr>
+				<td>dk.itst.oiosaml.configuration.util.FileToDatabaseLogger</td>
+				<td>Utility to import/export log4j file</td>
+			</tr>
+		</tbody>
+	</table>
+	<p>The package 'dk.itst.oiosaml.configuration' contains an SQL files with the necessary DDL.</p>
+	<p></p>
+
+</body>
+</html>

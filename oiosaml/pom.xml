@@ -4,8 +4,8 @@
 	<artifactId>oiosaml2.java</artifactId>
 	<name>OIOSAML for Java v2</name>
 	<packaging>jar</packaging>
-	<version>2.2.0</version>
-	<description>SAML Servlet Filter, configured to work with the danish SAML profile OIOSAML 3.0.0</description>
+	<version>2.0.9</version>
+	<description>SAML Servlet Filter, configured to work with the danish SAML profile OIOSAML 2.0.9</description>
 	<url>https://digitaliser.dk/group/42063/resources</url>
 
 	<licenses>
@@ -84,8 +84,8 @@
                                 <artifactId>maven-compiler-plugin</artifactId>
                                 <version>3.3</version>
                                 <configuration>
-                                        <source>1.8</source>
-                                        <target>1.8</target>
+                                        <source>1.6</source>
+                                        <target>1.6</target>
                                 </configuration>
                         </plugin>
 

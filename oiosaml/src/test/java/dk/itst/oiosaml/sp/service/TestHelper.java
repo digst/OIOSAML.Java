@@ -73,7 +73,6 @@ import dk.itst.oiosaml.sp.util.AttributeUtil;
 
 public class TestHelper {
 
-	@SuppressWarnings("resource")
 	public static X509Certificate getCertificate(Credential cred) throws CertificateException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, IOException, OperatorCreationException {
         X500Name issuer = new X500Name("C=DK, O=test, OU=test");
         BigInteger serial = BigInteger.valueOf(34234);
@@ -82,7 +81,7 @@ public class TestHelper {
         X500Name subject = new X500Name("C=DK, O=test, OU=test");
 
         ByteArrayInputStream bIn = new ByteArrayInputStream(cred.getPublicKey().getEncoded());
-        SubjectPublicKeyInfo publicKeyInfo = new SubjectPublicKeyInfo((ASN1Sequence) new ASN1InputStream(bIn).readObject());
+        SubjectPublicKeyInfo publicKeyInfo = new SubjectPublicKeyInfo((ASN1Sequence)new ASN1InputStream(bIn).readObject());
 
         X509v1CertificateBuilder gen = new X509v1CertificateBuilder(issuer, serial, notBefore, notAfter, subject, publicKeyInfo);
 

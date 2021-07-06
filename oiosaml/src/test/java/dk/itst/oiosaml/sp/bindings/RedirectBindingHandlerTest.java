@@ -34,7 +34,7 @@ public class RedirectBindingHandlerTest extends AbstractServiceTests {
 			one(res).setContentType("text/html");
 			one(res).getWriter(); will(returnValue(new PrintWriter(sw)));
 		}});
-		OIOAuthnRequest request = OIOAuthnRequest.buildAuthnRequest("http://ssoServiceLocation", "spEntityId", SAMLConstants.SAML2_ARTIFACT_BINDING_URI, handler, "state", "http://localhost", null);
+		OIOAuthnRequest request = OIOAuthnRequest.buildAuthnRequest("http://ssoServiceLocation", "spEntityId", SAMLConstants.SAML2_ARTIFACT_BINDING_URI, handler, "state", "http://localhost");
 
 		rh.handle(req, res, credential, request);
 		

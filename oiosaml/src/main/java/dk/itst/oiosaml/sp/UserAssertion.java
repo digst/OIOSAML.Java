@@ -27,8 +27,6 @@ import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Date;
 
-import dk.itst.oiosaml.oiobpp.PrivilegeList;
-
 public interface UserAssertion {
 	
 	/**
@@ -147,20 +145,6 @@ public interface UserAssertion {
 	 * @return The assurance level of the SAML assertion. Defined in "Vejledning vedrørende niveauer af autenticitetssikring"
 	 */
 	public int getAssuranceLevel();
-	
-	/**
-	 * NSIS-based assurance level of the subject
-	 * 
-	 * @return String representation of the NSIS-based assurance level of the subject
-	 */
-	public String getNSISLevel();
-
-	/**
-	 * OIO-BPP encoded priveleges of subject
-
-	 * @return OIO-BPP encoded priveleges of subject
-	 */
-	public PrivilegeList getPrivilegeList();
 
 	/**
 	 * The specification version, attribute: dk:gov:saml:attribute:SpecVer.<br />

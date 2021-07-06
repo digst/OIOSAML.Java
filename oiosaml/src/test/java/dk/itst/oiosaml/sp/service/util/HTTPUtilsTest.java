@@ -40,7 +40,6 @@ public class HTTPUtilsTest extends AbstractServiceTests {
 	
 	private RequestContext ctx;
 
-	@SuppressWarnings("serial")
 	@Before
 	public void setup() {
 		Configuration configuration = TestHelper.buildConfiguration(new HashMap<String, String>() {{

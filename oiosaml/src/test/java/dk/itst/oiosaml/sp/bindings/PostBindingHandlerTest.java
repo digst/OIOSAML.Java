@@ -35,7 +35,7 @@ public class PostBindingHandlerTest extends AbstractServiceTests{
 		samlRequestBase64Encoded = new StringValueHolder();
 		serviceLocation = "http://sso.url";
 		entityId = "SPEntityId";
-		request = OIOAuthnRequest.buildAuthnRequest(serviceLocation, entityId, SAMLConstants.SAML2_POST_BINDING_URI, handler, "state", "http://localhost", null);
+		request = OIOAuthnRequest.buildAuthnRequest(serviceLocation, entityId, SAMLConstants.SAML2_POST_BINDING_URI, handler, "state", "http://localhost");
 	}
 
 	@Test

@@ -29,8 +29,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 
-import dk.itst.oiosaml.oiobpp.PrivilegeList;
-
 public class PassiveUserAssertion implements UserAssertion {
 	
 	private final String userId;
@@ -49,14 +47,6 @@ public class PassiveUserAssertion implements UserAssertion {
 
 	public int getAssuranceLevel() {
 		return 0;
-	}
-	
-	public String getNSISLevel() {
-		return null;
-	}
-	
-	public PrivilegeList getPrivilegeList() {
-		return null;
 	}
 
 	public UserAttribute getAttribute(String name) {

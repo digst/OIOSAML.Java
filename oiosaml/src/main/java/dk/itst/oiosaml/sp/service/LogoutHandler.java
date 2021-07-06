@@ -38,6 +38,7 @@ import dk.itst.oiosaml.sp.LogoutAuthenticationHandler;
 import dk.itst.oiosaml.sp.metadata.IdpMetadata.Metadata;
 import dk.itst.oiosaml.sp.model.OIOAssertion;
 import dk.itst.oiosaml.sp.model.OIOLogoutRequest;
+import dk.itst.oiosaml.sp.service.session.SessionCopyListener;
 import dk.itst.oiosaml.sp.service.util.Constants;
 import dk.itst.oiosaml.sp.service.util.Utils;
 

@@ -23,13 +23,20 @@
  */
 package dk.itst.oiosaml.sp.model.validation;
 
+import dk.itst.oiosaml.logging.Logger;
+import dk.itst.oiosaml.logging.LoggerFactory;
 import org.joda.time.DateTime;
 import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.AuthnContext;
+import org.opensaml.saml2.core.AuthnContextClassRef;
 import org.opensaml.saml2.core.AuthnStatement;
 
+import dk.itst.oiosaml.common.OIOSAMLConstants;
+import dk.itst.oiosaml.sp.model.AssuranceLevel;
 import dk.itst.oiosaml.sp.model.OIOAssertion;
 
 public class OIOSAMLAssertionValidator extends BasicAssertionValidator {
+	private static final Logger log = LoggerFactory.getLogger(OIOSAMLAssertionValidator.class);
 
 	public void validate(OIOAssertion assertion, String spEntityId, String spAssertionConsumerURL) throws ValidationException {
 		super.validate(assertion, spEntityId, spAssertionConsumerURL);
@@ -45,9 +52,25 @@ public class OIOSAMLAssertionValidator extends BasicAssertionValidator {
     	if (a.getAuthnStatements().size() != 1) {  
     		throw new ValidationException("The assertion must contain exactly one AuthnStatement. Was " + a.getAuthnStatements().size());
     	}
-    	
+    	// AssuranceLevel and AuthnStatement/AuthnContext/AuthnContextClassRef must be consistent
+    	int assuranceLevel = assertion.getAssuranceLevel();
+    	String authnContextClassRefValue = null;
     	AuthnStatement authnStatement = (AuthnStatement) a.getAuthnStatements().get(0);
-  	
+    	AuthnContext authnContext = authnStatement.getAuthnContext();
+    	if (authnContext != null) {
+    		AuthnContextClassRef authnContextClassRef = authnContext.getAuthnContextClassRef();
+    		if (authnContextClassRef != null) {
+    			authnContextClassRefValue = authnContextClassRef.getAuthnContextClassRef();
+    		}
+    	}
+    	if (assuranceLevel == AssuranceLevel.PASSWORD_ASSURANCE_LEVEL && 
+    		!OIOSAMLConstants.PASSWORD_AUTHN_CONTEXT_CLASS_REF.equals(authnContextClassRefValue)) {
+    		log.warn("The assuranceLevel attribute " + assuranceLevel + "  in the assertion does not correspond with the value of AuthnStatement/AuthnContext/AuthnContextClassRef: " + authnContextClassRefValue);
+    	} else if (assuranceLevel == AssuranceLevel.CERTIFICATE_ASSURANCE_LEVEL && 
+    		!OIOSAMLConstants.X509_AUTHN_CONTEXT_CLASS_REF.equals(authnContextClassRefValue)) {
+    		log.warn("The assuranceLevel attribute " + assuranceLevel + "  in the assertion does not correspond with the value of AuthnStatement/AuthnContext/AuthnContextClassRef: " + authnContextClassRefValue);
+       	}
+    	
     	// There must be a SessionIndex
     	if (assertion.getSessionIndex() == null) {  
     		throw new ValidationException("The assertion must contain a AuthnStatement@SessionIndex");
@@ -67,8 +90,10 @@ public class OIOSAMLAssertionValidator extends BasicAssertionValidator {
     	}
     	
     	// Session must not have expired
-    	if (authnStatement.getSessionNotOnOrAfter() != null && !ClockSkewValidator.isAfterNow(authnStatement.getSessionNotOnOrAfter())) {  
+    	if (authnStatement.getSessionNotOnOrAfter() != null &&
+    			!ClockSkewValidator.isAfterNow(authnStatement.getSessionNotOnOrAfter())) {  
     		throw new ValidationException("The assertion must have a AuthnStatement@SessionNotOnOrAfter and it must not have expired. SessionNotOnOrAfter: " + authnStatement.getSessionNotOnOrAfter());
     	}
 	}
+
 }

@@ -24,7 +24,6 @@
 package dk.itst.oiosaml.sp;
 
 import dk.itst.oiosaml.common.OIOSAMLConstants;
-import dk.itst.oiosaml.oiobpp.PrivilegeList;
 import dk.itst.oiosaml.security.SecurityHelper;
 import dk.itst.oiosaml.sp.model.OIOAssertion;
 import dk.itst.oiosaml.sp.util.AttributeUtil;
@@ -53,7 +52,6 @@ public class UserAssertionImpl implements UserAssertion, Serializable {
 	private boolean signed;
 	private String xml;
 	private String id;
-	private PrivilegeList privilegeList;
 
 	public UserAssertionImpl(OIOAssertion assertion) {
 		for (AttributeStatement attrStatement : assertion.getAssertion().getAttributeStatements()) {
@@ -71,8 +69,6 @@ public class UserAssertionImpl implements UserAssertion, Serializable {
 			}
 		}
 		id = assertion.getID();
-		
-		this.privilegeList = assertion.getPrivilegeList();
 		
 		if (assertion.getAssertion().getIssueInstant() != null) {
 			issueTime = assertion.getAssertion().getIssueInstant().toDate();
@@ -110,15 +106,7 @@ public class UserAssertionImpl implements UserAssertion, Serializable {
 			return Integer.valueOf(level);
 		}
 	}
-	
-	public PrivilegeList getPrivilegeList() {
-		return privilegeList;
-	}
 
-	public String getNSISLevel() {
-		return getAttributeValue(OIOSAMLConstants.ATTRIBUTE_NSIS_LEVEL_NAME);
-	}
-	
 	public UserAttribute getAttribute(String name) {
 		return attributes.get(name);
 	}

@@ -29,24 +29,33 @@ received assertion and its attributes through a programming API.</p>
 <p>Contents of the OIOSAML.java distribution;</p>
 <ul>
 <li>doc: This documentation</li>
-<li>oiosaml: Source files for the project</li>
-<li>demo: The demo project</li>
+<li>lib: Jar file dependencies for OIOSAML.java</li>
+<li>src: Source files for the project</li>
+<li>oiosaml.java-discovery-x.x.war: OIOSAML Discovery service. See <a href="discovery.html">discovery guide</a>.</li>
+<li>oiosaml.java-sp-x.jar; OIOSAML.java library. Use this together with lib/ when embedding OIOSAML.java in an existing project. See <a href="installation.html">installation guide</a>.</li>
+<li>oiosaml.java-sp-demo-x.war; Demonstration project as a web application. Deploy to a servlet container to see OIOSAML.java in action. See <a href="installation.html">installation guide</a>.</li>
 </ul>
 
 
 <h3>Requirements</h3>
 <p>There are only a few requirements for OIOSAML.java:</p>
 <ul>
-	<li>Java 8+.</li>
+	<li>Java 6+.</li>
 	<li>Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files</li>
 	<li>A web container, for example <a href="http://tomcat.apache.org">Tomcat</a> supporting at least Servlet 2.4.</li>
 	<li>A SAML 2.0 compliant IdP. Assertions must be signed, as must SLO requests and responses.</li>
 </ul>
+<p>OIOSAML.java has been tested with:
+<ul>
+<li>Java 1.6.0_45 and Tomcat 7.0.42</li>
+<li>Java 1.6.0_03 and Tomcat 6.0.16</li>
+<li>Java 1.6.0_03 and Trifork P4</li>
+</ul></p>
 
 <h3>Dependencies</h3>
 <p>OIOSAML.java is built on the following technologies:</p>
 <ul>
-<li><a href="http://opensaml.org">OpenSAML 2.6.6</a></li>
+<li><a href="http://opensaml.org">OpenSAML 2.0</a></li>
 </ul>
 
 <h3>License</h3>

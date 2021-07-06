@@ -47,6 +47,7 @@ import dk.itst.oiosaml.sp.model.OIOAssertion;
 import dk.itst.oiosaml.sp.model.OIOResponse;
 import dk.itst.oiosaml.sp.model.RelayState;
 import dk.itst.oiosaml.sp.model.validation.AssertionValidator;
+import dk.itst.oiosaml.sp.service.session.SessionCopyListener;
 import dk.itst.oiosaml.sp.service.util.ArtifactExtractor;
 import dk.itst.oiosaml.sp.service.util.Constants;
 import dk.itst.oiosaml.sp.service.util.HTTPUtils;

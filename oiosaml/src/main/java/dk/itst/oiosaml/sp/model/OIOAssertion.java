@@ -29,9 +29,6 @@ import java.util.List;
 
 import dk.itst.oiosaml.logging.Logger;
 import dk.itst.oiosaml.logging.LoggerFactory;
-import dk.itst.oiosaml.oiobpp.OIOBPPUtil;
-import dk.itst.oiosaml.oiobpp.PrivilegeList;
-
 import org.joda.time.DateTime;
 import org.opensaml.common.SAMLVersion;
 import org.opensaml.saml2.core.Assertion;
@@ -55,7 +52,6 @@ public class OIOAssertion extends OIOSamlObject {
 	private static final Logger log = LoggerFactory.getLogger(OIOAssertion.class);
 	
 	private final Assertion assertion;
-	private PrivilegeList privilegeList;
 
 	public OIOAssertion(Assertion assertion) {
 		super(assertion);
@@ -227,40 +223,6 @@ public class OIOAssertion extends OIOSamlObject {
     	return assertion;
     }
     
-	public String getNSISLevel() {
-    	for (AttributeStatement attributeStatement : assertion.getAttributeStatements()) {
-    		for (Attribute attribute : attributeStatement.getAttributes()) {
-				if (OIOSAMLConstants.ATTRIBUTE_NSIS_LEVEL_NAME.equals(attribute.getName())) {
-					return AttributeUtil.extractAttributeValueValue(attribute);
-				}
-			}
-    	}
-    	
-    	return null;
-	}
-
-	public PrivilegeList getPrivilegeList() {
-		if (this.privilegeList != null) {
-			return this.privilegeList;
-		}
-
-		String attributeValue = null;
-    	for (AttributeStatement attributeStatement : assertion.getAttributeStatements()) {
-    		for (Attribute attribute : attributeStatement.getAttributes()) {
-				if (OIOSAMLConstants.ATTRIBUTE_PRIVILEGES_INTERMEDIATE.equals(attribute.getName())) {
-					attributeValue = AttributeUtil.extractAttributeValueValue(attribute);
-					break;
-				}
-			}
-    	}
-
-    	if (attributeValue != null) {
-    		this.privilegeList = OIOBPPUtil.parse(attributeValue);
-    	}
-		
-		return this.privilegeList;
-	}
-
     public int getAssuranceLevel() {
     	for (AttributeStatement attributeStatement : assertion.getAttributeStatements()) {
     		for (Attribute attribute : attributeStatement.getAttributes()) {
@@ -313,4 +275,6 @@ public class OIOAssertion extends OIOSamlObject {
 	public String getIssuer() {
 		return assertion.getIssuer().getValue();
 	}
+	
+
 }

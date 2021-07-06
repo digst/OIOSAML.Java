@@ -13,11 +13,7 @@
 
 	<listener>
 		<listener-class>dk.itst.oiosaml.sp.service.session.SessionDestroyListener</listener-class>
-	</listener>
-
-        <listener>
-                <listener-class>dk.itst.oiosaml.sp.service.session.SessionCopyListener</listener-class>
-        </listener>
+	</listener>	 
 
 	<servlet>
 		<servlet-name>SAMLDispatcherServlet</servlet-name>

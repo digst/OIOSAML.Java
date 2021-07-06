@@ -17,16 +17,13 @@ import org.w3c.dom.Element;
 
 public class AbstractStub implements SAMLObject {
 
-	@SuppressWarnings("rawtypes")
 	public void deregisterValidator(Validator arg0) {
 	}
 
-	@SuppressWarnings("rawtypes")
 	public List<Validator> getValidators() {
 		return null;
 	}
 
-	@SuppressWarnings("rawtypes")
 	public void registerValidator(Validator arg0) {
 	}
 

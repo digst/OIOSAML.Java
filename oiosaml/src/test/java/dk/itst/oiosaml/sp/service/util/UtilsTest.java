@@ -165,7 +165,7 @@ public class UtilsTest extends AbstractServiceTests {
 
 	@Test
 	public void testVerifySignature() throws UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchProviderException {
-		OIOAuthnRequest request = OIOAuthnRequest.buildAuthnRequest("http://ssoServiceLocation", "spEntityId", SAMLConstants.SAML2_ARTIFACT_BINDING_URI, handler, "state", "http://localhost", null);
+		OIOAuthnRequest request = OIOAuthnRequest.buildAuthnRequest("http://ssoServiceLocation", "spEntityId", SAMLConstants.SAML2_ARTIFACT_BINDING_URI, handler, "state", "http://localhost");
 		String url = request.getRedirectURL(credential);
 		credential.getPublicKey().getEncoded();
 		String signature = Utils.getParameter("Signature", url);

@@ -24,7 +24,6 @@ public class DispatcherServletTest extends AbstractServiceTests {
 	private DispatcherServlet servlet;
 	private HashMap<String, String> conf;
 
-	@SuppressWarnings("serial")
 	@Before
 	public void setUp() throws Exception {
 		handler = context.mock(SAMLHandler.class);

@@ -122,12 +122,6 @@ public interface OIOSAMLConstants {
 	public static final String ATTRIBUTE_USER_CERTIFICATE_FRIENDLY_NAME = "userCertificate";
 
 	public static final String ATTRIBUTE_ASSURANCE_LEVEL_NAME = "dk:gov:saml:attribute:AssuranceLevel";
-	
-	public static final String ATTRIBUTE_NSIS_LEVEL_NAME = "https://data.gov.dk/concept/core/nsis/loa";
-	
-	public static final String ATTRIBUTE_EID_PROFESSIONAL_CVR = "https://data.gov.dk/model/core/eid/professional/cvr";
-
-	public static final String ATTRIBUTE_EID_PROFESSIONAL_ORGNAME = "https://data.gov.dk/model/core/eid/professional/orgName";
 
 	public static final String ATTRIBUTE_ASSURANCE_LEVEL_FRIENDLY_NAME = "AssuranceLevel";
 
@@ -156,20 +150,4 @@ public interface OIOSAMLConstants {
     public static final String ATTRIBUTE_CERTIFICATE_ISSUER = "urn:oid:2.5.29.29";
 	
     public static final String NAMEIDFORMAT_X509SUBJECTNAME = "urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName";
-    
-    public static final String PROFILE_PERSON = "https://data.gov.dk/eid/Person";
-    
-    public static final String PROFILE_PROFESSIONAL = "https://data.gov.dk/eid/Professional";
-    
-    public static final String NSIS_REQUEST_LEVEL_LOW = "https://data.gov.dk/concept/core/nsis/loa/Low";
-    
-    public static final String NSIS_REQUEST_LEVEL_SUBSTANTIAL = "https://data.gov.dk/concept/core/nsis/loa/Substantial";
-    
-    public static final String NSIS_REQUEST_LEVEL_HIGH = "https://data.gov.dk/concept/core/nsis/loa/High";
-    
-    public static final String NSIS_RESPONSE_LEVEL_LOW = "Low";
-    
-    public static final String NSIS_RESPONSE_LEVEL_SUBSTANTIAL = "Substantial";
-    
-    public static final String NSIS_RESPONSE_LEVEL_HIGH = "High";
 }

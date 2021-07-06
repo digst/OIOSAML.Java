@@ -61,7 +61,6 @@ public class CRLCheckerTest extends AbstractTests {
 	}
 	
 
-	@SuppressWarnings("serial")
 	@Test
 	public void testCheckCertificatesWithNoRevoked() throws Exception {
 		checker.checkCertificates(idp, TestHelper.buildConfiguration(new HashMap<String, String>() {{
@@ -76,7 +75,6 @@ public class CRLCheckerTest extends AbstractTests {
 	}
 	
 	
-	@SuppressWarnings("serial")
 	@Test
 	public void testRevoked() throws Exception {
 		X509Certificate cert = (X509Certificate) idp.getFirstMetadata().getCertificates().iterator().next();
@@ -99,7 +97,6 @@ public class CRLCheckerTest extends AbstractTests {
 
 
 //	@Test(expected=InvalidCertificateException.class)
-	@SuppressWarnings("serial")
 	@Test
 	public void testTimer() throws Exception {
 		X509Certificate cert = (X509Certificate) idp.getFirstMetadata().getCertificates().iterator().next();
@@ -129,7 +126,6 @@ public class CRLCheckerTest extends AbstractTests {
 		assertEquals(0, idp.getFirstMetadata().getValidCertificates().size());
 	}
 	
-	@SuppressWarnings("serial")
 	@Test
 	public void invalid_signature_on_crl_should_fail() throws Exception {
 		final File crlFile = generateCRL(null);
@@ -165,7 +161,6 @@ public class CRLCheckerTest extends AbstractTests {
 		assertEquals(0, idp.getFirstMetadata().getValidCertificates().size());
 	}
 	
-	@SuppressWarnings("serial")
 	@Test
 	public void crl_should_be_signed_if_truststore_specified() throws Exception {
 		final File crlFile = generateCRL(null);

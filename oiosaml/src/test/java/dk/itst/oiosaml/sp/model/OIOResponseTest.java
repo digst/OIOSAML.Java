@@ -33,7 +33,6 @@ import dk.itst.oiosaml.sp.model.validation.ValidationException;
 import dk.itst.oiosaml.sp.service.TestHelper;
 import dk.itst.oiosaml.sp.service.session.SingleVMSessionHandler;
 
-@SuppressWarnings("deprecation")
 public class OIOResponseTest extends AbstractTests {
 
 	private Response srt;

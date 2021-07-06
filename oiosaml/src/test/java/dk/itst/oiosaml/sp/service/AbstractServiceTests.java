@@ -44,7 +44,6 @@ public abstract class AbstractServiceTests extends AbstractTests {
 	protected SessionHandlerFactory handlerFactory;
 	protected BindingHandlerFactory bindingHandlerFactory;
 
-	@SuppressWarnings("serial")
 	@Before
 	public void setUpTests() throws Exception {
 		bindingHandlerFactory = context.mock(BindingHandlerFactory.class);

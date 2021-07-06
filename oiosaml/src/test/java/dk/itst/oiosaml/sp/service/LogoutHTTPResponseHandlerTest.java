@@ -26,7 +26,6 @@ public class LogoutHTTPResponseHandlerTest extends AbstractServiceTests {
 	private Configuration configuration;
 	private RequestContext ctx;
 
-	@SuppressWarnings("serial")
 	@Before
 	public void setUp() throws NoSuchAlgorithmException, NoSuchProviderException {
 		lh = new LogoutHTTPResponseHandler();

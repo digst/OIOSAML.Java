@@ -25,10 +25,8 @@ package dk.itst.oiosaml.sp.service;
 
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -36,17 +34,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import dk.itst.oiosaml.logging.Logger;
+import dk.itst.oiosaml.logging.LoggerFactory;
 import org.apache.commons.configuration.Configuration;
 import org.apache.velocity.VelocityContext;
 import org.opensaml.saml2.metadata.Endpoint;
 import org.opensaml.xml.util.Base64;
 
-import dk.itst.oiosaml.common.OIOSAMLConstants;
 import dk.itst.oiosaml.common.SAMLUtil;
 import dk.itst.oiosaml.configuration.SAMLConfigurationFactory;
 import dk.itst.oiosaml.logging.Audit;
-import dk.itst.oiosaml.logging.Logger;
-import dk.itst.oiosaml.logging.LoggerFactory;
 import dk.itst.oiosaml.logging.Operation;
 import dk.itst.oiosaml.sp.UserAssertion;
 import dk.itst.oiosaml.sp.UserAssertionHolder;
@@ -54,6 +51,7 @@ import dk.itst.oiosaml.sp.bindings.BindingHandler;
 import dk.itst.oiosaml.sp.metadata.IdpMetadata;
 import dk.itst.oiosaml.sp.metadata.IdpMetadata.Metadata;
 import dk.itst.oiosaml.sp.model.OIOAuthnRequest;
+import dk.itst.oiosaml.sp.service.session.SessionCopyListener;
 import dk.itst.oiosaml.sp.service.util.Constants;
 import dk.itst.oiosaml.sp.service.util.HTTPUtils;
 
@@ -134,8 +132,7 @@ public class LoginHandler implements SAMLHandler {
 		UserAssertionHolder.set(null);
 
 		String relayState = context.getRequest().getParameter(Constants.SAML_RELAYSTATE);
-		
-		OIOAuthnRequest authnRequest = OIOAuthnRequest.buildAuthnRequest(signonLocation.getLocation(), context.getSpMetadata().getEntityID(), context.getSpMetadata().getDefaultAssertionConsumerService().getBinding(), context.getSessionHandler(), relayState, context.getSpMetadata().getDefaultAssertionConsumerService().getLocation(), getContextClassRefs(context));
+		OIOAuthnRequest authnRequest = OIOAuthnRequest.buildAuthnRequest(signonLocation.getLocation(), context.getSpMetadata().getEntityID(), context.getSpMetadata().getDefaultAssertionConsumerService().getBinding(), context.getSessionHandler(), relayState, context.getSpMetadata().getDefaultAssertionConsumerService().getLocation());
 		authnRequest.setNameIDPolicy(conf.getString(Constants.PROP_NAMEID_POLICY, null), conf.getBoolean(Constants.PROP_NAMEID_POLICY_ALLOW_CREATE, false));
 		authnRequest.setForceAuthn(isForceAuthnEnabled(request, conf));
 
@@ -150,44 +147,6 @@ public class LoginHandler implements SAMLHandler {
 		SAMLConfigurationFactory.getConfiguration().getSameSiteSessionSynchronizer().linkSession(authnRequest.getID(), session.getId());
 		
 		bindingHandler.handle(request, response, context.getCredential(), authnRequest);
-	}
-
-	private List<String> getContextClassRefs(RequestContext context) {
-		List<String> refs = new ArrayList<String>();
-		Configuration conf = context.getConfiguration();
-		
-		if ("true".equals(conf.getString(Constants.PROP_AUTHNCONTEXTCLASSREF_REQUEST, "false"))) {
-			String profile = conf.getString(Constants.PROP_REQUESTED_PROFILE, null);
-			if (profile != null) {
-				if (OIOSAMLConstants.PROFILE_PERSON.equals(profile)) {
-					refs.add(OIOSAMLConstants.PROFILE_PERSON);
-				}
-				else if (OIOSAMLConstants.PROFILE_PROFESSIONAL.equals(profile)) {
-					refs.add(OIOSAMLConstants.PROFILE_PROFESSIONAL);
-				}
-				else {
-					log.error("Invalid " + Constants.PROP_REQUESTED_PROFILE + " value '" + profile + "'. Only supported values are: Person, Professional");
-				}
-			}
-			
-			String nsisLevel = conf.getString(Constants.PROP_NSIS_LEVEL, null);
-			if (nsisLevel != null) {
-				if (OIOSAMLConstants.NSIS_REQUEST_LEVEL_LOW.equals(nsisLevel)) {
-					refs.add(OIOSAMLConstants.NSIS_REQUEST_LEVEL_LOW);
-				}
-				else if (OIOSAMLConstants.NSIS_REQUEST_LEVEL_SUBSTANTIAL.equals(nsisLevel)) {
-					refs.add(OIOSAMLConstants.NSIS_REQUEST_LEVEL_SUBSTANTIAL);
-				}
-				else if (OIOSAMLConstants.NSIS_REQUEST_LEVEL_HIGH.equals(nsisLevel)) {
-					refs.add(OIOSAMLConstants.NSIS_REQUEST_LEVEL_HIGH);
-				}
-				else {
-					log.error("Invalid " + Constants.PROP_NSIS_LEVEL + " value '" + nsisLevel + "'. Only supported values are: " + OIOSAMLConstants.NSIS_REQUEST_LEVEL_LOW + "," + OIOSAMLConstants.NSIS_REQUEST_LEVEL_SUBSTANTIAL + "," + OIOSAMLConstants.NSIS_REQUEST_LEVEL_HIGH);
-				}
-			}
-		}
-
-		return refs;
 	}
 
 	public void handlePost(RequestContext context) throws ServletException, IOException {

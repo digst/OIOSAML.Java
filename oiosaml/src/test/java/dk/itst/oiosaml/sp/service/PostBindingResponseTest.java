@@ -29,7 +29,6 @@ public class PostBindingResponseTest extends AbstractServiceTests {
 	private Response response;
 	private RequestContext ctx;
 
-	@SuppressWarnings("serial")
 	@Before
 	public void setUp() throws Exception {
 		

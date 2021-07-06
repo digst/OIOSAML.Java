@@ -403,7 +403,6 @@ public class UserAssertionImplTest {
 		return SAMLUtil.buildXMLObject(Assertion.class);
 	}
 	
-	@SuppressWarnings("deprecation")
 	private Attribute createAttribute(String name, String value) {
 		Attribute attr = SAMLUtil.buildXMLObject(Attribute.class);
 		attr.setName(name);

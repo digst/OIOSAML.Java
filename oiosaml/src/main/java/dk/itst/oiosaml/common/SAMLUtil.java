@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.security.InvalidParameterException;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -49,11 +48,9 @@ import org.opensaml.saml2.core.Audience;
 import org.opensaml.saml2.core.AudienceRestriction;
 import org.opensaml.saml2.core.AuthnContext;
 import org.opensaml.saml2.core.AuthnContextClassRef;
-import org.opensaml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.opensaml.saml2.core.Conditions;
 import org.opensaml.saml2.core.Issuer;
 import org.opensaml.saml2.core.NameID;
-import org.opensaml.saml2.core.RequestedAuthnContext;
 import org.opensaml.saml2.core.SessionIndex;
 import org.opensaml.saml2.core.Status;
 import org.opensaml.saml2.core.StatusCode;
@@ -621,20 +618,6 @@ public class SAMLUtil {
 			ids[i] = new String(Base64.decode(ids[i]));
 		}
 		return ids;
-	}
-
-	public static RequestedAuthnContext createRequestedAuthnContext(List<String> references) {
-		RequestedAuthnContext c = buildXMLObject(RequestedAuthnContext.class);
-		c.setComparison(AuthnContextComparisonTypeEnumeration.MINIMUM);
-
-		for (String reference : references) {
-			AuthnContextClassRef authnContextClassRef = buildXMLObject(AuthnContextClassRef.class);
-			authnContextClassRef.setAuthnContextClassRef(reference);
-
-			c.getAuthnContextClassRefs().add(authnContextClassRef);
-		}
-		
-		return c;
 	}
 
 	public static Company createCompany(String orgName) {

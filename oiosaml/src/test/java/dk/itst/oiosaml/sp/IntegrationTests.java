@@ -88,7 +88,6 @@ import dk.itst.oiosaml.sp.service.util.Constants;
 import dk.itst.oiosaml.sp.service.util.Utils;
 import dk.itst.oiosaml.sp.util.AttributeUtil;
 
-@SuppressWarnings("deprecation")
 public abstract class IntegrationTests {
 	protected static final String BASE = "http://127.0.0.1:8808/saml";
 	protected RedirectRefreshHandler handler;

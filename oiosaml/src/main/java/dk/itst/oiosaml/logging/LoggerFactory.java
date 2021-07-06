@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.ServiceLoader;
 
 public class LoggerFactory {
+    private static final Logger log = LoggerFactory.getLogger(LoggerFactory.class);
 
     public static Logger getLogger(String name){
         Logger logger = null;

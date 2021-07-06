@@ -131,9 +131,6 @@ Defaults to artifact,post,redirect,soap.</li>
 <li>oiosaml-sp.signature.algorithm: Set signature algorithm. Defaults to 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256', but can be configured to 'http://www.w3.org/2000/09/xmldsig#rsa-sha1' as well.</li>
 <li>oiosaml-sp.selfsignedcertificates: Enable or disable support for self-signed certificates. Defaults to false.</li>
 <li>oiosaml-cp.crl.disable-in-oces-test: Disable revocation check on certificates from the OCES test environment (the revocation services are behind a firewall). Defaults to true.</li>
-<li>oiosaml-sp.enable.authncontextclassref.request: Enable requesting a specific profile or assurance level in the AuthnRequest. This is disabled by default, and can be enabled by setting this property to true. Note that certain IdPs (e.g. AD FS) will break if this feature is enabled.</li>
-<li>oiosaml-sp.requested.profile: To enable validation of the eid profiles (Person or Professional), set this value to either https://data.gov.dk/eid/Person or https://data.gov.dk/eid/Professional. If this value is set, and the oiosaml-sp.enable.authncontetclassref.request setting is set to true, then the AuthnRequest will also contain the requested profile. The default value is blank, that is no requested profile.</li>
-<li>oiosaml-sp.nsislevel: If this value is set, login is only allowed if the issued assertion contains at least the configured NSIS assurancelevel. This setting can be used together with oiosaml-sp.assurancelevel, in which case just one of the requirements must be met for the user to successfully login. The legal values are https://data.gov.dk/concept/core/nsis/loa/Low, https://data.gov.dk/concept/core/nsis/loa/Substantial, https://data.gov.dk/concept/core/nsis/loa/High. The default value is blank</li>
 </ul>
 
 <h3>Service Provider Metadata</h3>
