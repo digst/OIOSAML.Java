@@ -164,6 +164,7 @@ public class TestHelper {
 		
 		assertion.setConditions(SAMLUtil.createAudienceCondition(audience));
 		assertion.getConditions().setNotOnOrAfter(new DateTime().plus(10000));
+		assertion.getConditions().setNotBefore(new DateTime().minusDays(1));
 
 		AuthnContext context = SAMLUtil.createAuthnContext("urn:oasis:names:tc:SAML:2.0:ac:classes:Password");
 		AuthnStatement authnStatement = SAMLUtil.buildXMLObject(AuthnStatement.class);
