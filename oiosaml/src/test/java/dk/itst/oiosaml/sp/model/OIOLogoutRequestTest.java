@@ -9,7 +9,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.net.URLDecoder;
-import java.security.SignatureException;
 
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -72,8 +71,8 @@ public class OIOLogoutRequestTest extends AbstractServiceTests {
 		try {
 			lh.validateRequest("sig", url.substring(url.indexOf('?') + 1), credential.getPublicKey(), "dest", "issuer");
 			fail();
-		} catch (SignatureException e) {
-			assertNotNull(e);
+		} catch (LogoutRequestValidationException e) {
+			assertEquals(e.getMessage(), 3, e.getErrors().size());
 		}
 		
 		try {
