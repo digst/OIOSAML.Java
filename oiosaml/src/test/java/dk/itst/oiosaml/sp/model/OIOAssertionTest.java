@@ -369,19 +369,19 @@ public class OIOAssertionTest extends AbstractTests {
 	@Test
 	public void testCheckConditionTime() {
 		assertion.getAssertion().getConditions().setNotOnOrAfter(new DateTime().plus(10000));
-		assertNotNull(assertion.getConditionTime());
+		assertNotNull(assertion.getConditionTimeNotOnOrAfter());
 	}
 
 	@Test
 	public void checkConditionTimeFailOnNoTime() {
 		assertion.getAssertion().getConditions().setNotOnOrAfter(null);
-		assertNull(assertion.getConditionTime());
+		assertNull(assertion.getConditionTimeNotOnOrAfter());
 	}
 
 	@Test
 	public void checkConditionTimeFailOnNoConditions() {
 		assertion.getAssertion().setConditions(null);
-		assertNull(assertion.getConditionTime());
+		assertNull(assertion.getConditionTimeNotOnOrAfter());
 	}
 
 	@Test
