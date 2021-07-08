@@ -33,7 +33,7 @@
          </ds:KeyInfo>
       </md:KeyDescriptor>
       <md:ArtifactResolutionService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact" Location="https://sp:8443/oiosaml2-demo.java/saml/SAMLAssertionConsumer" index="0" isDefault="true"/>
-      <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://sp:8443/oiosaml2-demo.java/saml/LogoutServiceHTTPRedirect" ResponseLocation="https://localhost:8443/oiosaml2-demo.java/saml/LogoutServiceHTTPRedirectResponse"/>
+      <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://sp:8443/oiosaml2-demo.java/saml/LogoutServiceHTTPRedirect" ResponseLocation="https://sp:8443/oiosaml2-demo.java/saml/LogoutServiceHTTPRedirectResponse"/>
       <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://sp:8443/oiosaml2-demo.java/saml/LogoutServiceSOAP"/>
       <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://sp:8443/oiosaml2-demo.java/saml/LogoutServiceHTTPPost" ResponseLocation="https://localhost:8443/oiosaml2-demo.java/saml/LogoutServiceHTTPRedirectResponse"/>
       <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName</md:NameIDFormat>
