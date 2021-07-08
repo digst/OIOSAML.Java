@@ -30,10 +30,12 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import dk.itst.oiosaml.common.SAMLUtil;
+import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -46,9 +48,20 @@ public class SAMLConfigurationTest {
 	}
 
 	@Test(expected = IllegalStateException.class)
-	public void failOnMissingSystemProperty() {
-		SAMLConfigurationFactory.reset();
-		SAMLConfigurationFactory.getConfiguration().getSystemConfiguration();
+	public void failOnMissingSystemProperty() throws IOException {
+		File homeDir = new File(File.createTempFile("test", "test").getAbsolutePath() + ".home");
+		try {
+			homeDir.mkdir();
+
+			SAMLConfigurationFactory.reset();
+			Map<String,String> params=new HashMap<String, String>();
+			params.put(Constants.INIT_OIOSAML_HOME, homeDir.getAbsolutePath());
+			SAMLConfigurationFactory.getConfiguration().setInitConfiguration(params);
+
+			SAMLConfigurationFactory.getConfiguration().getSystemConfiguration();
+		} finally {
+			FileUtils.forceDelete(homeDir);
+		}
 	}
 
 	@Test
