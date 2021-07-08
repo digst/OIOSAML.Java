@@ -4,7 +4,7 @@
 	<artifactId>oiosaml2.java</artifactId>
 	<name>OIOSAML for Java v2</name>
 	<packaging>jar</packaging>
-	<version>2.1.1</version>
+	<version>2.1.2</version>
 	<description>SAML Servlet Filter, configured to work with the danish SAML profile OIOSAML 2.0.9</description>
 	<url>https://digitaliser.dk/group/42063/resources</url>
 
