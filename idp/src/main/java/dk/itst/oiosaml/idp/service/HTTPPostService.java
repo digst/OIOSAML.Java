@@ -3,7 +3,9 @@ package dk.itst.oiosaml.idp.service;
 import java.io.ByteArrayInputStream;
 import java.security.cert.CertificateFactory;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.xml.crypto.dsig.CanonicalizationMethod;
 
@@ -230,7 +232,10 @@ public class HTTPPostService {
         if (session.isCorrectNameID()) {
             NameID nameID = samlBuilder.buildSAMLObject(NameID.class);
             nameID.setFormat(NameIDType.PERSISTENT);
-            nameID.setValue(session.getUsername());
+            nameID.setValue("https://data.gov.dk/model/core/eid/"
+                    + Objects.requireNonNullElse(session.getAttributeProfile(),"NONE").toString().toLowerCase()
+                    + "/uuid/"
+                    + UUID.nameUUIDFromBytes(session.getUsername().getBytes()));
             subject.setNameID(nameID);
         }
 
