@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<jar name="discovery.war">
+
+    <dir path="" from="webapp"/>    
+    <dir path="WEB-INF/classes" from="bin"/>
+    <dir path="WEB-INF/lib" from="lib"/>
+
+</jar>

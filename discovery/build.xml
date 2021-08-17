@@ -1,0 +1,158 @@
+<?xml version="1.0"?>
+<project name="OIOSAML.java-discovery" default="compile" basedir=".">
+
+	<property name="system" value="oiosaml.java-discovery" />
+	<property name="version" value="1.2" />
+
+
+	<property name="target.dir" value="target" />
+	<property name="dist.dir" value="target/dist" />
+	<property name="build.dir" value="target/build" />
+	<property name="test.build.dir" value="target/test" />
+	<property name="src.dir" value="src" />
+	<property name="test.src.dir" value="test" />
+	<property name="test.reports" value="target/reports" />
+	<property name="lib.dir" value="lib" />
+	<property name="docs.dir" value="target/docs" />
+	<property name="web.dir" value="webapp" />
+	<property name="web-inf.dir" value="${web.dir}/WEB-INF" />
+	<property name="warname" value="${system}-${version}.war"/>
+
+
+	
+
+	<path id="classpath">
+		<fileset dir="lib/">
+			<include name="**/*.jar" />
+		</fileset>
+		<pathelement location="${build.dir}" />
+	</path>
+
+	<target name="init">
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${docs.dir}" />
+		<mkdir dir="${dist.dir}" />
+		<mkdir dir="${test.build.dir}" />
+		<mkdir dir="${test.reports}" />
+		<mkdir dir="${test.reports}/html" />
+	</target>
+
+	<target name="clean">
+		<delete dir="${target.dir}" />
+	</target>
+
+	<target name="compile" depends="init">
+		<javac srcdir="${src.dir}" includes="**/*.java" destdir="${build.dir}" encoding="ISO-8859-1" debug="true" source="1.5" target="1.5" classpathref="classpath">
+		</javac>
+		<copy todir="${build.dir}">
+			<fileset dir="${src.dir}" excludes="**/*.java" />
+		</copy>
+	</target>
+
+	<target name="war" depends="compile">
+		<war destfile="${dist.dir}/${warname}" webxml="${web-inf.dir}/web.xml">
+			<classes dir="${build.dir}" />
+			<fileset dir="${web.dir}" />
+			<lib dir="${lib.dir}">
+				<exclude name="servletapi-2.4.jar" />
+				<include name="*.jar" />
+			</lib>
+			<metainf dir="." includes="LICENSE.txt" />
+		</war>
+	</target>
+	
+	<target name="init-test">
+		<tstamp />
+		<mkdir dir="target/test"/>
+	</target>
+	
+    <target name="test" depends="init-test,compile-test,instrument">
+		<junit forkmode="once" fork="true" failureproperty="test.failed">
+			<classpath path="target/instrumented"/>
+			<classpath refid="classpath" />
+			<classpath path="${test.build.dir}" />
+			<formatter type="plain"/>
+			<formatter type="xml"/>
+			<sysproperty key="net.sourceforge.cobertura.datafile" file="target/cobertura.ser" />
+			<batchtest fork="yes" todir="${test.reports}">
+				<fileset dir="test">
+					<include name="**/*Test.java"/>
+				</fileset>
+			</batchtest>
+		</junit>
+			<junitreport todir="${test.reports}/html">
+			<fileset dir="${test.reports}">
+				<include name="TEST-*.xml"/>
+			</fileset>
+			<report format="frames" todir="${test.reports}/html" />
+		</junitreport>
+		<fail if="test.failed" message="There were test failures" />
+    	<antcall target="coverage-report" />
+    </target>
+
+	
+	<target name="compile-test" depends="init-test, compile">
+		<javac srcdir="${test.src.dir}" includes="**/*.java" destdir="${test.build.dir}" encoding="ISO-8859-1" debug="true" source="1.5" target="1.5" classpathref="classpath">
+		</javac>
+		<copy todir="${test.build.dir}">
+			<fileset dir="${test.src.dir}" excludes="**/*.java" />
+		</copy>	
+	</target>
+	
+	<target name="instrument" depends="compile-test" unless="instrument.skip">
+		<taskdef classpathref="classpath" resource="tasks.properties" />
+		
+		<delete file="target/cobertura.ser" />
+		<delete dir="target/instrumented"/>
+
+		<cobertura-instrument todir="target/instrumented" datafile="target/cobertura.ser">
+		    <ignore regex="org.apache.log4j.*" />
+		    <fileset dir="${build.dir}">
+		        <include name="**/*.class" />
+		        <exclude name="**/*Test.class" />
+		    </fileset>
+		</cobertura-instrument>	
+	</target>
+	
+	
+	<target name="coverage-report" unless="instrument.skip">
+		<taskdef classpathref="classpath" resource="tasks.properties" />
+		<cobertura-report format="html" destdir="target/coverage" datafile="target/cobertura.ser">
+		    <fileset dir="src">
+		        <include name="**/*.java" />
+		        <exclude name="**/*Stub.java" />
+		    </fileset>
+		</cobertura-report>
+		<cobertura-report format="xml" destdir="target/coverage" datafile="target/cobertura.ser">
+		    <fileset dir="src">
+		        <include name="**/*.java" />
+		        <exclude name="**/*Stub.java" />
+		    </fileset>
+		</cobertura-report>
+	</target>
+
+	<target name="build-everything" depends="clean, init, compile, javadoc, test, war" />
+	
+	<target name="javadoc" depends="compile">
+		<javadoc packagenames="dk.*" sourcepath="${src.dir}" defaultexcludes="yes" destdir="${docs.dir}" author="true" version="true" use="true" windowtitle="OIOSAML-J" classpathref="classpath" charset="UTF-8">
+			<doctitle>
+				<![CDATA[<h1>OIOSAML Discovery</h1>]]></doctitle>
+			<bottom>
+			<![CDATA[<i><p><small>
+				The contents of this file are subject to the Mozilla Public 
+				License Version 1.1 (the "License"); you may not use this 
+				file except in compliance with the License. You may obtain 
+				a copy of the License at http://www.mozilla.org/MPL/<br />
+				Software distributed under the License is distributed on an 
+				"AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express 
+				or implied. See the License for the specific language governing
+				rights and limitations under the License.<br />
+				The Original Code is OIOSAML.java Service Provider.<br />
+				The Initial Developer of the Original Code is <a href="http://trifork.com">Trifork A/S</a>. Portions 
+				created by <a href="http://trifork.com">Trifork A/S</a> are Copyright (C) 2008 <a href="http://itst.dk">Danish National IT 
+				and Telecom Agency (http://www.itst.dk)</a>. All Rights Reserved.
+				</small></p></i>]]></bottom>
+			<tag name="todo" scope="all" description="To do:" />
+		</javadoc>
+	</target>
+</project>
