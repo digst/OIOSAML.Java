@@ -25,9 +25,9 @@
 	</developers>
 
 	<scm>
-		<connection>scm:svn:https://svn.softwareborsen.dk/oiosaml.java/sp/trunk/</connection>
-		<developerConnection>scm:svn:https://svn.softwareborsen.dk/oiosaml.java/sp/trunk/</developerConnection>
-		<url>https://svn.softwareborsen.dk/oiosaml.java/sp/trunk/</url>
+		<connection>scm:git:https://github.com/digst/OIOSAML.Java.git</connection>
+		<developerConnection>scm:git:https://github.com/digst/OIOSAML.Java.git</developerConnection>
+		<url>https://github.com/digst/OIOSAML.Java</url>
 	</scm>
 
 	<properties>
