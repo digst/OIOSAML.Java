@@ -25,7 +25,7 @@
 	</developers>
 
 	<scm>
-		<connection>scm:git:https://github.com/digst/OIOSAML.Java.git</connection>
+		<connection>scm:git:https://github.comgit /digst/OIOSAML.Java.git</connection>
 		<developerConnection>scm:git:https://github.com/digst/OIOSAML.Java.git</developerConnection>
 		<url>https://github.com/digst/OIOSAML.Java</url>
 	</scm>
