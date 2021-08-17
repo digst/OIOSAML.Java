@@ -87,7 +87,7 @@ public class OIOLogoutRequestTest extends AbstractServiceTests {
 			assertEquals(1, e.getErrors().size());
 		}
 
-		lr.setNotOnOrAfter(new DateTime().minusHours(1));
+		lr.setNotOnOrAfter(new DateTime().minusMinutes(5));
 		try {
 			String parm = Utils.getParameter("Signature", url);
 			assert parm != null;
