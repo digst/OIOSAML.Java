@@ -101,7 +101,7 @@ public class LoggedInHandlerTest extends AbstractServiceTests{
 		handler.registerRequest("1", "id");
 		SessionCleaner.startCleaner(handler, 1, 1);
 		
-		Thread.sleep(2000);
+		Thread.sleep(2100);
 		handler.removeEntityIdForRequest("1");
 	}
 	

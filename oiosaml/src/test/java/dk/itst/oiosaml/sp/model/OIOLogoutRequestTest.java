@@ -1,15 +1,12 @@
 package dk.itst.oiosaml.sp.model;
 
-import static dk.itst.oiosaml.sp.service.TestHelper.parseBase64Encoded;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.net.URLDecoder;
-
+import dk.itst.oiosaml.common.SAMLUtil;
+import dk.itst.oiosaml.configuration.SAMLConfigurationFactory;
+import dk.itst.oiosaml.sp.service.AbstractServiceTests;
+import dk.itst.oiosaml.sp.service.TestHelper;
+import dk.itst.oiosaml.sp.service.util.Constants;
+import dk.itst.oiosaml.sp.service.util.Utils;
+import dk.itst.oiosaml.sp.util.LogoutRequestValidationException;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,12 +16,10 @@ import org.opensaml.saml2.core.SessionIndex;
 import org.opensaml.xml.security.credential.Credential;
 import org.w3c.dom.Document;
 
-import dk.itst.oiosaml.common.SAMLUtil;
-import dk.itst.oiosaml.sp.service.AbstractServiceTests;
-import dk.itst.oiosaml.sp.service.TestHelper;
-import dk.itst.oiosaml.sp.service.util.Constants;
-import dk.itst.oiosaml.sp.service.util.Utils;
-import dk.itst.oiosaml.sp.util.LogoutRequestValidationException;
+import java.net.URLDecoder;
+
+import static dk.itst.oiosaml.sp.service.TestHelper.parseBase64Encoded;
+import static org.junit.Assert.*;
 
 public class OIOLogoutRequestTest extends AbstractServiceTests {
 	
@@ -58,6 +53,7 @@ public class OIOLogoutRequestTest extends AbstractServiceTests {
 
 	@Test
 	public void testValidateLogoutRequest() throws Exception {
+		SAMLConfigurationFactory.getConfiguration();
 		String location = "http://logoutServiceLocation";
 		String issuer = "entityId";
 		String url = OIOLogoutRequest.buildLogoutRequest(session, location, issuer, handler).getRedirectRequestURL(credential);
@@ -65,7 +61,7 @@ public class OIOLogoutRequestTest extends AbstractServiceTests {
 		Document doc = parseBase64Encoded(Utils.getParameter("SAMLRequest", url));
 		LogoutRequest lr = (LogoutRequest) Configuration.getUnmarshallerFactory().getUnmarshaller(doc.getDocumentElement()).unmarshall(doc.getDocumentElement());
 		lh = new OIOLogoutRequest(lr);
-		
+
 		try {
 			lh.validateRequest("sig", url.substring(url.indexOf('?') + 1), credential.getPublicKey(), "dest", "issuer");
 			fail();
@@ -74,29 +70,37 @@ public class OIOLogoutRequestTest extends AbstractServiceTests {
 		}
 		
 		try {
-			lh.validateRequest(URLDecoder.decode(Utils.getParameter("Signature", url), "UTF-8"), url.substring(url.indexOf('?') + 1), credential.getPublicKey(), "dest", "issuer");
+			String parm = Utils.getParameter("Signature", url);
+			assert parm != null;
+			lh.validateRequest(URLDecoder.decode(parm, "UTF-8"), url.substring(url.indexOf('?') + 1), credential.getPublicKey(), "dest", "issuer");
 			fail();
 		} catch (LogoutRequestValidationException e) {
 			assertEquals(2, e.getErrors().size());
 		}
 		
 		try {
-			lh.validateRequest(URLDecoder.decode(Utils.getParameter("Signature", url), "UTF-8"), url.substring(url.indexOf('?') + 1), credential.getPublicKey(),location, "issuer");
+			String parm = Utils.getParameter("Signature", url);
+			assert parm != null;
+			lh.validateRequest(URLDecoder.decode(parm, "UTF-8"), url.substring(url.indexOf('?') + 1), credential.getPublicKey(),location, "issuer");
 			fail();
 		} catch (LogoutRequestValidationException e) {
 			assertEquals(1, e.getErrors().size());
 		}
-		
-		lr.setNotOnOrAfter(new DateTime().minusMinutes(1));
+
+		lr.setNotOnOrAfter(new DateTime().minusMinutes(5));
 		try {
-			lh.validateRequest(URLDecoder.decode(Utils.getParameter("Signature", url), "UTF-8"), url.substring(url.indexOf('?') + 1), credential.getPublicKey(),location, lr.getIssuer().getValue());
+			String parm = Utils.getParameter("Signature", url);
+			assert parm != null;
+			lh.validateRequest(URLDecoder.decode(parm, "UTF-8"), url.substring(url.indexOf('?') + 1), credential.getPublicKey(),location, lr.getIssuer().getValue());
 			fail("message is expired");
 		} catch (LogoutRequestValidationException e) {
 			assertEquals(1, e.getErrors().size());
 		}
 
 		lr.setNotOnOrAfter(new DateTime().plusHours(1));
-		lh.validateRequest(URLDecoder.decode(Utils.getParameter("Signature", url), "UTF-8"), url.substring(url.indexOf('?') + 1), credential.getPublicKey(),location, issuer);
+		String parm = Utils.getParameter("Signature", url);
+		assert parm != null;
+		lh.validateRequest(URLDecoder.decode(parm, "UTF-8"), url.substring(url.indexOf('?') + 1), credential.getPublicKey(),location, issuer);
 	}
 
 	@Test

@@ -4,7 +4,7 @@
 	<artifactId>oiosaml2.java</artifactId>
 	<name>OIOSAML for Java v2</name>
 	<packaging>jar</packaging>
-	<version>2.0.9</version>
+	<version>2.1.2</version>
 	<description>SAML Servlet Filter, configured to work with the danish SAML profile OIOSAML 2.0.9</description>
 	<url>https://digitaliser.dk/group/42063/resources</url>
 
@@ -25,9 +25,9 @@
 	</developers>
 
 	<scm>
-		<connection>scm:svn:https://svn.softwareborsen.dk/oiosaml.java/sp/trunk/</connection>
-		<developerConnection>scm:svn:https://svn.softwareborsen.dk/oiosaml.java/sp/trunk/</developerConnection>
-		<url>https://svn.softwareborsen.dk/oiosaml.java/sp/trunk/</url>
+		<connection>scm:git:https://github.comgit /digst/OIOSAML.Java.git</connection>
+		<developerConnection>scm:git:https://github.com/digst/OIOSAML.Java.git</developerConnection>
+		<url>https://github.com/digst/OIOSAML.Java</url>
 	</scm>
 
 	<properties>
@@ -44,33 +44,33 @@
 				<javadoc.opts>-Xdoclint:none</javadoc.opts>
 			</properties>
 		</profile>
-                <profile>
-                        <id>sign</id>
-                        <build>
-                                <plugins>
-                                        <plugin>
-                                                <groupId>org.apache.maven.plugins</groupId>
-                                                <artifactId>maven-gpg-plugin</artifactId>
-                                                <version>1.5</version>
-                                                <executions>
-                                                        <execution>
-                                                                <id>sign-artifacts</id>
-                                                                <phase>verify</phase>
-                                                                <goals>
-                                                                        <goal>sign</goal>
-                                                                </goals>
-                                                        </execution>
-                                                </executions>
-                                        </plugin>
-                                </plugins>
-                        </build>
+		<profile>
+			<id>sign</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.5</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 
-                </profile>
+		</profile>
 	</profiles>
 
 	<build>
 		<plugins>
- 			<plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.18.1</version>
@@ -79,15 +79,15 @@
 				</configuration>
 			</plugin>
 
-                        <plugin>
-                                <groupId>org.apache.maven.plugins</groupId>
-                                <artifactId>maven-compiler-plugin</artifactId>
-                                <version>3.3</version>
-                                <configuration>
-                                        <source>1.6</source>
-                                        <target>1.6</target>
-                                </configuration>
-                        </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.3</version>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -97,7 +97,7 @@
 					<downloadSources>true</downloadSources>
 					<downloadJavadocs>true</downloadJavadocs>
 				</configuration>
-                        </plugin>
+			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -133,16 +133,40 @@
 	</build>
 
 	<dependencies>
-                <dependency>
-                        <groupId>log4j</groupId>
-                        <artifactId>log4j</artifactId>
-                        <version>1.2.17</version>
-                </dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.opensaml</groupId>
 			<artifactId>opensaml</artifactId>
 			<version>2.6.6</version>
+			<exclusions>
+				<!-- CVE-2015-7501 -->
+				<exclusion>
+					<groupId>commons-collections</groupId>
+					<artifactId>commons-collections</artifactId>
+				</exclusion>
+				<!-- CVE-2013-5960  -->
+				<exclusion>
+					<groupId>org.owasp.esapi</groupId>
+					<artifactId>esapi</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+			<version>3.2.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.owasp.esapi</groupId>
+			<artifactId>esapi</artifactId>
+			<version>2.1.0.1</version>
 		</dependency>
 
 		<dependency>
@@ -158,29 +182,29 @@
 		</dependency>
 
 		<!-- The next four dependencies are required as we upgraded from opensaml 2.6.1, and it no longer pulls in these dependencies -->
-                <dependency>
-                        <groupId>xerces</groupId>
-                        <artifactId>xercesImpl</artifactId>
-                        <version>2.10.0</version>
-                </dependency>
+		<dependency>
+			<groupId>xerces</groupId>
+			<artifactId>xercesImpl</artifactId>
+			<version>2.10.0</version>
+		</dependency>
 
-                <dependency>
-                        <groupId>xalan</groupId>
-                        <artifactId>serializer</artifactId>
-                        <version>2.7.1</version>
-                </dependency>
+		<dependency>
+			<groupId>xalan</groupId>
+			<artifactId>serializer</artifactId>
+			<version>2.7.1</version>
+		</dependency>
 
-                <dependency>
-                        <groupId>xml-resolver</groupId>
-                        <artifactId>xml-resolver</artifactId>
-                        <version>1.2</version>
-                </dependency>
+		<dependency>
+			<groupId>xml-resolver</groupId>
+			<artifactId>xml-resolver</artifactId>
+			<version>1.2</version>
+		</dependency>
 
-                <dependency>
-                        <groupId>xalan</groupId>
-                        <artifactId>xalan</artifactId>
-                        <version>2.7.1</version>
-                </dependency>
+		<dependency>
+			<groupId>xalan</groupId>
+			<artifactId>xalan</artifactId>
+			<version>2.7.1</version>
+		</dependency>
 		<!-- end special fix -->
 
 		<dependency>
@@ -245,8 +269,15 @@
 			<artifactId>htmlunit</artifactId>
 			<version>2.2</version>
 			<scope>test</scope>
+			<!-- CVE-2015-7501 -->
+			<exclusions>
+				<exclusion>
+					<groupId>commons-collections</groupId>
+					<artifactId>commons-collections</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.mortbay.jetty</groupId>
 			<artifactId>jetty-embedded</artifactId>

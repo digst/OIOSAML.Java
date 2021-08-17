@@ -61,7 +61,7 @@ public class SessionCopyListener implements HttpSessionListener, SameSiteSession
 		return null;
 	}
 	
-	public void linkSession(String requestId, String sessionId) {
+	public synchronized void linkSession(String requestId, String sessionId) {
 		sessionLinks.put(requestId, sessionId);
 	}
 	

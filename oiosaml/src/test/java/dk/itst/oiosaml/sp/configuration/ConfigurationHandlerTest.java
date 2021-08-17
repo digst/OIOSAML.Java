@@ -116,6 +116,10 @@ public class ConfigurationHandlerTest extends AbstractServiceTests {
 	
 	@Test
 	public void showConfigurationIfUnconfigured() throws Exception {
+		Map<String,String> params=new HashMap<String, String>();
+		params.put(Constants.INIT_OIOSAML_HOME, homeDir.getAbsolutePath());
+		SAMLConfigurationFactory.getConfiguration().setInitConfiguration(params);
+
 		final StringWriter sw = new StringWriter();
 		final String url = "http://localhost/saml";
 		context.checking(new Expectations() {{
@@ -128,6 +132,7 @@ public class ConfigurationHandlerTest extends AbstractServiceTests {
 			allowing(req).getServerName(); will(returnValue("localhost"));
 			allowing(req).getScheme(); will(returnValue("http"));
 		}});
+
 		handler.handleGet(new RequestContext(req, res, null, null, null, null, null, bindingHandlerFactory));
 		String output = sw.toString();
 		assertNotNull(output);
