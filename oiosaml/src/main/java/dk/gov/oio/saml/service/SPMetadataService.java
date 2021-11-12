@@ -115,7 +115,7 @@ public class SPMetadataService {
         AssertionConsumerService assertionConsumerService = SamlHelper.build(AssertionConsumerService.class);
         spssoDescriptor.getAssertionConsumerServices().add(assertionConsumerService);
         assertionConsumerService.setBinding(SAMLConstants.SAML2_POST_BINDING_URI);
-        assertionConsumerService.setLocation(config.getBaseUrl() + "/saml/assertionConsumer");
+        assertionConsumerService.setLocation(config.getServletAssertionConsumerURL());
         assertionConsumerService.setIsDefault(true);
         assertionConsumerService.setIndex(0);
 
@@ -124,16 +124,16 @@ public class SPMetadataService {
         spssoDescriptor.getSingleLogoutServices().add(singleLogoutService);
 
         singleLogoutService.setBinding(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
-        singleLogoutService.setLocation(config.getBaseUrl() + "/saml/logout");
-        singleLogoutService.setResponseLocation(config.getBaseUrl() + "/saml/logoutResponse");
+        singleLogoutService.setLocation(config.getServletLogoutURL());
+        singleLogoutService.setResponseLocation(config.getServletLogoutResponseURL());
         
         // Create SLO endpoint for POST
         singleLogoutService = SamlHelper.build(SingleLogoutService.class);
         spssoDescriptor.getSingleLogoutServices().add(singleLogoutService);
 
         singleLogoutService.setBinding(SAMLConstants.SAML2_POST_BINDING_URI);
-        singleLogoutService.setLocation(config.getBaseUrl() + "/saml/logout");
-        singleLogoutService.setResponseLocation(config.getBaseUrl() + "/saml/logoutResponse");
+        singleLogoutService.setLocation(config.getServletLogoutURL());
+        singleLogoutService.setResponseLocation(config.getServletLogoutResponseURL());
 
         String contactEmail = config.getContactEmail();
         if (contactEmail != null && !"".equals(contactEmail)) {

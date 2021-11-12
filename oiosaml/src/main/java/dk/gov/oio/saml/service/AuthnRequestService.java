@@ -134,7 +134,7 @@ public class AuthnRequestService {
         authnRequest.setIsPassive(isPassive);
         authnRequest.setForceAuthn(forceAuthn);
         authnRequest.setProtocolBinding(SAMLConstants.SAML2_POST_BINDING_URI);
-        authnRequest.setAssertionConsumerServiceURL(config.getBaseUrl() + "/saml/assertionConsumer");
+        authnRequest.setAssertionConsumerServiceURL(config.getServletAssertionConsumerURL());
 
         // Set Issuer
         Issuer issuer = SamlHelper.build(Issuer.class);

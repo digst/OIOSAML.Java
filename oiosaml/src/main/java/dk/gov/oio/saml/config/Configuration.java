@@ -9,7 +9,13 @@ public class Configuration {
     // SP configuration
     private String spEntityID; // This SP's EntityID
     private String baseUrl; // The URL endpoint that the DispatcherServlet is working on
-    private boolean validationEnabled = true;
+	private String servletRoutingPathPrefix; // The endpoint prefix that the DispatcherServlet is working on
+	private String servletRoutingPathSuffixError; // The endpoint suffix for error
+	private String servletRoutingPathSuffixMetadata; // The endpoint suffix for metadata
+	private String servletRoutingPathSuffixLogout; // The endpoint suffix for logout
+	private String servletRoutingPathSuffixLogoutResponse; // The endpoint suffix for logout response
+	private String servletRoutingPathSuffixAssertion; // The endpoint suffix for assertion
+	private boolean validationEnabled = true;
     private boolean isAssuranceLevelAllowed = false;
     private int minimumAssuranceLevel = 3;
     private String contactEmail;
@@ -208,6 +214,54 @@ public class Configuration {
 		this.baseUrl = baseUrl;
 	}
 
+	public String getServletRoutingPathPrefix() {
+		return servletRoutingPathPrefix;
+	}
+
+	public void setServletRoutingPathPrefix(String servletRoutingPathPrefix) {
+		this.servletRoutingPathPrefix = servletRoutingPathPrefix;
+	}
+
+	public String getServletRoutingPathSuffixError() {
+		return servletRoutingPathSuffixError;
+	}
+
+	public void setServletRoutingPathSuffixError(String servletRoutingPathSuffixError) {
+		this.servletRoutingPathSuffixError = servletRoutingPathSuffixError;
+	}
+
+	public String getServletRoutingPathSuffixMetadata() {
+		return servletRoutingPathSuffixMetadata;
+	}
+
+	public void setServletRoutingPathSuffixMetadata(String servletRoutingPathSuffixMetadata) {
+		this.servletRoutingPathSuffixMetadata = servletRoutingPathSuffixMetadata;
+	}
+
+	public String getServletRoutingPathSuffixLogout() {
+		return servletRoutingPathSuffixLogout;
+	}
+
+	public void setServletRoutingPathSuffixLogout(String servletRoutingPathSuffixLogout) {
+		this.servletRoutingPathSuffixLogout = servletRoutingPathSuffixLogout;
+	}
+
+	public String getServletRoutingPathSuffixLogoutResponse() {
+		return servletRoutingPathSuffixLogoutResponse;
+	}
+
+	public void setServletRoutingPathSuffixLogoutResponse(String servletRoutingPathSuffixLogoutResponse) {
+		this.servletRoutingPathSuffixLogoutResponse = servletRoutingPathSuffixLogoutResponse;
+	}
+
+	public String getServletRoutingPathSuffixAssertion() {
+		return servletRoutingPathSuffixAssertion;
+	}
+
+	public void setServletRoutingPathSuffixAssertion(String servletRoutingPathSuffixAssertion) {
+		this.servletRoutingPathSuffixAssertion = servletRoutingPathSuffixAssertion;
+	}
+
 	public String getErrorPage() {
 		return errorPage;
 	}
@@ -266,8 +320,14 @@ public class Configuration {
         private String keystoreLocation;
         private String keystorePassword;
         private String keyAlias;
+		private String servletRoutingPathPrefix;
+		private String servletRoutingPathSuffixError;
+		private String servletRoutingPathSuffixMetadata;
+		private String servletRoutingPathSuffixLogout;
+		private String servletRoutingPathSuffixLogoutResponse;
+		private String servletRoutingPathSuffixAssertion;
 
-        public Configuration build() throws InternalException {
+		public Configuration build() throws InternalException {
             if (spEntityID == null || spEntityID.length() == 0) {
                 throw new InternalException("Cannot create configuration without SP's entityID");
             }
@@ -297,6 +357,30 @@ public class Configuration {
                 throw new InternalException("Cannot create configuration without knowing the alias used inside the keystore");
             }
 
+			if (servletRoutingPathPrefix == null || servletRoutingPathPrefix.length() == 0) {
+				throw new InternalException("Cannot create configuration without servlet routing path prefix");
+			}
+
+			if (servletRoutingPathSuffixError == null || servletRoutingPathSuffixError.length() == 0) {
+				throw new InternalException("Cannot create configuration without servlet routing path error suffix");
+			}
+
+			if (servletRoutingPathSuffixMetadata == null || servletRoutingPathSuffixMetadata.length() == 0) {
+				throw new InternalException("Cannot create configuration without servlet routing path metadata suffix");
+			}
+
+			if (servletRoutingPathSuffixLogout == null || servletRoutingPathSuffixLogout.length() == 0) {
+				throw new InternalException("Cannot create configuration without servlet routing path logout suffix");
+			}
+
+			if (servletRoutingPathSuffixLogoutResponse == null || servletRoutingPathSuffixLogoutResponse.length() == 0) {
+				throw new InternalException("Cannot create configuration without servlet routing path logout response suffix");
+			}
+
+			if (servletRoutingPathSuffixAssertion == null || servletRoutingPathSuffixAssertion.length() == 0) {
+				throw new InternalException("Cannot create configuration without servlet routing path assertion suffix");
+			}
+
             // Create configuration
             Configuration configuration = new Configuration();
             configuration.spEntityID = this.spEntityID;
@@ -307,6 +391,12 @@ public class Configuration {
             configuration.keystoreLocation = this.keystoreLocation;
             configuration.keystorePassword = this.keystorePassword;
             configuration.keyAlias = this.keyAlias;
+			configuration.servletRoutingPathPrefix = this.servletRoutingPathPrefix;
+			configuration.servletRoutingPathSuffixError = this.servletRoutingPathSuffixError;
+			configuration.servletRoutingPathSuffixMetadata = this.servletRoutingPathSuffixMetadata;
+			configuration.servletRoutingPathSuffixLogout = this.servletRoutingPathSuffixLogout;
+			configuration.servletRoutingPathSuffixLogoutResponse = this.servletRoutingPathSuffixLogoutResponse;
+			configuration.servletRoutingPathSuffixAssertion = this.servletRoutingPathSuffixAssertion;
 
             return configuration;
         }
@@ -350,6 +440,36 @@ public class Configuration {
             this.keyAlias = keyAlias;
             return this;
         }
+		
+		public Builder setServletRoutingPathPrefix(String servletRoutingPathPrefix) {
+			this.servletRoutingPathPrefix = servletRoutingPathPrefix;
+			return this;
+		}
+		
+		public Builder setServletRoutingPathSuffixError(String servletRoutingPathSuffixError) {
+			this.servletRoutingPathSuffixError = servletRoutingPathSuffixError;
+			return this;
+		}
+		
+		public Builder setServletRoutingPathSuffixMetadata(String servletRoutingPathSuffixMetadata) {
+			this.servletRoutingPathSuffixMetadata = servletRoutingPathSuffixMetadata;
+			return this;
+		}
+		
+		public Builder setServletRoutingPathSuffixLogout(String servletRoutingPathSuffixLogout) {
+			this.servletRoutingPathSuffixLogout = servletRoutingPathSuffixLogout;
+			return this;
+		}
+		
+		public Builder setServletRoutingPathSuffixLogoutResponse(String servletRoutingPathSuffixLogoutResponse) {
+			this.servletRoutingPathSuffixLogoutResponse=servletRoutingPathSuffixLogoutResponse;
+			return this;
+		}
+		
+		public Builder setServletRoutingPathSuffixAssertion(String servletRoutingPathSuffixAssertion) {
+			this.servletRoutingPathSuffixAssertion=servletRoutingPathSuffixAssertion;
+			return this;
+		}
     }
 
     public boolean isAssuranceLevelSufficient(String value) {
@@ -365,5 +485,25 @@ public class Configuration {
 		}
 
 		return i >= minimumAssuranceLevel;
+	}
+
+	public String getServletAssertionConsumerURL() {
+		return String.format("%s/%s/%s",baseUrl,servletRoutingPathPrefix,servletRoutingPathSuffixAssertion);
+	}
+
+	public String getServletErrorURL() {
+		return String.format("%s/%s/%s",baseUrl,servletRoutingPathPrefix,servletRoutingPathSuffixError);
+	}
+
+	public String getServletLogoutURL() {
+		return String.format("%s/%s/%s",baseUrl,servletRoutingPathPrefix,servletRoutingPathSuffixLogout);
+	}
+
+	public String getServletLogoutResponseURL() {
+		return String.format("%s/%s/%s",baseUrl,servletRoutingPathPrefix,servletRoutingPathSuffixLogoutResponse);
+	}
+
+	public String getServletMetadataURL() {
+		return String.format("%s/%s/%s",baseUrl,servletRoutingPathPrefix,servletRoutingPathSuffixMetadata);
 	}
 }
