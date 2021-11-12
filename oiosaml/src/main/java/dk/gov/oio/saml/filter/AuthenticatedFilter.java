@@ -104,7 +104,12 @@ public class AuthenticatedFilter implements Filter {
 
                 AuthnRequestService authnRequestService = AuthnRequestService.getInstance();
 
-                req.getSession().setAttribute(Constants.SESSION_REQUESTED_PATH, req.getRequestURI());
+                String reqPath = req.getRequestURI();
+                if(req.getQueryString() != null) {
+                    reqPath += "?" + req.getQueryString();
+                }
+
+                req.getSession().setAttribute(Constants.SESSION_REQUESTED_PATH, reqPath);
                 MessageContext<SAMLObject> authnRequest = authnRequestService.createMessageWithAuthnRequest(isPassive, forceAuthn, requiredNsisLevel, attributeProfile);
                 sendAuthnRequest(req, res, authnRequest, requiredNsisLevel);
 			}
