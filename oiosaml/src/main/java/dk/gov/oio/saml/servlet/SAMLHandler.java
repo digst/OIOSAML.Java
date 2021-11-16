@@ -13,7 +13,7 @@ import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.saml2.binding.decoding.impl.HTTPPostDecoder;
 import org.opensaml.saml.saml2.binding.decoding.impl.HTTPRedirectDeflateDecoder;
-import org.opensaml.saml.saml2.binding.encoding.impl.HTTPPostEncoder;
+import org.opensaml.saml.saml2.binding.encoding.impl.HTTPPostSimpleSignEncoder;
 import org.opensaml.saml.saml2.binding.encoding.impl.HTTPRedirectDeflateEncoder;
 
 import dk.gov.oio.saml.util.ExternalException;
@@ -86,7 +86,7 @@ public abstract class SAMLHandler {
             log.debug("Encoding and sending message (HTTPPost)");
         }
 
-        HTTPPostEncoder encoder = new HTTPPostEncoder();
+        HTTPPostSimpleSignEncoder encoder = new HTTPPostSimpleSignEncoder();
 
         encoder.setHttpServletResponse(httpServletResponse);
         encoder.setMessageContext(message);
