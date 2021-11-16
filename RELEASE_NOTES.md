@@ -2,6 +2,7 @@
 
 ## 3.0.2 (planned)
 - NLRFIM-124: ResponseLocation is optional cf. section 2.2.2 in OASIS SAML 2 Metadata and hence if attribute is not present NULL check must be performed.
+- NLRFIM-130: Store query parameters in session when redirecting to IdP.
 
 ## 3.0.1
 First official release based on OpenSAML 3.
