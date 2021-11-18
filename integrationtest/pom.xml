@@ -7,7 +7,7 @@
     <parent>
         <artifactId>oiosaml3-parent</artifactId>
         <groupId>dk.digst</groupId>
-        <version>3.0.1</version>
+        <version>3.0.2-SNAPSHOT</version>
     </parent>
 
     <dependencies>
