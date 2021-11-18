@@ -1,9 +1,9 @@
 package dk.itst.oiosaml.idp.dao.model.enums;
 
 public enum LevelOfAssurance {
-    LOW("https://data.gov.dk/concept/core/nsis/loa/Low"),
-    SUBSTANTIAL("https://data.gov.dk/concept/core/nsis/loa/Substantial"),
-    HIGH("https://data.gov.dk/concept/core/nsis/loa/High");
+    LOW("Low"),
+    SUBSTANTIAL("Substantial"),
+    HIGH("High");
 
     private String text;
 
