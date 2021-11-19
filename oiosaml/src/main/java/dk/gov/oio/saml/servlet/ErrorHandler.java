@@ -41,9 +41,10 @@ public class ErrorHandler extends SAMLHandler {
     }
 
 	public static void handle(HttpServletRequest request, HttpServletResponse response, ERROR_TYPE type, String message) throws IOException {
+		Configuration config = OIOSAML3Service.getConfig();
 		request.getSession().setAttribute(Constants.SESSION_ERROR_MESSAGE, message);
 		request.getSession().setAttribute(Constants.SESSION_ERROR_TYPE, type.toString());
 
-		response.sendRedirect(StringUtil.getUrl(request, "/saml/error"));
+		response.sendRedirect(StringUtil.getUrl(request,String.format("/%s/%s",config.getServletRoutingPathPrefix(),config.getServletRoutingPathSuffixError())));
 	}
 }

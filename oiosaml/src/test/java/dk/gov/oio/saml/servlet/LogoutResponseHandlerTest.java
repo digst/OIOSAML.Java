@@ -102,7 +102,7 @@ public class LogoutResponseHandlerTest {
 		LogoutResponseHandler logoutResponseHandler = new LogoutResponseHandler();
 		logoutResponseHandler.handleGet(request, response);
 
-		Mockito.verify(response).sendRedirect("/saml/error");
+		Mockito.verify(response).sendRedirect(String.format("/%s/%s",TestConstants.SP_ROUTING_BASE,TestConstants.SP_ROUTING_ERROR));
 	}
 
 	private class DummyOutputStream extends ServletOutputStream {

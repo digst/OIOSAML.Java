@@ -11,6 +11,7 @@ import java.util.List;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -44,6 +45,12 @@ public class AuthenticatedFilterTest {
         Configuration configuration = new Configuration.Builder()
 				.setSpEntityID(TestConstants.SP_ENTITY_ID)
 				.setBaseUrl(TestConstants.SP_BASE_URL)
+				.setServletRoutingPathPrefix(TestConstants.SP_ROUTING_BASE)
+				.setServletRoutingPathSuffixError(TestConstants.SP_ROUTING_ERROR)
+				.setServletRoutingPathSuffixMetadata(TestConstants.SP_ROUTING_METADATA)
+				.setServletRoutingPathSuffixLogout(TestConstants.SP_ROUTING_LOGOUT)
+				.setServletRoutingPathSuffixLogoutResponse(TestConstants.SP_ROUTING_LOGOUT_RESPONSE)
+				.setServletRoutingPathSuffixAssertion(TestConstants.SP_ROUTING_ASSERTION)
 				.setIdpEntityID(TestConstants.IDP_ENTITY_ID)
 				.setIdpMetadataUrl(TestConstants.IDP_METADATA_URL)
 				.setKeystoreLocation("sp.pfx")
@@ -334,6 +341,54 @@ public class AuthenticatedFilterTest {
 		// verify that the AuthnRequest is forceAuthn
 		Assertions.assertTrue(authnRequest.isPassive());
 		Assertions.assertFalse(authnRequest.isForceAuthn());
+	}
+
+	@DisplayName("Setting SESSION_REQUESTED_PATH when authenticating")
+	@Test
+	public void settingRedirectUrlOnAuthentication() throws Exception {
+		AuthenticatedFilter filter = new AuthenticatedFilter();
+		filter.init(getConfig(false, false, "SUBSTANTIAL"));
+
+		// mock session with state: not logged in at any NSIS level
+		HttpSession session = Mockito.mock(HttpSession.class);
+		Mockito.when(session.getAttribute(Constants.SESSION_NSIS_LEVEL)).thenReturn(null);
+		Mockito.when(session.getAttribute(Constants.SESSION_AUTHENTICATED)).thenReturn(null);
+
+		// mock request
+		HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+		Mockito.when(request.getSession()).thenReturn(session);
+		Mockito.when(request.getRequestURI()).thenReturn("/some/url");
+		Mockito.when(request.getQueryString()).thenReturn("var1=1&var2=2");
+
+		// invoke method to be tested
+		filter.doFilter(request, Mockito.mock(HttpServletResponse.class), Mockito.mock(FilterChain.class));
+
+		// verify that URL is added to the session
+		Mockito.verify(session, Mockito.times(1)).setAttribute(Constants.SESSION_REQUESTED_PATH,"/some/url?var1=1&var2=2");
+	}
+
+	@DisplayName("Not setting SESSION_REQUESTED_PATH on current session")
+	@Test
+	public void settingRedirectUrl() throws Exception {
+		AuthenticatedFilter filter = new AuthenticatedFilter();
+		filter.init(getConfig(false, false, "SUBSTANTIAL"));
+
+		// mock session with state: logged in at NSIS level SUBSTANTIAL
+		HttpSession session = Mockito.mock(HttpSession.class);
+		Mockito.when(session.getAttribute(Constants.SESSION_NSIS_LEVEL)).thenReturn(NSISLevel.SUBSTANTIAL);
+		Mockito.when(session.getAttribute(Constants.SESSION_AUTHENTICATED)).thenReturn("true");
+
+		// mock request
+		HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+		Mockito.when(request.getSession()).thenReturn(session);
+		Mockito.when(request.getRequestURI()).thenReturn("/some/url");
+		Mockito.when(request.getQueryString()).thenReturn("var1=1&var2=2");
+
+		// invoke method to be tested
+		filter.doFilter(request, Mockito.mock(HttpServletResponse.class), Mockito.mock(FilterChain.class));
+
+		// verify that URL is added to the session
+		Mockito.verify(session,Mockito.never()).setAttribute(Mockito.eq(Constants.SESSION_REQUESTED_PATH), Mockito.any());
 	}
 
 	private FilterConfig getConfig(boolean isPassive, boolean forceAuthn, String requiredLevel) {
