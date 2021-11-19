@@ -10,6 +10,7 @@ public class TestConstants {
 	public static final String IDP_ENTITY_ID = "http://mockidp.localhost";
 	public static final String IDP_METADATA_URL = "http://localhost:8081/saml/metadata";
 	public static final String IDP_LOGOUT_REQUEST_URL = "http://localhost:8081/saml/logout";
+	public static final String IDP_LOGOUT_RESPONSE_URL = "http://localhost:8081/saml/logout/response";
 
 	public static final String IDP_METADATA = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><md:EntityDescriptor xmlns:md=\"urn:oasis:names:tc:SAML:2.0:metadata\" ID=\"_077ae9ba-e94a-3ced-89a7-ddf7638bccf5\" entityID=\"http://mockidp.localhost\">\n" +
 			"    <md:IDPSSODescriptor WantAuthnRequestsSigned=\"true\" protocolSupportEnumeration=\"urn:oasis:names:tc:SAML:2.0:protocol\">\n" +
