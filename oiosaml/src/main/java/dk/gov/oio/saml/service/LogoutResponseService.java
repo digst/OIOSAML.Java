@@ -14,7 +14,6 @@ import org.opensaml.saml.saml2.core.LogoutRequest;
 import org.opensaml.saml.saml2.core.LogoutResponse;
 import org.opensaml.saml.saml2.core.Status;
 import org.opensaml.saml.saml2.core.StatusCode;
-import org.opensaml.saml.saml2.core.impl.AssertionMarshaller;
 import org.opensaml.saml.saml2.metadata.SingleSignOnService;
 import org.opensaml.security.x509.BasicX509Credential;
 import org.opensaml.xmlsec.SignatureSigningParameters;
@@ -38,6 +37,9 @@ public class LogoutResponseService {
 	}
 
 	public static MessageContext<SAMLObject> createMessageWithLogoutResponse(LogoutRequest logoutRequest, String destination) throws InitializationException, InternalException {
+		if (log.isDebugEnabled()) {
+			log.debug("Create and sign logout response message for  request id '" + logoutRequest.getID() + "'");
+		}
 		// Create message context
 		MessageContext<SAMLObject> messageContext = new MessageContext<>();
 
@@ -65,10 +67,17 @@ public class LogoutResponseService {
 	}
 
 	private static LogoutResponse createLogoutResponse(String destination, LogoutRequest logoutRequest) throws InitializationException {
+		if (log.isDebugEnabled()) {
+			log.debug("Create logout response message for  request id '" + logoutRequest.getID() + "'");
+		}
 		LogoutResponse logoutResponse = SamlHelper.build(LogoutResponse.class);
 
 		RandomIdentifierGenerationStrategy randomIdentifierGenerator = new RandomIdentifierGenerationStrategy();
 		String id = randomIdentifierGenerator.generateIdentifier();
+
+		if (log.isDebugEnabled()) {
+			log.debug("Created logout response id '" + id + "' for  request id '" + logoutRequest.getID() + "'");
+		}
 
 		logoutResponse.setID(id);
 		logoutResponse.setDestination(destination);
@@ -91,10 +100,11 @@ public class LogoutResponseService {
 	}
 
 	private static LogoutResponse signResponse(LogoutResponse logoutResponse) {
-		Signature signature = SamlHelper.build(Signature.class);
-
-		// Sign Assertion
+		if (log.isDebugEnabled()) {
+			log.debug("Signing logout response message with id '" + logoutResponse.getID() + "'");
+		}
 		try {
+			Signature signature = SamlHelper.build(Signature.class);
 
 			BasicX509Credential x509Credential = CredentialService.getInstance().getPrimaryBasicX509Credential();
 			SignatureRSASHA256 signatureRSASHA256 = new SignatureRSASHA256();
@@ -106,9 +116,11 @@ public class LogoutResponseService {
 
 			logoutResponse.setSignature(signature);
 
+			// Marshall and Sign
+			SamlHelper.marshallObject(logoutResponse);
 			Signer.signObject(signature);
 
-		} catch (SignatureException | InitializationException | InternalException e) {
+		} catch (SignatureException | InitializationException | InternalException | MarshallingException e) {
 			log.error("Signing of '" + logoutResponse.getID() + "' failed", e);
 		}
 		return logoutResponse;

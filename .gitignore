@@ -7,3 +7,4 @@ target/
 velocity.log
 .DS_Store
 .run/
+velocity.log.*
