@@ -136,6 +136,8 @@ public class LogoutRequestHandlerTest {
 		// Verify that response is for IDP and from SP
 		LogoutResponse logoutResponse = logoutRequestHandler.getSamlObject(contextArgumentCaptor.getAllValues().get(0), LogoutResponse.class);
 
+		Assertions.assertTrue(logoutResponse.isSigned());
+
 		Assertions.assertEquals(StatusCode.SUCCESS, logoutResponse.getStatus().getStatusCode().getValue());
 		Assertions.assertEquals(TestConstants.SP_ENTITY_ID, logoutResponse.getIssuer().getValue());
 		Assertions.assertEquals(TestConstants.IDP_LOGOUT_RESPONSE_URL, logoutResponse.getDestination());
