@@ -100,13 +100,13 @@ public class AssertionValidationService {
 
         //Check Response Issue instant
         DateTime responseIssueInstant = response.getIssueInstant();
-        if (responseIssueInstant.isBefore(DateTime.now().minusSeconds(clockSkew))) {
+        if (responseIssueInstant.isBefore(DateTime.now().minusMinutes(clockSkew))) {
             throw new AssertionValidationException("Response Lifetime incorrect");
         }
 
         //Check Assertion Issue instant
         DateTime assertionIssueInstant = assertion.getIssueInstant();
-        if (assertionIssueInstant.isBefore(DateTime.now().minusSeconds(clockSkew))) {
+        if (assertionIssueInstant.isBefore(DateTime.now().minusMinutes(clockSkew))) {
             throw new AssertionValidationException("Assertion Lifetime incorrect");
         }
 
@@ -114,13 +114,13 @@ public class AssertionValidationService {
         Conditions conditions = assertion.getConditions();
         if (conditions != null) {
             if (conditions.getNotOnOrAfter() != null) {
-                if (!DateTime.now().minusSeconds(clockSkew).isBefore(conditions.getNotOnOrAfter())) {
+                if (!DateTime.now().minusMinutes(clockSkew).isBefore(conditions.getNotOnOrAfter())) {
                     throw new AssertionValidationException("Assertion conditions notOnOrAfter expired");
                 }
             }
 
             if (conditions.getNotBefore() != null) {
-                if (!DateTime.now().plusSeconds(clockSkew).isAfter(conditions.getNotBefore())) {
+                if (!DateTime.now().plusMinutes(clockSkew).isAfter(conditions.getNotBefore())) {
                     throw new AssertionValidationException("Assertion conditions notBefore not reached yet");
                 }
             }
@@ -398,7 +398,7 @@ public class AssertionValidationService {
             throw new AssertionValidationException("The SubjectConfirmationData element MUST a NotOnOrAfter attribute");
         }
 
-        if (!DateTime.now().isBefore(notOnOrAfter.plusSeconds(config.getClockSkew()))) {
+        if (!DateTime.now().isBefore(notOnOrAfter.plusMinutes(config.getClockSkew()))) {
             throw new AssertionValidationException("This instant was validated after SubjectConfirmationData 'NotOnOrAfter' attribute plus clockskew");
         }
     }

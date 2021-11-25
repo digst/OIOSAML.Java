@@ -6,6 +6,7 @@
 - NLRFIM-115: Custom URL paths in Java
 - NLRFIM-130: Store query parameters in session when redirecting to IdP.
 - NLRFIM-128: Update local IDP stub to fix runtime problems in the demo
+- NLRFIM-110: Java OIO SAML 3 clock controls seconds instead of minutes
 
 ## 3.0.1
 First official release based on OpenSAML 3.
