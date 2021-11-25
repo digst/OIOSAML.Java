@@ -14,7 +14,7 @@ import org.opensaml.saml.common.messaging.context.SAMLBindingContext;
 import org.opensaml.saml.common.messaging.context.SAMLEndpointContext;
 import org.opensaml.saml.common.messaging.context.SAMLPeerEntityContext;
 import org.opensaml.saml.common.xml.SAMLConstants;
-import org.opensaml.saml.saml2.binding.encoding.impl.HTTPPostSimpleSignEncoder;
+import org.opensaml.saml.saml2.binding.encoding.impl.HTTPPostEncoder;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.core.impl.AuthnRequestMarshaller;
@@ -142,7 +142,7 @@ public class SingleSignOnController {
             endpointContext.setEndpoint(endpoint);
 
             // Encode and send
-            HTTPPostSimpleSignEncoder encoder = new HTTPPostSimpleSignEncoder();
+            HTTPPostEncoder encoder = new HTTPPostEncoder();
             encoder.setHttpServletResponse(httpServletResponse);
             encoder.setMessageContext(messageContext);
             encoder.setVelocityEngine(VelocityEngine.newVelocityEngine());

@@ -52,7 +52,7 @@ public class LogoutResponseService {
 		SAMLEndpointContext endpointContext = peerEntityContext.getSubcontext(SAMLEndpointContext.class, true);
 
 		SingleSignOnService endpoint = SamlHelper.build(SingleSignOnService.class);
-		endpoint.setBinding(SAMLConstants.SAML2_POST_SIMPLE_SIGN_BINDING_URI);
+		endpoint.setBinding(SAMLConstants.SAML2_POST_BINDING_URI);
 		endpoint.setLocation(destination);
 
 		endpointContext.setEndpoint(endpoint);
