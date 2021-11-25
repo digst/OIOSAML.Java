@@ -2,6 +2,7 @@
 
 ## 3.0.2 (planned)
 - NLRFIM-124: ResponseLocation is optional cf. section 2.2.2 in OASIS SAML 2 Metadata and hence if attribute is not present NULL check must be performed.
+- NLRFIM-125: Missing KeyInfo in XML signature.
 - NLRFIM-115: Custom URL paths in Java
 - NLRFIM-130: Store query parameters in session when redirecting to IdP.
 - NLRFIM-128: Update local IDP stub to fix runtime problems in the demo

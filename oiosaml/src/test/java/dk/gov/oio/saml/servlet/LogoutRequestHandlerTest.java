@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import dk.gov.oio.saml.util.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,17 +22,13 @@ import org.mockito.Mockito;
 import org.opensaml.core.xml.util.XMLObjectSupport;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.saml.common.SAMLObject;
+import org.opensaml.saml.saml2.core.LogoutResponse;
 import org.opensaml.saml.saml2.core.NameID;
+import org.opensaml.saml.saml2.core.StatusCode;
 import org.w3c.dom.Element;
 
 import dk.gov.oio.saml.model.NSISLevel;
 import dk.gov.oio.saml.service.OIOSAML3Service;
-import dk.gov.oio.saml.util.Constants;
-import dk.gov.oio.saml.util.ExternalException;
-import dk.gov.oio.saml.util.IdpUtil;
-import dk.gov.oio.saml.util.InternalException;
-import dk.gov.oio.saml.util.StringUtil;
-import dk.gov.oio.saml.util.TestConstants;
 import net.shibboleth.utilities.java.support.codec.Base64Support;
 import net.shibboleth.utilities.java.support.xml.SerializeSupport;
 
@@ -116,17 +113,34 @@ public class LogoutRequestHandlerTest {
 		Mockito.when(request.getParameter("SAMLRequest")).thenReturn(base64EncodedMessage);
 
 		// Mock DummyOutputStream
-		DummyOutputStream dummyOutputStream = Mockito.mock(DummyOutputStream.class);
+		ServletOutputStream outputStreamMock = Mockito.mock(ServletOutputStream.class);
 
 		// Mock HttpServletResponse
 		HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
-		Mockito.when(response.getOutputStream()).thenReturn(dummyOutputStream);
+		Mockito.when(response.getOutputStream()).thenReturn(outputStreamMock);
 
-		LogoutRequestHandler logoutRequestHandler = new LogoutRequestHandler();
+		// Capture request and parameters
+		ArgumentCaptor<MessageContext<SAMLObject>> contextArgumentCaptor = ArgumentCaptor.forClass(MessageContext.class);
+
+		// Spy test class to capture output
+		LogoutRequestHandler logoutRequestHandler = Mockito.spy(new LogoutRequestHandler());
+
+		// Action
 		logoutRequestHandler.handleGet(request, response);
 
+		// Verification
 		Mockito.verify(session).invalidate();
-		Mockito.verify(dummyOutputStream).flush(); //Verify that something is sent to the IdP
+		Mockito.verify(outputStreamMock).flush(); //Verify that something is sent to the IdP
+		Mockito.verify(logoutRequestHandler).sendPost(Mockito.eq(response), contextArgumentCaptor.capture());
+
+		// Verify that response is for IDP and from SP
+		LogoutResponse logoutResponse = logoutRequestHandler.getSamlObject(contextArgumentCaptor.getAllValues().get(0), LogoutResponse.class);
+
+		Assertions.assertTrue(logoutResponse.isSigned());
+
+		Assertions.assertEquals(StatusCode.SUCCESS, logoutResponse.getStatus().getStatusCode().getValue());
+		Assertions.assertEquals(TestConstants.SP_ENTITY_ID, logoutResponse.getIssuer().getValue());
+		Assertions.assertEquals(TestConstants.IDP_LOGOUT_RESPONSE_URL, logoutResponse.getDestination());
 	}
 	
 	@DisplayName("Test that a user that is not logged in can safely attempt a logout")
@@ -195,24 +209,16 @@ public class LogoutRequestHandlerTest {
 		Mockito.when(request.getParameter("SAMLRequest")).thenReturn(base64EncodedMessage);
 
 		// Mock DummyOutputStream
-		DummyOutputStream dummyOutputStream = Mockito.mock(DummyOutputStream.class);
+		ServletOutputStream outputStreamMock = Mockito.mock(ServletOutputStream.class);
 
 		// Mock HttpServletResponse
 		HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
-		Mockito.when(response.getOutputStream()).thenReturn(dummyOutputStream);
+		Mockito.when(response.getOutputStream()).thenReturn(outputStreamMock);
 
 		LogoutRequestHandler logoutRequestHandler = new LogoutRequestHandler();
 		logoutRequestHandler.handleGet(request, response);
 
 		Mockito.verify(session).invalidate();
-		Mockito.verify(dummyOutputStream).flush(); //Verify that something is sent to the IdP
+		Mockito.verify(outputStreamMock).flush(); //Verify that something is sent to the IdP
 	}
-
-	private class DummyOutputStream extends ServletOutputStream {
-		@Override
-		public void write(int i) throws IOException {
-			//Do nothing
-		}
-	}
-
 }
