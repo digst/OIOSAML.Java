@@ -1,6 +1,8 @@
 # OIO SAML 3 (Artifact ID: oiosaml3.java)
 
-## 3.0.2 (planned)
+## 3.0.3 (planned)
+
+## 3.0.2
 - NLRFIM-124: ResponseLocation is optional cf. section 2.2.2 in OASIS SAML 2 Metadata and hence if attribute is not present NULL check must be performed.
 - NLRFIM-125: Missing KeyInfo in XML signature.
 - NLRFIM-115: Custom URL paths in Java
