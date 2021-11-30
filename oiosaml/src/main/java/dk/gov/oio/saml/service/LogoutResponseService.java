@@ -1,6 +1,7 @@
 package dk.gov.oio.saml.service;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.xml.io.MarshallingException;
@@ -30,7 +31,7 @@ import org.opensaml.xmlsec.signature.support.Signer;
 import javax.xml.crypto.dsig.CanonicalizationMethod;
 
 public class LogoutResponseService {
-	private static final Logger log = Logger.getLogger(LogoutResponseService.class);
+	private static final Logger log = LoggerFactory.getLogger(LogoutResponseService.class);
 
 	public void validateLogoutResponse() {
 		return;

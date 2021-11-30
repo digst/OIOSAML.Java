@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.messaging.context.MessageContext;
@@ -38,7 +39,7 @@ import net.shibboleth.utilities.java.support.security.RandomIdentifierGeneration
 import net.shibboleth.utilities.java.support.xml.BasicParserPool;
 
 public class AuthnRequestService {
-    private static final Logger log = Logger.getLogger(AuthnRequestService.class);
+    private static final Logger log = LoggerFactory.getLogger(AuthnRequestService.class);
 
     // Single instance
     private static AuthnRequestService singleInstance = new AuthnRequestService();

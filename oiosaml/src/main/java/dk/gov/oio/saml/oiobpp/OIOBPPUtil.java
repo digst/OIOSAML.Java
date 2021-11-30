@@ -13,13 +13,14 @@ import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
 
 public class OIOBPPUtil {
-    private static final Logger log = Logger.getLogger(OIOBPPUtil.class);
+    private static final Logger log = LoggerFactory.getLogger(OIOBPPUtil.class);
 
 	@SuppressWarnings("unchecked")
 	public static PrivilegeList parse(String object) {

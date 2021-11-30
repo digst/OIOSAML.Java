@@ -13,7 +13,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opensaml.core.config.InitializationException;
 
 import dk.gov.oio.saml.config.Configuration;
@@ -25,7 +26,7 @@ import dk.gov.oio.saml.util.InternalException;
 
 public class DispatcherServlet extends HttpServlet {
 	private static final long serialVersionUID = -9177718057493368235L;
-	private static final Logger log = Logger.getLogger(DispatcherServlet.class);
+	private static final Logger log = LoggerFactory.getLogger(DispatcherServlet.class);
     private Map<String, SAMLHandler> handlers;
     private boolean initialized = false;
 

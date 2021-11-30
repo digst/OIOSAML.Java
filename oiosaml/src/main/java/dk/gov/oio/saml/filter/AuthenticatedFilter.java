@@ -16,7 +16,8 @@ import javax.servlet.http.HttpSession;
 
 import dk.gov.oio.saml.config.Configuration;
 import dk.gov.oio.saml.service.OIOSAML3Service;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.opensaml.saml.common.SAMLObject;
@@ -33,8 +34,8 @@ import dk.gov.oio.saml.util.InternalException;
 import dk.gov.oio.saml.util.LoggingUtil;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 
-public class AuthenticatedFilter implements Filter {
-    private static final Logger log = Logger.getLogger(AuthenticatedFilter.class);
+public class    AuthenticatedFilter implements Filter {
+    private static final Logger log = LoggerFactory.getLogger(AuthenticatedFilter.class);
     private boolean isPassive, forceAuthn;
     private String attributeProfile;
     private NSISLevel requiredNsisLevel = NSISLevel.NONE;

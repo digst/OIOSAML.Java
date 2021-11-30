@@ -26,7 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
@@ -48,7 +49,7 @@ import dk.gov.oio.saml.util.ExternalException;
 import dk.gov.oio.saml.util.InternalException;
 
 public class CRLChecker {
-	private static final Logger log = Logger.getLogger(CRLChecker.class);
+	private static final Logger log = LoggerFactory.getLogger(CRLChecker.class);
 	private static final String AUTH_INFO_ACCESS = Extension.authorityInfoAccess.getId();
 	private static Map<String, X509Certificate> certificateMap = new HashMap<String, X509Certificate>();
 	

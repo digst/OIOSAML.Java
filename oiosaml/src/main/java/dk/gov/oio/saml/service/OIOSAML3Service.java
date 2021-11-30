@@ -1,6 +1,7 @@
 package dk.gov.oio.saml.service;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.xmlsec.config.impl.JavaCryptoValidationInitializer;
@@ -8,7 +9,7 @@ import org.opensaml.xmlsec.config.impl.JavaCryptoValidationInitializer;
 import dk.gov.oio.saml.config.Configuration;
 
 public class OIOSAML3Service {
-    private static final Logger log = Logger.getLogger(OIOSAML3Service.class);
+    private static final Logger log = LoggerFactory.getLogger(OIOSAML3Service.class);
 
     public static boolean initialized = false;
     private static Configuration configuration = null;

@@ -5,7 +5,8 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.encoder.MessageEncodingException;
@@ -26,7 +27,7 @@ import dk.gov.oio.saml.util.StringUtil;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 
 public class LogoutRequestHandler extends SAMLHandler {
-    private static final Logger log = Logger.getLogger(LogoutRequestHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(LogoutRequestHandler.class);
 
     @Override
     public void handleGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ExternalException, InternalException {
