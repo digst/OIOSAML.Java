@@ -211,10 +211,10 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- used by some of the OpenSAML classes -->
+		<!-- Use simple SLF4J logger in unit tests -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
+			<artifactId>slf4j-simple</artifactId>
 			<version>1.7.32</version>
 			<scope>test</scope>
 		</dependency>
@@ -222,6 +222,13 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>
+			<version>1.7.32</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>log4j-over-slf4j</artifactId>
 			<version>1.7.32</version>
 			<scope>test</scope>
 		</dependency>
