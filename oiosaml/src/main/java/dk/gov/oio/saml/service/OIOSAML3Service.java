@@ -1,5 +1,6 @@
 package dk.gov.oio.saml.service;
 
+import dk.gov.oio.saml.audit.AuditService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.opensaml.core.config.InitializationException;
@@ -12,7 +13,8 @@ public class OIOSAML3Service {
     private static final Logger log = LoggerFactory.getLogger(OIOSAML3Service.class);
 
     public static boolean initialized = false;
-    private static Configuration configuration = null;
+    private static Configuration configuration;
+    private static AuditService auditService;
 
     public static void init(Configuration configuration) throws InitializationException {
         if (log.isDebugEnabled()) {
@@ -37,6 +39,7 @@ public class OIOSAML3Service {
             log.debug("Setting OIOSAML Configuration");
         }
         OIOSAML3Service.configuration = configuration;
+        OIOSAML3Service.auditService = new AuditService(configuration);
         initialized = true;
 
         if (log.isDebugEnabled()) {
@@ -50,5 +53,13 @@ public class OIOSAML3Service {
         }
 
         return configuration;
+    }
+
+    public static AuditService getAuditService() throws RuntimeException {
+        if (!initialized) {
+            throw new RuntimeException("Configuration not set");
+        }
+
+        return auditService;
     }
 }

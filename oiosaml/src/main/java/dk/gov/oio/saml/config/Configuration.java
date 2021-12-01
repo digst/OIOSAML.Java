@@ -15,6 +15,7 @@ public class Configuration {
     private String servletRoutingPathSuffixLogout; // The endpoint suffix for logout
     private String servletRoutingPathSuffixLogoutResponse; // The endpoint suffix for logout response
     private String servletRoutingPathSuffixAssertion; // The endpoint suffix for assertion
+    private String auditAdapterClassName; // Class name of SP's implementation of the AuditAdapter
     private boolean validationEnabled = true;
     private boolean isAssuranceLevelAllowed = false;
     private int minimumAssuranceLevel = 3;
@@ -310,6 +311,14 @@ public class Configuration {
         this.ocspCheckEnabled = ocspCheckEnabled;
     }
 
+    public String getAuditAdapterClassName() {
+        return this.auditAdapterClassName;
+    }
+
+    public void setAuditAdapterClassName(String auditAdapterClassName) {
+        this.auditAdapterClassName = auditAdapterClassName;
+    }
+
     // Configuration builder for mandatory fields
     public static class Builder {
         private String spEntityID;
@@ -326,6 +335,7 @@ public class Configuration {
         private String servletRoutingPathSuffixLogout;
         private String servletRoutingPathSuffixLogoutResponse;
         private String servletRoutingPathSuffixAssertion;
+        private String auditAdapterClassName;
 
         public Configuration build() throws InternalException {
             if (spEntityID == null || spEntityID.length() == 0) {
@@ -381,6 +391,10 @@ public class Configuration {
                 servletRoutingPathSuffixAssertion = "assertionConsumer";
             }
 
+            if (auditAdapterClassName == null || auditAdapterClassName.length() == 0) {
+                auditAdapterClassName = "dk.gov.oio.saml.audit.Slf4jAuditAdapter";
+            }
+
             // Create configuration
             Configuration configuration = new Configuration();
             configuration.spEntityID = this.spEntityID;
@@ -397,6 +411,7 @@ public class Configuration {
             configuration.servletRoutingPathSuffixLogout = this.servletRoutingPathSuffixLogout;
             configuration.servletRoutingPathSuffixLogoutResponse = this.servletRoutingPathSuffixLogoutResponse;
             configuration.servletRoutingPathSuffixAssertion = this.servletRoutingPathSuffixAssertion;
+            configuration.auditAdapterClassName = this.auditAdapterClassName;
 
             return configuration;
         }
@@ -468,6 +483,11 @@ public class Configuration {
         
         public Builder setServletRoutingPathSuffixAssertion(String servletRoutingPathSuffixAssertion) {
             this.servletRoutingPathSuffixAssertion=servletRoutingPathSuffixAssertion;
+            return this;
+        }
+
+        public Builder setAuditAdapterClassName(String auditAdapterClassName) {
+            this.auditAdapterClassName=auditAdapterClassName;
             return this;
         }
     }
