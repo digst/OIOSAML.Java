@@ -1,6 +1,6 @@
 # OIO SAML 3 (Artifact ID: oiosaml3.java)
 
-## 3.0.3 (planned)
+## 3.1.0 (planned)
 - NLRFIM-109: Logging for Java OIO SAML 3
 
 ## 3.0.2
