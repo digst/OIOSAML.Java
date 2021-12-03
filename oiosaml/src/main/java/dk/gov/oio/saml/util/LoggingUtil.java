@@ -26,6 +26,8 @@ import org.opensaml.saml.saml2.core.StatusMessage;
 import org.opensaml.saml.saml2.core.impl.AssertionMarshaller;
 import org.w3c.dom.Element;
 
+
+// TODO: Refactor this class
 public class LoggingUtil {
 	private static final Logger log = LoggerFactory.getLogger(LoggingUtil.class);
 

@@ -17,34 +17,24 @@ public class OIOSAML3Service {
     private static AuditService auditService;
 
     public static void init(Configuration configuration) throws InitializationException {
-        if (log.isDebugEnabled()) {
-            log.debug("Initializing OIOSAML");
-        }
+        log.debug("Initializing OIOSAML");
 
         // Validate Crypto
-        if (log.isDebugEnabled()) {
-            log.debug("Validating Java Cryptographic Architecture");
-        }
+        log.debug("Validating Java Cryptographic Architecture");
         JavaCryptoValidationInitializer cryptoValidationInitializer = new JavaCryptoValidationInitializer();
         cryptoValidationInitializer.init();
 
         // Initialize OpenSAML
-        if (log.isDebugEnabled()) {
-            log.debug("Initializing OpenSAML");
-        }
+        log.debug("Initializing OpenSAML");
         InitializationService.initialize();
 
         // Set configuration
-        if (log.isDebugEnabled()) {
-            log.debug("Setting OIOSAML Configuration");
-        }
+        log.debug("Setting OIOSAML Configuration");
         OIOSAML3Service.configuration = configuration;
         OIOSAML3Service.auditService = new AuditService(configuration);
         initialized = true;
 
-        if (log.isDebugEnabled()) {
-            log.debug("OIOSAML Initialized");
-        }
+        log.debug("OIOSAML Initialized");
     }
 
     public static Configuration getConfig() throws RuntimeException {

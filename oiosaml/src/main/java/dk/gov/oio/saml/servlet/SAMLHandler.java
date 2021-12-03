@@ -30,9 +30,8 @@ public abstract class SAMLHandler {
 
     MessageContext<SAMLObject> decodeGet(HttpServletRequest httpServletRequest) throws InternalException, ExternalException {
         try {
-            if (log.isDebugEnabled()) {
-                log.debug("Decoding message as HTTPRedirect");
-            }
+            log.debug("Decoding message as HTTPRedirect");
+
             HTTPRedirectDeflateDecoder decoder = new HTTPRedirectDeflateDecoder();
             decoder.setHttpServletRequest(httpServletRequest);
 
@@ -50,9 +49,8 @@ public abstract class SAMLHandler {
 
     MessageContext<SAMLObject> decodePost(HttpServletRequest httpServletRequest) throws InternalException, ExternalException {
         try {
-            if (log.isDebugEnabled()) {
-                log.debug("Decoding message as HTTP Post");
-            }
+            log.debug("Decoding message as HTTP Post");
+
             HTTPPostDecoder decoder = new HTTPPostDecoder();
             decoder.setHttpServletRequest(httpServletRequest);
 
@@ -69,9 +67,7 @@ public abstract class SAMLHandler {
     }
 
     void sendGet(HttpServletResponse httpServletResponse, MessageContext<SAMLObject> message) throws ComponentInitializationException, MessageEncodingException {
-        if (log.isDebugEnabled()) {
-            log.debug("Encoding, deflating and sending message (HTTPRedirect)");
-        }
+        log.debug("Encoding, deflating and sending message (HTTPRedirect)");
 
         HTTPRedirectDeflateEncoder encoder = new HTTPRedirectDeflateEncoder();
 
@@ -83,9 +79,7 @@ public abstract class SAMLHandler {
     }
 
     void sendPost(HttpServletResponse httpServletResponse, MessageContext<SAMLObject> message) throws ComponentInitializationException, MessageEncodingException {
-        if (log.isDebugEnabled()) {
-            log.debug("Encoding and sending message (HTTPPost)");
-        }
+        log.debug("Encoding and sending message (HTTPPost)");
 
         HTTPPostEncoder encoder = new HTTPPostEncoder();
 

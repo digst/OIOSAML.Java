@@ -73,9 +73,7 @@ public class IdPMetadata {
 
         // If last scheduled refresh failed, Refresh now to give up to date metadata
         if (!resolver.wasLastRefreshSuccess()) {
-            if (log.isDebugEnabled()) {
-                log.debug("Last Metadata was not successful, Refreshing metadata.");
-            }
+            log.debug("Last Metadata was not successful, Refreshing metadata.");
 
             try {
                 resolver.refresh();

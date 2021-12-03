@@ -22,9 +22,7 @@ public class AuditService {
     private transient Configuration configuration;
 
     public AuditService(Configuration configuration) throws InitializationException {
-        if (log.isDebugEnabled()) {
-            log.debug("Initialize AuditService");
-        }
+        log.debug("Initialize AuditService");
         this.configuration = configuration;
         this.auditAdapter = createAuditAdapter(configuration.getAuditAdapterClassName());
     }

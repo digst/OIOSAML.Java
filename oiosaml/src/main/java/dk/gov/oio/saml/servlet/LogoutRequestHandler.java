@@ -31,9 +31,7 @@ public class LogoutRequestHandler extends SAMLHandler {
 
     @Override
     public void handleGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ExternalException, InternalException {
-        if (log.isDebugEnabled()) {
-            log.debug("Handling LogoutRequest");
-        }
+        log.debug("Handling LogoutRequest");
 
         // Find out if this is SP or IdP Initiated
         String samlRequest = httpServletRequest.getParameter("SAMLRequest");
@@ -48,17 +46,13 @@ public class LogoutRequestHandler extends SAMLHandler {
 
             // Send LogoutRequest to IdP only if the session actually has an authenticated user on it
             if (authenticated) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Session invalidated");
-                }
+                log.debug("Session invalidated");
 
                 try {
                     String location = IdPMetadataService.getInstance().getLogoutEndpoint().getLocation();
                     MessageContext<SAMLObject> messageContext = LogoutRequestService.createMessageWithLogoutRequest(nameId, nameIdFormat, location, index);
 
-                    if (log.isDebugEnabled()) {
-                        log.debug("Sending LogoutRequest");
-                    }
+                    log.debug("Sending LogoutRequest");
 
                     LoggingUtil.logLogoutRequest(getSamlObject(messageContext, LogoutRequest.class), "Outgoing");
                     sendGet(httpServletResponse, messageContext);
@@ -88,9 +82,7 @@ public class LogoutRequestHandler extends SAMLHandler {
 
         // Delete session
         httpServletRequest.getSession().invalidate();
-        if (log.isDebugEnabled()) {
-            log.debug("Session invalidated");
-        }
+        log.debug("Session invalidated");
 
         // Create LogoutResponse
         try {
@@ -98,9 +90,7 @@ public class LogoutRequestHandler extends SAMLHandler {
             String logoutResponseEndpoint = metadataService.getLogoutResponseEndpoint(); // Has to be from the specific IdP that verified the user
             MessageContext<SAMLObject> messageContext = LogoutResponseService.createMessageWithLogoutResponse(logoutRequest, logoutResponseEndpoint);
 
-            if (log.isDebugEnabled()) {
-                log.debug("Sending LogoutResponse");
-            }
+            log.debug("Sending LogoutResponse");
 
             LoggingUtil.logLogoutResponse(getSamlObject(messageContext, LogoutResponse.class), "Outgoing");
             sendPost(httpServletResponse, messageContext);

@@ -50,9 +50,7 @@ public class AuthnRequestService {
 
     // Credential service
     public MessageContext<SAMLObject> getMessageContext(HttpServletRequest request) throws ComponentInitializationException, MessageDecodingException {
-        if (log.isDebugEnabled()) {
-            log.debug("Decoding Http Redirect deflate");
-        }
+        log.debug("Decoding Http Redirect deflate");
 
         HTTPRedirectDeflateDecoder decoder = new HTTPRedirectDeflateDecoder();
             decoder.setHttpServletRequest(request);

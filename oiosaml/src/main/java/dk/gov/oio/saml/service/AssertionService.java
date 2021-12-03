@@ -40,10 +40,7 @@ public class AssertionService {
     }
 
     private Assertion decryptAssertion(EncryptedAssertion encryptedAssertion) throws InternalException, ExternalException {
-        if (log.isDebugEnabled()) {
-            log.debug("Decrypting Assertion");
-        }
-
+        log.debug("Decrypting Assertion");
         try {
             KeyInfoCredentialResolver keyResolver = null;
             try {

@@ -75,9 +75,7 @@ public class    AuthenticatedFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
         
-        if (log.isDebugEnabled()) {
-            log.debug("AuthenticatedFilter invoked by endpoint: '" + req.getContextPath() + req.getServletPath() + "'");
-        }
+        log.debug("AuthenticatedFilter invoked by endpoint: '%s%s'", req.getContextPath(), req.getServletPath());
 
         HttpSession session = req.getSession();
 
@@ -93,15 +91,11 @@ public class    AuthenticatedFilter implements Filter {
                 authenticated = true;
             }
 
-            if (log.isDebugEnabled()) {
-                log.debug("Current NSIS Level on session: " + authenticatedNsisLevel + ", Required NSIS Level: " + requiredNsisLevel);
-            }
+            log.debug("Current NSIS Level on session: %s, Required NSIS Level: %s", authenticatedNsisLevel, requiredNsisLevel);
 
             // Is the user authenticated, and at the required level?
             if (!authenticated || !isAssuranceSufficient(requiredNsisLevel, authenticatedNsisLevel, authenticatedAssuranceLevel)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Filter config: isPassive: " + isPassive + ", forceAuthn: " + forceAuthn);
-                }
+                log.debug("Filter config: isPassive: %s, forceAuthn: %s", isPassive, forceAuthn);
 
                 AuthnRequestService authnRequestService = AuthnRequestService.getInstance();
 
@@ -206,9 +200,8 @@ public class    AuthenticatedFilter implements Filter {
 	}
 
     private void sendAuthnRequest(HttpServletRequest req, HttpServletResponse res, MessageContext<SAMLObject> authnRequest, NSISLevel requestedNsisLevel) throws InternalException {
-        if (log.isDebugEnabled()) {
-            LoggingUtil.logAuthnRequest((AuthnRequest) authnRequest.getMessage());
-        }
+        //TODO: refactor logging here
+        LoggingUtil.logAuthnRequest((AuthnRequest) authnRequest.getMessage());
 
         // Save authnRequest on session
         HttpSession session = req.getSession();

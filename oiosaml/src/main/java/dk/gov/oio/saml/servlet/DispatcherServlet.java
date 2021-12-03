@@ -32,16 +32,12 @@ public class DispatcherServlet extends HttpServlet {
 
     @Override
     public void init(ServletConfig servletConfig) throws ServletException {
-        if (log.isDebugEnabled()) {
-            log.debug("Initializing DispatcherServlet");
-        }
+        log.debug("Initializing DispatcherServlet");
 
         super.init(servletConfig);
         initServlet();
 
-        if (log.isDebugEnabled()) {
-            log.debug("Initialized DispatcherServlet");
-        }
+        log.debug("Initialized DispatcherServlet");
     }
 
     private void handleOptionalValues(Map<String, String> config, Configuration configuration) {
@@ -172,9 +168,7 @@ public class DispatcherServlet extends HttpServlet {
         	return;
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("Selected MessageHandler: " + samlHandler.getClass().getName());
-        }
+        log.debug("Selected MessageHandler: %s", samlHandler.getClass().getName());
 
 		try {
 			samlHandler.handleGet(req, res);
@@ -204,15 +198,13 @@ public class DispatcherServlet extends HttpServlet {
 
         SAMLHandler samlHandler = handlers.get(action);
         if (samlHandler == null) {
-        	log.error("No handler registered for action: " + action);
+        	log.error("No handler registered for action: %s", action);
         	
         	ErrorHandler.handle(req, res, ERROR_TYPE.CONFIGURATION_ERROR, "No handler registered for action: " + action);
         	return;
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("Selected MessageHandler: " + samlHandler.getClass().getName());
-        }
+        log.debug("Selected MessageHandler: %s", samlHandler.getClass().getName());
 
         try {
             samlHandler.handlePost(req, res);
@@ -261,7 +253,7 @@ public class DispatcherServlet extends HttpServlet {
                 }
         	}
         	catch (Exception ex) {
-        		log.error("Failed to load external configuration file: " + externalConfigurationFile, ex);
+        		log.error("Failed to load external configuration file: %s", externalConfigurationFile, ex);
         	}
         }
 
