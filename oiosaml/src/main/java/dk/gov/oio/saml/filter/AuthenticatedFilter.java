@@ -1,8 +1,7 @@
 package dk.gov.oio.saml.filter;
 
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.*;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -14,9 +13,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import dk.gov.oio.saml.audit.AuditService;
 import dk.gov.oio.saml.config.Configuration;
 import dk.gov.oio.saml.service.OIOSAML3Service;
+import dk.gov.oio.saml.util.RequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.opensaml.messaging.context.MessageContext;
@@ -114,10 +113,10 @@ public class    AuthenticatedFilter implements Filter {
                 req.getSession().setAttribute(Constants.SESSION_REQUESTED_PATH, reqPath);
                 MessageContext<SAMLObject> authnRequest = authnRequestService.createMessageWithAuthnRequest(isPassive, forceAuthn, requiredNsisLevel, attributeProfile);
 
-                OIOSAML3Service.getAuditService().auditLog(new AuditService
-                        .Builder()
-                        .withAuthnAttribute("IP", req.getRemoteAddr())
-                        .withAuthnAttribute("AuthnRequestId", ((AuthnRequest)authnRequest.getMessage()).getID())
+                //Audit logging
+                OIOSAML3Service.getAuditService().auditLog(RequestUtil
+                        .createBasicAuditBuilder(req, "BSA1", "AuthnRequest")
+                        .withAuthnAttribute("AUTH_REQUEST_ID", ((AuthnRequest)authnRequest.getMessage()).getID())
                         .withAuthnAttribute("URL", req.getContextPath()));
 
                 sendAuthnRequest(req, res, authnRequest, requiredNsisLevel);

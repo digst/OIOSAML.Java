@@ -16,6 +16,10 @@ public class Configuration {
     private String servletRoutingPathSuffixLogoutResponse; // The endpoint suffix for logout response
     private String servletRoutingPathSuffixAssertion; // The endpoint suffix for assertion
     private String auditAdapterClassName; // Class name of SP's implementation of the AuditAdapter
+    private String auditRequestAttributeIP; // Replace IP in audit request with value from attribute [protocol:name]
+    private String auditRequestAttributePort; // Replace IP in audit request with value from attribute [protocol:name]
+    private String auditRequestAttributeSessionId; // Replace SessionId in audit request with value from attribute [protocol:name]
+    private String auditRequestAttributeServiceProviderUserId; // Replace ServiceProviderUserId in audit request with value from attribute [protocol:name]
     private boolean validationEnabled = true;
     private boolean isAssuranceLevelAllowed = false;
     private int minimumAssuranceLevel = 3;
@@ -319,6 +323,38 @@ public class Configuration {
         this.auditAdapterClassName = auditAdapterClassName;
     }
 
+    public String getAuditRequestAttributeIP() {
+        return auditRequestAttributeIP;
+    }
+
+    public void setAuditRequestAttributeIP(String auditRequestAttributeIP) {
+        this.auditRequestAttributeIP = auditRequestAttributeIP;
+    }
+
+    public String getAuditRequestAttributePort() {
+        return auditRequestAttributePort;
+    }
+
+    public void setAuditRequestAttributePort(String auditRequestAttributePort) {
+        this.auditRequestAttributePort = auditRequestAttributePort;
+    }
+
+    public String getAuditRequestAttributeSessionId() {
+        return auditRequestAttributeSessionId;
+    }
+
+    public void setAuditRequestAttributeSessionId(String auditRequestAttributeSessionId) {
+        this.auditRequestAttributeSessionId = auditRequestAttributeSessionId;
+    }
+
+    public String getAuditRequestAttributeServiceProviderUserId() {
+        return auditRequestAttributeServiceProviderUserId;
+    }
+
+    public void setAuditRequestAttributeServiceProviderUserId(String auditRequestAttributeServiceProviderUserId) {
+        this.auditRequestAttributeServiceProviderUserId = auditRequestAttributeServiceProviderUserId;
+    }
+
     // Configuration builder for mandatory fields
     public static class Builder {
         private String spEntityID;
@@ -336,6 +372,10 @@ public class Configuration {
         private String servletRoutingPathSuffixLogoutResponse;
         private String servletRoutingPathSuffixAssertion;
         private String auditAdapterClassName;
+        private String auditRequestAttributeIP;
+        private String auditRequestAttributePort;
+        private String auditRequestAttributeSessionId;
+        private String auditRequestAttributeServiceProviderUserId;
 
         public Configuration build() throws InternalException {
             if (spEntityID == null || spEntityID.length() == 0) {
@@ -412,6 +452,10 @@ public class Configuration {
             configuration.servletRoutingPathSuffixLogoutResponse = this.servletRoutingPathSuffixLogoutResponse;
             configuration.servletRoutingPathSuffixAssertion = this.servletRoutingPathSuffixAssertion;
             configuration.auditAdapterClassName = this.auditAdapterClassName;
+            configuration.auditRequestAttributeIP = this.auditRequestAttributeIP;
+            configuration.auditRequestAttributePort = this.auditRequestAttributePort;
+            configuration.auditRequestAttributeSessionId = this.auditRequestAttributeSessionId;
+            configuration.auditRequestAttributeServiceProviderUserId = this.auditRequestAttributeServiceProviderUserId;
 
             return configuration;
         }
@@ -488,6 +532,26 @@ public class Configuration {
 
         public Builder setAuditAdapterClassName(String auditAdapterClassName) {
             this.auditAdapterClassName=auditAdapterClassName;
+            return this;
+        }
+
+        public Builder setAuditRequestAttributeIP(String auditRequestAttributeIP) {
+            this.auditRequestAttributeIP=auditRequestAttributeIP;
+            return this;
+        }
+
+        public Builder setAuditRequestAttributePort(String auditRequestAttributePort) {
+            this.auditRequestAttributePort=auditRequestAttributePort;
+            return this;
+        }
+
+        public Builder setAuditRequestAttributeSessionId(String auditRequestAttributeSessionId) {
+            this.auditRequestAttributeSessionId=auditRequestAttributeSessionId;
+            return this;
+        }
+
+        public Builder setAuditRequestAttributeServiceProviderUserId(String auditRequestAttributeServiceProviderUserId) {
+            this.auditRequestAttributeServiceProviderUserId=auditRequestAttributeServiceProviderUserId;
             return this;
         }
     }

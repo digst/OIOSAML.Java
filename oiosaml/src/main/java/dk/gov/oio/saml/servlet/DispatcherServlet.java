@@ -291,6 +291,8 @@ public class DispatcherServlet extends HttpServlet {
                         .setServletRoutingPathSuffixLogout(config.get(Constants.SP_ROUTING_LOGOUT))
                         .setServletRoutingPathSuffixLogoutResponse(config.get(Constants.SP_ROUTING_LOGOUT_RESPONSE))
                         .setServletRoutingPathSuffixAssertion(config.get(Constants.SP_ROUTING_ASSERTION))
+                        .setAuditAdapterClassName(config.get(Constants.SP_AUDIT_CLASSNAME))
+                        // TODO: Add missing configuration
                         .build();
 
                 handleOptionalValues(config, configuration);

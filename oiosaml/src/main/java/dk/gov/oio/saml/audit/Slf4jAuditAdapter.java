@@ -15,6 +15,12 @@ public class Slf4jAuditAdapter implements AuditAdapter {
     private static final Logger log = LoggerFactory.getLogger(Slf4jAuditAdapter.class);
     private static Marker audit = MarkerFactory.getMarker("AUDIT");
 
+    /**
+     * SLF4J default audit logging adapter, audit logging must be persisted 6 month.
+     */
+    public Slf4jAuditAdapter() {
+        log.info("SLF4J default audit logging adapter created, audit logging must be persisted 6 month!");
+    }
 
     /**
      * Audit log a message, e.g. AuthnRequest or Assertion from SAML

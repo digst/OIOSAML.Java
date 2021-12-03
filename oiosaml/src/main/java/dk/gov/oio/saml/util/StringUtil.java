@@ -25,37 +25,43 @@ public class StringUtil {
 		return url;
 	}
 
+	/**
+	 * Return an escaped value for use in a json document.
+	 * @param value input value with special characters
+	 * @return json escaped output value, an empty string if value is null.
+	 */
 	public static String jsonEscape(String value) {
 		StringBuilder sb = new StringBuilder();
-		if (null != value) {
-			for (char ch : value.toCharArray()) {
-				switch (ch) {
-					case '"':
-					case '\\':
-						sb.append("\\").append(ch);
-						break;
-					case '\t':
-						sb.append("\\t");
-						break;
-					case '\b':
-						sb.append("\\b");
-						break;
-					case '\n':
-						sb.append("\\n");
-						break;
-					case '\r':
-						sb.append("\\r");
-						break;
-					case '\f':
-						sb.append("\\f");
-						break;
-					default:
-						if (ch <= 0x1F | ch == '\u2028' | ch == '\u2029') {
-							sb.append(String.format("\\u%04x", (int) ch));
-						} else {
-							sb.append(ch);
-						}
-				}
+		if (null == value) {
+			return "";
+		}
+		for (char ch : value.toCharArray()) {
+			switch (ch) {
+				case '"':
+				case '\\':
+					sb.append("\\").append(ch);
+					break;
+				case '\t':
+					sb.append("\\t");
+					break;
+				case '\b':
+					sb.append("\\b");
+					break;
+				case '\n':
+					sb.append("\\n");
+					break;
+				case '\r':
+					sb.append("\\r");
+					break;
+				case '\f':
+					sb.append("\\f");
+					break;
+				default:
+					if (ch <= 0x1F | ch == '\u2028' | ch == '\u2029') {
+						sb.append(String.format("\\u%04x", (int) ch));
+					} else {
+						sb.append(ch);
+					}
 			}
 		}
 		return sb.toString();

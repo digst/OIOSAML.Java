@@ -18,12 +18,6 @@ public class Constants {
     // Configuration constants for DispatcherServlet (required)
     public static final String SP_ENTITY_ID = "oiosaml.servlet.entityid";
     public static final String SP_BASE_URL = "oiosaml.servlet.baseurl";
-    public static final String SP_ROUTING_BASE = "oiosaml.servlet.routing.path.prefix";
-    public static final String SP_ROUTING_ERROR = "oiosaml.servlet.routing.path.suffix.error";
-    public static final String SP_ROUTING_METADATA = "oiosaml.servlet.routing.path.suffix.metadata";
-    public static final String SP_ROUTING_LOGOUT = "oiosaml.servlet.routing.path.suffix.logout";
-    public static final String SP_ROUTING_LOGOUT_RESPONSE = "oiosaml.servlet.routing.path.suffix.logoutResponse";
-    public static final String SP_ROUTING_ASSERTION = "oiosaml.servlet.routing.path.suffix.assertion";
     public static final String KEYSTORE_LOCATION = "oiosaml.servlet.keystore.location";
     public static final String KEYSTORE_PASSWORD = "oiosaml.servlet.keystore.password";
     public static final String KEY_ALIAS = "oiosaml.servlet.keystore.alias";
@@ -48,6 +42,13 @@ public class Constants {
     public static final String LOGOUT_PAGE = "oiosaml.servlet.secondary.page.logout";
     public static final String LOGIN_PAGE = "oiosaml.servlet.secondary.page.login";
     public static final String SUPPORT_SELF_SIGNED = "oiosaml.servlet.trust.selfsigned.certs";
+    public static final String SP_ROUTING_BASE = "oiosaml.servlet.routing.path.prefix";
+    public static final String SP_ROUTING_ERROR = "oiosaml.servlet.routing.path.suffix.error";
+    public static final String SP_ROUTING_METADATA = "oiosaml.servlet.routing.path.suffix.metadata";
+    public static final String SP_ROUTING_LOGOUT = "oiosaml.servlet.routing.path.suffix.logout";
+    public static final String SP_ROUTING_LOGOUT_RESPONSE = "oiosaml.servlet.routing.path.suffix.logoutResponse";
+    public static final String SP_ROUTING_ASSERTION = "oiosaml.servlet.routing.path.suffix.assertion";
+    public static final String SP_AUDIT_CLASSNAME = "oiosaml.servlet.audit.adapter.classname";
 
     // Configuration constants for revocation check settings
     public static final String CRL_CHECK_ENABLED = "oiosaml.servlet.revocation.crl.check.enabled";
