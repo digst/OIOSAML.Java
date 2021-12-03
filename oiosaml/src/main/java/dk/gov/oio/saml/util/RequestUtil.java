@@ -28,7 +28,7 @@ public class RequestUtil {
         if (null == parameter || parameter.length() == 0 ) {
             return defaultValue;
         }
-        String[] name = Objects.toString(parameter, "").split(":", 1);
+        String[] name = Objects.toString(parameter, "").split(":", 2);
 
         if (name.length != 2) {
             log.error(String.format("Custom request parameter '%s' is malformed, should be '<protocol>:<attribute>'",parameter));
