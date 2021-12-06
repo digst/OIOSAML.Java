@@ -1,10 +1,16 @@
 package dk.gov.oio.saml.servlet;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import dk.gov.oio.saml.util.*;
+import org.joda.time.DateTime;
+import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.saml.saml2.core.Issuer;
+import org.opensaml.saml.saml2.ecp.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.opensaml.core.config.InitializationException;
@@ -19,12 +25,8 @@ import dk.gov.oio.saml.service.IdPMetadataService;
 import dk.gov.oio.saml.service.LogoutRequestService;
 import dk.gov.oio.saml.service.LogoutResponseService;
 import dk.gov.oio.saml.service.OIOSAML3Service;
-import dk.gov.oio.saml.util.Constants;
-import dk.gov.oio.saml.util.ExternalException;
-import dk.gov.oio.saml.util.InternalException;
-import dk.gov.oio.saml.util.LoggingUtil;
-import dk.gov.oio.saml.util.StringUtil;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import org.w3c.dom.Element;
 
 public class LogoutRequestHandler extends SAMLHandler {
     private static final Logger log = LoggerFactory.getLogger(LogoutRequestHandler.class);
@@ -51,10 +53,21 @@ public class LogoutRequestHandler extends SAMLHandler {
                 try {
                     String location = IdPMetadataService.getInstance().getLogoutEndpoint().getLocation();
                     MessageContext<SAMLObject> messageContext = LogoutRequestService.createMessageWithLogoutRequest(nameId, nameIdFormat, location, index);
+                    LogoutRequest logoutRequest = getSamlObject(messageContext, LogoutRequest.class);
 
-                    log.debug("Sending LogoutRequest");
+                    log.info("Outgoing LogoutRequest - ID:'{}' Issuer:'{}' IssueInstant:'{}' SessionIndexes:'{}' Destination:'{}'",
+                            logoutRequest.getID(),
+                            logoutRequest.getIssuer() != null ?
+                                    logoutRequest.getIssuer().getValue() : "",
+                            logoutRequest.getIssueInstant() != null ?
+                                    logoutRequest.getIssueInstant().toString() : "",
+                            logoutRequest.getSessionIndexes()
+                                    .stream()
+                                    .map(sessionIndex -> sessionIndex.getSessionIndex())
+                                    .collect(Collectors
+                                            .joining(", ", "[", "]")),
+                            logoutRequest.getDestination());
 
-                    LoggingUtil.logLogoutRequest(getSamlObject(messageContext, LogoutRequest.class), "Outgoing");
                     sendGet(httpServletResponse, messageContext);
                     return;
                 }
@@ -76,7 +89,19 @@ public class LogoutRequestHandler extends SAMLHandler {
         MessageContext<SAMLObject> context = decodeGet(httpServletRequest);
         LogoutRequest logoutRequest = getSamlObject(context, LogoutRequest.class);
 
-        LoggingUtil.logLogoutRequest(logoutRequest, "Incoming");
+        log.info("Incoming LogoutRequest - ID:'{}' Issuer:'{}' IssueInstant:'{}' SessionIndexes:'{}' Destination:'{}'",
+                logoutRequest.getID(),
+                logoutRequest.getIssuer() != null ?
+                        logoutRequest.getIssuer().getValue() : "",
+                logoutRequest.getIssueInstant() != null ?
+                        logoutRequest.getIssueInstant().toString() : "",
+                logoutRequest.getSessionIndexes()
+                        .stream()
+                        .map(sessionIndex -> sessionIndex.getSessionIndex())
+                        .collect(Collectors
+                                .joining(", ", "[", "]")),
+                logoutRequest.getDestination());
+
 
         // Validate logout request, we log the user out not matter what, but we should log if the request is wrong
 
@@ -90,9 +115,26 @@ public class LogoutRequestHandler extends SAMLHandler {
             String logoutResponseEndpoint = metadataService.getLogoutResponseEndpoint(); // Has to be from the specific IdP that verified the user
             MessageContext<SAMLObject> messageContext = LogoutResponseService.createMessageWithLogoutResponse(logoutRequest, logoutResponseEndpoint);
 
-            log.debug("Sending LogoutResponse");
+            try {
+                Element element = SamlHelper.marshallObject(logoutRequest);
+                log.debug("LogoutRequest: " + StringUtil.elementToString(element));
+            } catch (MarshallingException e) {
+                log.error("Could not marshall LogoutRequest for logging purposes");
+            }
 
-            LoggingUtil.logLogoutResponse(getSamlObject(messageContext, LogoutResponse.class), "Outgoing");
+            log.info("Outgoing LogoutRequest - ID:'{}' Issuer:'{}' IssueInstant:'{}' SessionIndexes:'{}' Destination:'{}'",
+                    logoutRequest.getID(),
+                    logoutRequest.getIssuer() != null ?
+                            logoutRequest.getIssuer().getValue() : "",
+                    logoutRequest.getIssueInstant() != null ?
+                            logoutRequest.getIssueInstant().toString() : "",
+                    logoutRequest.getSessionIndexes()
+                            .stream()
+                            .map(sessionIndex -> sessionIndex.getSessionIndex())
+                            .collect(Collectors
+                                    .joining(", ", "[", "]")),
+                    logoutRequest.getDestination());
+
             sendPost(httpServletResponse, messageContext);
 		}
 		catch (InitializationException | ComponentInitializationException | MessageEncodingException e) {

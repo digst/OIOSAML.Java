@@ -15,7 +15,10 @@ import javax.servlet.http.HttpSession;
 
 import dk.gov.oio.saml.config.Configuration;
 import dk.gov.oio.saml.service.OIOSAML3Service;
-import dk.gov.oio.saml.util.RequestUtil;
+import dk.gov.oio.saml.util.*;
+import org.joda.time.DateTime;
+import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.saml.saml2.core.Issuer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.opensaml.messaging.context.MessageContext;
@@ -29,12 +32,9 @@ import dk.gov.oio.saml.service.AuthnRequestService;
 import dk.gov.oio.saml.session.AssertionWrapper;
 import dk.gov.oio.saml.session.AssertionWrapperHolder;
 import dk.gov.oio.saml.session.AuthnRequestWrapper;
-import dk.gov.oio.saml.util.Constants;
-import dk.gov.oio.saml.util.InternalException;
-import dk.gov.oio.saml.util.LoggingUtil;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 
-public class    AuthenticatedFilter implements Filter {
+public class AuthenticatedFilter implements Filter {
     private static final Logger log = LoggerFactory.getLogger(AuthenticatedFilter.class);
     private boolean isPassive, forceAuthn;
     private String attributeProfile;
@@ -75,7 +75,7 @@ public class    AuthenticatedFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
         
-        log.debug("AuthenticatedFilter invoked by endpoint: '%s%s'", req.getContextPath(), req.getServletPath());
+        log.debug("AuthenticatedFilter invoked by endpoint: '{}{}'", req.getContextPath(), req.getServletPath());
 
         HttpSession session = req.getSession();
 
@@ -91,11 +91,11 @@ public class    AuthenticatedFilter implements Filter {
                 authenticated = true;
             }
 
-            log.debug("Current NSIS Level on session: %s, Required NSIS Level: %s", authenticatedNsisLevel, requiredNsisLevel);
+            log.debug("Current NSIS Level on session: {}, Required NSIS Level: {}", authenticatedNsisLevel, requiredNsisLevel);
 
             // Is the user authenticated, and at the required level?
             if (!authenticated || !isAssuranceSufficient(requiredNsisLevel, authenticatedNsisLevel, authenticatedAssuranceLevel)) {
-                log.debug("Filter config: isPassive: %s, forceAuthn: %s", isPassive, forceAuthn);
+                log.debug("Filter config: isPassive: {}, forceAuthn: {}", isPassive, forceAuthn);
 
                 AuthnRequestService authnRequestService = AuthnRequestService.getInstance();
 
@@ -110,7 +110,7 @@ public class    AuthenticatedFilter implements Filter {
                 //Audit logging
                 OIOSAML3Service.getAuditService().auditLog(RequestUtil
                         .createBasicAuditBuilder(req, "BSA1", "AuthnRequest")
-                        .withAuthnAttribute("AUTH_REQUEST_ID", ((AuthnRequest)authnRequest.getMessage()).getID())
+                        .withAuthnAttribute("AUTHN_REQUEST_ID", ((AuthnRequest)authnRequest.getMessage()).getID())
                         .withAuthnAttribute("URL", req.getContextPath()));
 
                 sendAuthnRequest(req, res, authnRequest, requiredNsisLevel);
@@ -118,7 +118,7 @@ public class    AuthenticatedFilter implements Filter {
 			else {
 				try {
 					putAssertionOnThreadLocal(session);
-	
+
 					// User already authenticated to the correct level
 	                chain.doFilter(req, res);
 				}
@@ -187,7 +187,7 @@ public class    AuthenticatedFilter implements Filter {
 
 	private void putAssertionOnThreadLocal(HttpSession session) {
         Object assertionObject = session.getAttribute(Constants.SESSION_ASSERTION);
-        if (assertionObject != null && assertionObject instanceof AssertionWrapper) {                    
+        if (assertionObject != null && assertionObject instanceof AssertionWrapper) {
             AssertionWrapperHolder.set((AssertionWrapper) assertionObject);
 
             if (log.isDebugEnabled()) {
@@ -200,12 +200,19 @@ public class    AuthenticatedFilter implements Filter {
 	}
 
     private void sendAuthnRequest(HttpServletRequest req, HttpServletResponse res, MessageContext<SAMLObject> authnRequest, NSISLevel requestedNsisLevel) throws InternalException {
-        //TODO: refactor logging here
-        LoggingUtil.logAuthnRequest((AuthnRequest) authnRequest.getMessage());
+        try {
+            log.debug("AuthnRequest: {}", StringUtil.elementToString(SamlHelper.marshallObject(authnRequest.getMessage())));
+        }
+        catch (MarshallingException e) {
+            log.error("Could not marshall AuthnRequest for logging purposes");
+        }
 
         // Save authnRequest on session
         HttpSession session = req.getSession();
-        session.setAttribute(Constants.SESSION_AUTHN_REQUEST, new AuthnRequestWrapper((AuthnRequest) authnRequest.getMessage(), requiredNsisLevel));
+        AuthnRequestWrapper wrapper = new AuthnRequestWrapper((AuthnRequest) authnRequest.getMessage(), requiredNsisLevel);
+        session.setAttribute(Constants.SESSION_AUTHN_REQUEST, wrapper);
+
+        log.info("Outgoing AuthnRequest - ID:'" + wrapper.getId() + "' Issuer:'" + wrapper.getIssuer() + "' IssueInstant:'" + wrapper.getIssueInstant() + "' Destination:'" + wrapper.getDestination() + "'");
 
         // Deflating and sending the message
         HTTPRedirectDeflateEncoder encoder = new HTTPRedirectDeflateEncoder();
@@ -213,6 +220,10 @@ public class    AuthenticatedFilter implements Filter {
         encoder.setHttpServletResponse(res);
 
         try {
+            OIOSAML3Service.getAuditService().auditLog(RequestUtil
+                    .createBasicAuditBuilder(req, "BSA2", "SendAuthnRequest")
+                    .withAuthnAttribute("AUTHN_REQUEST_ID", ((AuthnRequest)authnRequest.getMessage()).getID()));
+
             encoder.initialize();
             encoder.encode();
         }

@@ -63,10 +63,10 @@ public class CRLChecker {
 		for (final X509Certificate certificate : x509Certificates) {
 			if (checkCertificate(certificate)) {
 				result.add(certificate);
-				log.debug("Certificate validated successfully: %s", certificate.getSubjectDN());
+				log.debug("Certificate validated successfully: {}", certificate.getSubjectDN());
 			}
 			else {
-				log.error("Certificate did not validate: %s", certificate.getSubjectDN());
+				log.error("Certificate did not validate: {}", certificate.getSubjectDN());
 			}
 		}
 
@@ -112,7 +112,7 @@ public class CRLChecker {
 	}
 
 	private static boolean doOCSPCheck(X509Certificate certificate) throws CertificateException, CertPathValidatorException, InvalidAlgorithmParameterException, NoSuchAlgorithmException {
-		log.debug("Starting OCSP validation of certificate %s", certificate.getSubjectDN());
+		log.debug("Starting OCSP validation of certificate {}", certificate.getSubjectDN());
 
 		String ocspServer = getOCSPUrl(certificate);
 		if (ocspServer == null) {
@@ -150,10 +150,10 @@ public class CRLChecker {
 		catch (CertPathValidatorException cpve) {
 			if (cpve.getMessage() != null && cpve.getMessage().contains("Certificate has been revoked")) {
 				revoked = true;
-				log.info("Certificate revoked, cert[%s] : %s", cpve.getIndex(), cpve.getMessage());
+				log.info("Certificate revoked, cert[{}] : {}", cpve.getIndex(), cpve.getMessage());
 			}
 			else {
-				log.error("Validation failure, cert[%s] : %s", cpve.getIndex(), cpve.getMessage());
+				log.error("Validation failure, cert[{}] : {}", cpve.getIndex(), cpve.getMessage());
 				throw cpve;
 			}
 		}
@@ -162,7 +162,7 @@ public class CRLChecker {
 	}
 
 	private static X509Certificate getIssuingCertificate(X509Certificate certificate) {
-		log.debug("Attempting to extract issuing ca certifcate from certificate %s", certificate.getSubjectDN());
+		log.debug("Attempting to extract issuing ca certifcate from certificate {}", certificate.getSubjectDN());
 
 		AuthorityInformationAccess authInfoAcc = null;
 
@@ -212,10 +212,10 @@ public class CRLChecker {
 					return certificate;
 				}
 				
-				log.warn("Failed to parse certificate from %s", url);
+				log.warn("Failed to parse certificate from {}", url);
 			}
 			catch (IOException ex) {
-				log.warn("Failed to download intermediate CA certificate from %s", url);
+				log.warn("Failed to download intermediate CA certificate from {}", url);
 			}
 		}
 		catch (CertificateException ex) {
@@ -226,7 +226,7 @@ public class CRLChecker {
 	}
 
 	private static String getOCSPUrl(X509Certificate certificate) {
-		log.debug("Attempting to extract OCSP location from certificate %s", certificate.getSubjectDN());
+		log.debug("Attempting to extract OCSP location from certificate {}", certificate.getSubjectDN());
 
 		AuthorityInformationAccess authInfoAcc = null;
 
@@ -312,7 +312,7 @@ public class CRLChecker {
 			CertificateFactory cf = CertificateFactory.getInstance("X.509");
 			X509CRL crl = (X509CRL) cf.generateCRL(is);
 
-			log.debug("CRL for %s: %s", url, crl);
+			log.debug("CRL for {}: {}", url, crl);
 
 			X509CRLEntry revokedCertificate = crl.getRevokedCertificate(certificate.getSerialNumber());
 			if (revokedCertificate != null) {
@@ -328,7 +328,7 @@ public class CRLChecker {
 	}
 
 	private static String getCRLUrl(X509Certificate certificate) throws IOException {
-		log.debug("Attempting to extract distribution point from certificate %s", certificate.getSubjectDN());
+		log.debug("Attempting to extract distribution point from certificate {}", certificate.getSubjectDN());
 
 		byte[] val = certificate.getExtensionValue("2.5.29.31");
 		if (val != null) {

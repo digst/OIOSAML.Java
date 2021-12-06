@@ -18,13 +18,13 @@ public class AuditService {
     private static final Logger log = LoggerFactory.getLogger(AuditService.class);
     private static SimpleDateFormat JSON_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
-    private transient AuditAdapter auditAdapter;
+    private transient AuditLogger auditLogger;
     private transient Configuration configuration;
 
     public AuditService(Configuration configuration) throws InitializationException {
         log.debug("Initialize AuditService");
         this.configuration = configuration;
-        this.auditAdapter = createAuditAdapter(configuration.getAuditAdapterClassName());
+        this.auditLogger = createAuditAdapter(configuration.getAuditLoggerClassName());
     }
 
     /**
@@ -32,7 +32,7 @@ public class AuditService {
      */
     public void auditLog(Builder auditBuilder) {
         if (null != auditBuilder) {
-            auditAdapter.auditLog(auditBuilder
+            auditLogger.auditLog(auditBuilder
                     .withAuthnAttribute("Time", JSON_DATE_FORMATTER.format(Calendar.getInstance().getTime()))
                     .withAuthnAttribute("SpEntityID", configuration.getSpEntityID())
                     .withAuthnAttribute("IdpEntityID", configuration.getIdpEntityID())
@@ -58,20 +58,20 @@ public class AuditService {
         }
     }
 
-    private AuditAdapter createAuditAdapter(String auditAdapterClassName) throws InitializationException {
-        Class<?> adapterClazz = Slf4jAuditAdapter.class;
+    private AuditLogger createAuditAdapter(String auditAdapterClassName) throws InitializationException {
+        Class<?> adapterClazz = Slf4JAuditLogger.class;
         try {
             if (null != auditAdapterClassName && auditAdapterClassName.length() > 0) {
 
-                log.info(String.format("Initializing AuditAdapter '%s'", auditAdapterClassName));
+                log.info("Initializing AuditAdapter '{}'", auditAdapterClassName);
                 adapterClazz = Class.forName(auditAdapterClassName);
             }
 
             for (Constructor<?> constructor : adapterClazz.getConstructors()) {
                 if (constructor.getParameterTypes().length == 0) {
 
-                    log.info(String.format("Create '%s' AuditAdapter", adapterClazz.getName()));
-                    return (AuditAdapter) constructor.newInstance();
+                    log.info("Create '{}' AuditAdapter", adapterClazz.getName());
+                    return (AuditLogger) constructor.newInstance();
                 }
             }
             throw new InitializationException(String.format("Cannot create AuditAdapter, '%s' must have default constructor", adapterClazz.getName()));

@@ -5,10 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dk.gov.oio.saml.model.NSISLevel;
+import org.joda.time.DateTime;
 import org.opensaml.saml.saml2.core.AuthnContextClassRef;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 
 import dk.gov.oio.saml.util.InternalException;
+import org.opensaml.saml.saml2.core.Issuer;
 
 public class AuthnRequestWrapper implements Serializable {
 	private static final long serialVersionUID = -6155927753076931485L;
@@ -17,6 +19,9 @@ public class AuthnRequestWrapper implements Serializable {
 	private boolean passive;
 	private NSISLevel requestedNsisLevel;
 	private List<String> authnContextClassRefValues;
+	private String issuer = "";
+	private String issueInstant = "";
+	private String destination;
 
 	public AuthnRequestWrapper(AuthnRequest authnRequest, NSISLevel requestedNsisLevel) throws InternalException {
 		// get ContextClassRefs
@@ -33,9 +38,21 @@ public class AuthnRequestWrapper implements Serializable {
         }
         
         // get passive/forceAuthn
-        passive = authnRequest.isPassive();
-        forceAuthn = authnRequest.isForceAuthn();
+        this.passive = authnRequest.isPassive();
+        this.forceAuthn = authnRequest.isForceAuthn();
         this.requestedNsisLevel = requestedNsisLevel;
+
+		this.destination = authnRequest.getDestination();
+
+		Issuer issuer = authnRequest.getIssuer();
+		if (issuer != null) {
+			this.issuer = issuer.getValue();
+		}
+
+		DateTime issueInstant = authnRequest.getIssueInstant();
+		if (issueInstant != null) {
+			this.issueInstant = issueInstant.toString();
+		}
 
 		// get id
 		this.id = authnRequest.getID();
@@ -59,5 +76,17 @@ public class AuthnRequestWrapper implements Serializable {
 
 	public NSISLevel getRequestedNsisLevel() {
 		return requestedNsisLevel;
+	}
+
+	public String getIssuer() {
+		return issuer;
+	}
+
+	public String getIssueInstant() {
+		return issueInstant;
+	}
+
+	public String getDestination() {
+		return destination;
 	}
 }

@@ -15,7 +15,7 @@ public class Configuration {
     private String servletRoutingPathSuffixLogout; // The endpoint suffix for logout
     private String servletRoutingPathSuffixLogoutResponse; // The endpoint suffix for logout response
     private String servletRoutingPathSuffixAssertion; // The endpoint suffix for assertion
-    private String auditAdapterClassName; // Class name of SP's implementation of the AuditAdapter
+    private String auditLoggerClassName; // Class name of SP's implementation of the AuditLogger adapter
     private String auditRequestAttributeIP; // Replace IP in audit request with value from attribute [protocol:name]
     private String auditRequestAttributePort; // Replace IP in audit request with value from attribute [protocol:name]
     private String auditRequestAttributeSessionId; // Replace SessionId in audit request with value from attribute [protocol:name]
@@ -315,12 +315,12 @@ public class Configuration {
         this.ocspCheckEnabled = ocspCheckEnabled;
     }
 
-    public String getAuditAdapterClassName() {
-        return this.auditAdapterClassName;
+    public String getAuditLoggerClassName() {
+        return this.auditLoggerClassName;
     }
 
-    public void setAuditAdapterClassName(String auditAdapterClassName) {
-        this.auditAdapterClassName = auditAdapterClassName;
+    public void setAuditLoggerClassName(String auditLoggerClassName) {
+        this.auditLoggerClassName = auditLoggerClassName;
     }
 
     public String getAuditRequestAttributeIP() {
@@ -371,7 +371,7 @@ public class Configuration {
         private String servletRoutingPathSuffixLogout;
         private String servletRoutingPathSuffixLogoutResponse;
         private String servletRoutingPathSuffixAssertion;
-        private String auditAdapterClassName;
+        private String auditLoggerClassName;
         private String auditRequestAttributeIP;
         private String auditRequestAttributePort;
         private String auditRequestAttributeSessionId;
@@ -431,8 +431,24 @@ public class Configuration {
                 servletRoutingPathSuffixAssertion = "assertionConsumer";
             }
 
-            if (auditAdapterClassName == null || auditAdapterClassName.length() == 0) {
-                auditAdapterClassName = "dk.gov.oio.saml.audit.Slf4jAuditAdapter";
+            if (auditLoggerClassName == null || auditLoggerClassName.length() == 0) {
+                auditLoggerClassName = "dk.gov.oio.saml.audit.Slf4JAuditLogger";
+            }
+
+            if (auditRequestAttributeIP == null || auditRequestAttributeIP.length() == 0) {
+                auditRequestAttributeIP = "request:remoteAddr";
+            }
+
+            if (auditRequestAttributePort == null || auditRequestAttributePort.length() == 0) {
+                auditRequestAttributePort = "request:remotePort";
+            }
+
+            if (auditRequestAttributeServiceProviderUserId == null || auditRequestAttributeServiceProviderUserId.length() == 0) {
+                auditRequestAttributeServiceProviderUserId = "request:remoteUser";
+            }
+
+            if (auditRequestAttributeSessionId == null || auditRequestAttributeSessionId.length() == 0) {
+                auditRequestAttributeSessionId = "request:sessionId";
             }
 
             // Create configuration
@@ -451,7 +467,7 @@ public class Configuration {
             configuration.servletRoutingPathSuffixLogout = this.servletRoutingPathSuffixLogout;
             configuration.servletRoutingPathSuffixLogoutResponse = this.servletRoutingPathSuffixLogoutResponse;
             configuration.servletRoutingPathSuffixAssertion = this.servletRoutingPathSuffixAssertion;
-            configuration.auditAdapterClassName = this.auditAdapterClassName;
+            configuration.auditLoggerClassName = this.auditLoggerClassName;
             configuration.auditRequestAttributeIP = this.auditRequestAttributeIP;
             configuration.auditRequestAttributePort = this.auditRequestAttributePort;
             configuration.auditRequestAttributeSessionId = this.auditRequestAttributeSessionId;
@@ -530,8 +546,8 @@ public class Configuration {
             return this;
         }
 
-        public Builder setAuditAdapterClassName(String auditAdapterClassName) {
-            this.auditAdapterClassName=auditAdapterClassName;
+        public Builder setAuditLoggerClassName(String auditLoggerClassName) {
+            this.auditLoggerClassName = auditLoggerClassName;
             return this;
         }
 

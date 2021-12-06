@@ -11,14 +11,14 @@ import org.slf4j.MarkerFactory;
  * NB: This log need to be persisted 6 months, so implementing a JPA based adapter and serializing
  * this to a database seems a better choice than just appending to output.
  */
-public class Slf4jAuditAdapter implements AuditAdapter {
-    private static final Logger log = LoggerFactory.getLogger(Slf4jAuditAdapter.class);
+public class Slf4JAuditLogger implements AuditLogger {
+    private static final Logger log = LoggerFactory.getLogger(Slf4JAuditLogger.class);
     private static Marker audit = MarkerFactory.getMarker("AUDIT");
 
     /**
      * SLF4J default audit logging adapter, audit logging must be persisted 6 month.
      */
-    public Slf4jAuditAdapter() {
+    public Slf4JAuditLogger() {
         log.info("SLF4J default audit logging adapter created, audit logging must be persisted 6 month!");
     }
 
@@ -30,6 +30,6 @@ public class Slf4jAuditAdapter implements AuditAdapter {
     @Override
     public void auditLog(String message) {
         // Separate this log from existing logging
-        log.info(audit, String.format("\n---- AUDIT LOGGER ----\n%s\n----------------------", message));
+        log.info(audit, "\n---- AUDIT LOGGER ----\n{}\n----------------------", message);
     }
 }

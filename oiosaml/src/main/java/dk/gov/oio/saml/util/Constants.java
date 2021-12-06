@@ -48,7 +48,11 @@ public class Constants {
     public static final String SP_ROUTING_LOGOUT = "oiosaml.servlet.routing.path.suffix.logout";
     public static final String SP_ROUTING_LOGOUT_RESPONSE = "oiosaml.servlet.routing.path.suffix.logoutResponse";
     public static final String SP_ROUTING_ASSERTION = "oiosaml.servlet.routing.path.suffix.assertion";
-    public static final String SP_AUDIT_CLASSNAME = "oiosaml.servlet.audit.adapter.classname";
+    public static final String SP_AUDIT_CLASSNAME = "oiosaml.servlet.audit.logger.classname";
+    public static final String SP_AUDIT_ATTRIBUTE_IP = "oiosaml.servlet.audit.logger.attribute.ip";
+    public static final String SP_AUDIT_ATTRIBUTE_PORT = "oiosaml.servlet.audit.logger.attribute.port";
+    public static final String SP_AUDIT_ATTRIBUTE_USER_ID = "oiosaml.servlet.audit.logger.attribute.userid";
+    public static final String SP_AUDIT_ATTRIBUTE_SESSION_ID = "oiosaml.servlet.audit.logger.attribute.sessionId";
 
     // Configuration constants for revocation check settings
     public static final String CRL_CHECK_ENABLED = "oiosaml.servlet.revocation.crl.check.enabled";

@@ -38,7 +38,7 @@ public class LogoutResponseService {
 	}
 
 	public static MessageContext<SAMLObject> createMessageWithLogoutResponse(LogoutRequest logoutRequest, String destination) throws InitializationException, InternalException {
-		log.debug("Create and sign logout response message for  request id '%s'", logoutRequest.getID());
+		log.debug("Create and sign logout response message for  request id '{}'", logoutRequest.getID());
 
 		// Create message context
 		MessageContext<SAMLObject> messageContext = new MessageContext<>();
@@ -67,7 +67,7 @@ public class LogoutResponseService {
 	}
 
 	private static LogoutResponse createLogoutResponse(String destination, LogoutRequest logoutRequest) throws InitializationException {
-		log.debug("Create logout response message for  request id '%s'", logoutRequest.getID());
+		log.debug("Create logout response message for  request id '{}'", logoutRequest.getID());
 
 		LogoutResponse logoutResponse = SamlHelper.build(LogoutResponse.class);
 
@@ -97,7 +97,7 @@ public class LogoutResponseService {
 	}
 
 	private static LogoutResponse signResponse(LogoutResponse logoutResponse) {
-		log.debug("Signing logout response message with id '%s'", logoutResponse.getID());
+		log.debug("Signing logout response message with id '{}'", logoutResponse.getID());
 		try {
 			Signature signature = SamlHelper.build(Signature.class);
 

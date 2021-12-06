@@ -1,6 +1,12 @@
 package dk.gov.oio.saml.util;
 
+import org.w3c.dom.Element;
+
 import javax.servlet.http.HttpServletRequest;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.StringWriter;
 
 public class StringUtil {
 
@@ -23,6 +29,33 @@ public class StringUtil {
 		}
 		
 		return url;
+	}
+
+	/**
+	 * Create string representation of XML element.
+	 *
+	 * @param element Any XML element
+	 * @return XML is parsed to string, if this fails null is returned
+	 */
+	public static String elementToString(Element element) {
+		try {
+			Source source = new DOMSource(element);
+			TransformerFactory transFactory = TransformerFactory.newInstance();
+			Transformer transformer = transFactory.newTransformer();
+			StringWriter buffer = new StringWriter();
+
+			transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+			transformer.transform(source, new StreamResult(buffer));
+
+			return buffer.toString();
+		}
+		catch (Exception ex) {
+			return null;
+		}
 	}
 
 	/**

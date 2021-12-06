@@ -168,7 +168,7 @@ public class DispatcherServlet extends HttpServlet {
         	return;
         }
 
-        log.debug("Selected MessageHandler: %s", samlHandler.getClass().getName());
+        log.debug("Selected MessageHandler: {}", samlHandler.getClass().getName());
 
 		try {
 			samlHandler.handleGet(req, res);
@@ -198,13 +198,13 @@ public class DispatcherServlet extends HttpServlet {
 
         SAMLHandler samlHandler = handlers.get(action);
         if (samlHandler == null) {
-        	log.error("No handler registered for action: %s", action);
+        	log.error("No handler registered for action: {}", action);
         	
         	ErrorHandler.handle(req, res, ERROR_TYPE.CONFIGURATION_ERROR, "No handler registered for action: " + action);
         	return;
         }
 
-        log.debug("Selected MessageHandler: %s", samlHandler.getClass().getName());
+        log.debug("Selected MessageHandler: {}", samlHandler.getClass().getName());
 
         try {
             samlHandler.handlePost(req, res);
@@ -253,7 +253,7 @@ public class DispatcherServlet extends HttpServlet {
                 }
         	}
         	catch (Exception ex) {
-        		log.error("Failed to load external configuration file: %s", externalConfigurationFile, ex);
+        		log.error("Failed to load external configuration file: {}", externalConfigurationFile, ex);
         	}
         }
 
@@ -283,8 +283,11 @@ public class DispatcherServlet extends HttpServlet {
                         .setServletRoutingPathSuffixLogout(config.get(Constants.SP_ROUTING_LOGOUT))
                         .setServletRoutingPathSuffixLogoutResponse(config.get(Constants.SP_ROUTING_LOGOUT_RESPONSE))
                         .setServletRoutingPathSuffixAssertion(config.get(Constants.SP_ROUTING_ASSERTION))
-                        .setAuditAdapterClassName(config.get(Constants.SP_AUDIT_CLASSNAME))
-                        // TODO: Add missing configuration
+                        .setAuditLoggerClassName(config.get(Constants.SP_AUDIT_CLASSNAME))
+                        .setAuditRequestAttributeIP(config.get(Constants.SP_AUDIT_ATTRIBUTE_IP))
+                        .setAuditRequestAttributePort(config.get(Constants.SP_AUDIT_ATTRIBUTE_PORT))
+                        .setAuditRequestAttributeServiceProviderUserId(config.get(Constants.SP_AUDIT_ATTRIBUTE_USER_ID))
+                        .setAuditRequestAttributeSessionId(config.get(Constants.SP_AUDIT_ATTRIBUTE_SESSION_ID))
                         .build();
 
                 handleOptionalValues(config, configuration);

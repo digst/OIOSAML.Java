@@ -31,7 +31,7 @@ public class RequestUtil {
         String[] name = Objects.toString(parameter, "").split(":", 2);
 
         if (name.length != 2) {
-            log.error(String.format("Custom request parameter '%s' is malformed, should be '<protocol>:<attribute>'",parameter));
+            log.error("Custom request parameter '{}' is malformed, should be '<protocol>:<attribute>'",parameter);
             return defaultValue;
         }
 
@@ -39,7 +39,7 @@ public class RequestUtil {
             case "header":
                 return Objects.toString(request.getHeader(name[1]), defaultValue);
             case "session":
-                return Objects.toString(request.getSession().getAttribute(name[2]), defaultValue);
+                return Objects.toString(request.getSession().getAttribute(name[1]), defaultValue);
             case "query":
                 String[] parameterValues = request.getParameterValues(name[1]);
                 return (null != parameterValues && parameterValues.length > 0)?
@@ -52,8 +52,24 @@ public class RequestUtil {
                 }
                 return defaultValue;
             }
+            case "request": {
+                switch (name[1]) {
+                    case "remoteHost" :
+                        return Objects.toString(request.getRemoteHost(), defaultValue);
+                    case "remoteAddr" :
+                        return Objects.toString(request.getRemoteAddr(), defaultValue);
+                    case "remotePort" :
+                        return Objects.toString(String.valueOf(request.getRemotePort()), defaultValue);
+                    case "remoteUser" :
+                        return Objects.toString(request.getRemoteUser(), defaultValue);
+                    case "sessionId" :
+                        return Objects.toString(request.getSession().getId(), defaultValue);
+                    default:
+                        log.error("Request parameter '{}' is missing, should be [remoteHost|remoteAddr|remotePort|remoteUser]",name[1]);
+                }
+            }
             default:
-                log.error(String.format("Custom parameter protocol '%s' is malformed, should be [query|header|cookie|session]",name[0]));
+                log.error("Custom parameter protocol '{}' is malformed, should be [query|header|cookie|session]",name[0]);
         }
         return defaultValue;
     }
