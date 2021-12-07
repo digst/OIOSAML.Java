@@ -11,7 +11,6 @@ import java.util.List;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -30,7 +29,6 @@ import org.mockserver.matchers.Times;
 
 import dk.gov.oio.saml.config.Configuration;
 import dk.gov.oio.saml.model.NSISLevel;
-import dk.gov.oio.saml.service.AssertionServiceTest;
 import dk.gov.oio.saml.service.OIOSAML3Service;
 import dk.gov.oio.saml.session.AuthnRequestWrapper;
 import dk.gov.oio.saml.util.Constants;

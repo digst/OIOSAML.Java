@@ -74,7 +74,7 @@ public class LogoutResponseService {
 		RandomIdentifierGenerationStrategy randomIdentifierGenerator = new RandomIdentifierGenerationStrategy();
 		String id = randomIdentifierGenerator.generateIdentifier();
 
- 		log.debug("Created logout response id '" + id + "' for  request id '" + logoutRequest.getID() + "'");
+ 		log.debug("Created logout response id '{}' for  request id '{}'", id, logoutRequest.getID());
 
 		logoutResponse.setID(id);
 		logoutResponse.setDestination(destination);
@@ -116,7 +116,7 @@ public class LogoutResponseService {
 			Signer.signObject(signature);
 
 		} catch (SignatureException | InitializationException | InternalException | MarshallingException e) {
-			log.error("Signing of '" + logoutResponse.getID() + "' failed", e);
+			log.error("Signing of '{}' failed", logoutResponse.getID(), e);
 		}
 		return logoutResponse;
 	}

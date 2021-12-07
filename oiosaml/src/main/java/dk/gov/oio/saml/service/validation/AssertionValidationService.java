@@ -221,7 +221,7 @@ public class AssertionValidationService {
         Configuration configuration = OIOSAML3Service.getConfig();
         String assuranceLevel = attributes.get(Constants.ASSURANCE_LEVEL);
         if(authnRequest.getRequestedNsisLevel() == NSISLevel.NONE && assuranceLevel != null) {
-            log.info("Assurance level of " + assuranceLevel + " received. Accepting, requested NSIS LoA was NONE");
+            log.info("Assurance level of {} received. Accepting, requested NSIS LoA was NONE", assuranceLevel);
             return;
         }
 
@@ -230,7 +230,7 @@ public class AssertionValidationService {
         }
 
         if(configuration.isAssuranceLevelSufficient(assuranceLevel)) {
-            log.info("Assurance level of " + assuranceLevel + " received instead of NSIS LoA. Accepted because of configuration");
+            log.info("Assurance level of {} received instead of NSIS LoA. Accepted because of configuration", assuranceLevel);
             return;
         }
 

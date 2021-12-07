@@ -58,7 +58,7 @@ public class DispatcherServlet extends HttpServlet {
                 configuration.setMinimumAssuranceLevel(i);
             }
             catch (Exception ex) {
-                log.error("Invalid value " + Constants.OIOSAML_ASSURANCE_LEVEL_MINIMUM + " = " + value, ex);
+                log.error("Invalid value {} = {}", Constants.OIOSAML_ASSURANCE_LEVEL_MINIMUM, value, ex);
             }
         }
         
@@ -109,7 +109,7 @@ public class DispatcherServlet extends HttpServlet {
         		configuration.setIdpMetadataMinRefreshDelay(i);
         	}
         	catch (Exception ex) {
-        		log.error("Invalid value " + Constants.IDP_METADATA_MIN_REFRESH + " = " + value, ex);
+        		log.error("Invalid value {} = {}", Constants.IDP_METADATA_MIN_REFRESH, value, ex);
         	}
         }
         
@@ -120,7 +120,7 @@ public class DispatcherServlet extends HttpServlet {
         		configuration.setIdpMetadataMaxRefreshDelay(i);
         	}
         	catch (Exception ex) {
-        		log.error("Invalid value " + Constants.IDP_METADATA_MAX_REFRESH + " = " + value, ex);
+        		log.error("Invalid value {} = {}", Constants.IDP_METADATA_MAX_REFRESH, value, ex);
         	}
         }
 
@@ -148,7 +148,7 @@ public class DispatcherServlet extends HttpServlet {
 	@Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         if (log.isDebugEnabled()) {
-            log.debug("Received GET (" + req.getServletPath() + req.getContextPath() + ")");
+            log.debug("Received GET ({}{})", req.getServletPath(), req.getContextPath());
         }
 
         if (!initialized) {
@@ -162,7 +162,7 @@ public class DispatcherServlet extends HttpServlet {
 
         SAMLHandler samlHandler = handlers.get(action);
         if (samlHandler == null) {
-        	log.error("No handler registered for action: " + action);
+        	log.error("No handler registered for action: {}", action);
         	
         	ErrorHandler.handle(req, res, ERROR_TYPE.CONFIGURATION_ERROR, "No handler registered for action: " + action);
         	return;
@@ -184,7 +184,7 @@ public class DispatcherServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         if (log.isDebugEnabled()) {
-            log.debug("Received GET (" + req.getServletPath() + req.getContextPath() + ")");
+            log.debug("Received GET ({}{})", req.getServletPath(), req.getContextPath());
         }
 
         if (!initialized) {

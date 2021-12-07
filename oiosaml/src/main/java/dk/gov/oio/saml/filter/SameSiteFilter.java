@@ -18,13 +18,11 @@ public class SameSiteFilter implements Filter {
 	private static final String SAMESITE_COOKIE_HEADER = "Set-Cookie";
 	private static final String SAMESITE_ATTRIBITE_NAME = "SameSite";
 	private static final String SAMESITE_NONE_VALUE = "None";
-    
+
     public void init(FilterConfig filterConfig) throws ServletException {
-    	;
     }
-    
+
     public void destroy() {
-    	;
     }
 
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {

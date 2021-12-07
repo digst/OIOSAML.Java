@@ -11,23 +11,19 @@ import javax.servlet.http.HttpSession;
 import dk.gov.oio.saml.audit.AuditService;
 import dk.gov.oio.saml.util.*;
 import org.joda.time.DateTime;
-import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.common.assertion.AssertionValidationException;
 import org.opensaml.saml.saml2.core.*;
 
-import dk.gov.oio.saml.config.Configuration;
 import dk.gov.oio.saml.model.NSISLevel;
 import dk.gov.oio.saml.service.AssertionService;
 import dk.gov.oio.saml.service.OIOSAML3Service;
 import dk.gov.oio.saml.service.validation.AssertionValidationService;
 import dk.gov.oio.saml.session.AssertionWrapper;
 import dk.gov.oio.saml.session.AuthnRequestWrapper;
-import org.opensaml.saml.saml2.core.impl.AssertionMarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Element;
 
 public class AssertionHandler extends SAMLHandler {
     private static final Logger log = LoggerFactory.getLogger(AssertionHandler.class);
@@ -85,7 +81,7 @@ public class AssertionHandler extends SAMLHandler {
         String issuer = response.getIssuer() != null ? response.getIssuer().getValue() : null;
 
         // Log response
-        log.info("Incoming Response - ID:'" + response.getID() + "' InResponseTo:'" + response.getInResponseTo() + "' Issuer:'" + issuer + "' Status:'" + responseStatus + "' IssueInstant:'" + instant + "' Destination:'" + response.getDestination() + "'");
+        log.info("Incoming Response - ID:'{}' InResponseTo:'{}' Issuer:'{}' Status:'{}' IssueInstant:'{}' Destination:'{}'", response.getID(), response.getInResponseTo(), issuer, responseStatus, instant, response.getDestination());
 
         // Audit log builder
         AuditService.Builder auditBuilder = RequestUtil

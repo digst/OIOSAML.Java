@@ -7,10 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import dk.gov.oio.saml.util.*;
-import org.joda.time.DateTime;
 import org.opensaml.core.xml.io.MarshallingException;
-import org.opensaml.saml.saml2.core.Issuer;
-import org.opensaml.saml.saml2.ecp.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.opensaml.core.config.InitializationException;
@@ -18,7 +15,6 @@ import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.saml2.core.LogoutRequest;
-import org.opensaml.saml.saml2.core.LogoutResponse;
 
 import dk.gov.oio.saml.config.Configuration;
 import dk.gov.oio.saml.service.IdPMetadataService;
@@ -117,7 +113,7 @@ public class LogoutRequestHandler extends SAMLHandler {
 
             try {
                 Element element = SamlHelper.marshallObject(logoutRequest);
-                log.debug("LogoutRequest: " + StringUtil.elementToString(element));
+                log.debug("LogoutRequest: {}", StringUtil.elementToString(element));
             } catch (MarshallingException e) {
                 log.error("Could not marshall LogoutRequest for logging purposes");
             }

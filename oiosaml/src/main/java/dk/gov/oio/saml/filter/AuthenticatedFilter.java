@@ -16,9 +16,7 @@ import javax.servlet.http.HttpSession;
 import dk.gov.oio.saml.config.Configuration;
 import dk.gov.oio.saml.service.OIOSAML3Service;
 import dk.gov.oio.saml.util.*;
-import org.joda.time.DateTime;
 import org.opensaml.core.xml.io.MarshallingException;
-import org.opensaml.saml.saml2.core.Issuer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.opensaml.messaging.context.MessageContext;
@@ -212,7 +210,7 @@ public class AuthenticatedFilter implements Filter {
         AuthnRequestWrapper wrapper = new AuthnRequestWrapper((AuthnRequest) authnRequest.getMessage(), requiredNsisLevel);
         session.setAttribute(Constants.SESSION_AUTHN_REQUEST, wrapper);
 
-        log.info("Outgoing AuthnRequest - ID:'" + wrapper.getId() + "' Issuer:'" + wrapper.getIssuer() + "' IssueInstant:'" + wrapper.getIssueInstant() + "' Destination:'" + wrapper.getDestination() + "'");
+        log.info("Outgoing AuthnRequest - ID:'{}' Issuer:'{}' IssueInstant:'{}' Destination:'{}'", wrapper.getId(), wrapper.getIssuer(), wrapper.getIssueInstant(), wrapper.getDestination());
 
         // Deflating and sending the message
         HTTPRedirectDeflateEncoder encoder = new HTTPRedirectDeflateEncoder();

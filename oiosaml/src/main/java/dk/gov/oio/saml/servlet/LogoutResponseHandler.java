@@ -1,7 +1,6 @@
 package dk.gov.oio.saml.servlet;
 
 import java.io.IOException;
-import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -55,7 +54,7 @@ public class LogoutResponseHandler extends SAMLHandler {
         // Log response
 		try {
 			Element element = SamlHelper.marshallObject(logoutResponse);
-			log.debug("LogoutResponse: " + StringUtil.elementToString(element));
+			log.debug("LogoutResponse: {}", StringUtil.elementToString(element));
 		} catch (MarshallingException e) {
 			log.error("Could not marshall LogoutResponse for logging purposes");
 		}

@@ -40,7 +40,7 @@ public class OIOBPPUtil {
 			return privilegeList.getValue();
 		}
 		catch (Exception ex) {
-			log.error("Failed to parse input string: " + object, ex);
+			log.error("Failed to parse input string: {}", object, ex);
 		}
 
 		return null;
