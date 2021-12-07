@@ -24,7 +24,7 @@ public class AuditService {
     public AuditService(Configuration configuration) throws InitializationException {
         log.debug("Initialize AuditService");
         this.configuration = configuration;
-        this.auditLogger = createAuditAdapter(configuration.getAuditLoggerClassName());
+        this.auditLogger = createAuditLogger(configuration.getAuditLoggerClassName());
     }
 
     /**
@@ -58,27 +58,27 @@ public class AuditService {
         }
     }
 
-    private AuditLogger createAuditAdapter(String auditAdapterClassName) throws InitializationException {
+    private AuditLogger createAuditLogger(String auditLoggerClassName) throws InitializationException {
         Class<?> adapterClazz = Slf4JAuditLogger.class;
         try {
-            if (null != auditAdapterClassName && auditAdapterClassName.length() > 0) {
+            if (null != auditLoggerClassName && auditLoggerClassName.length() > 0) {
 
-                log.info("Initializing AuditAdapter '{}'", auditAdapterClassName);
-                adapterClazz = Class.forName(auditAdapterClassName);
+                log.info("Initializing AuditLogger '{}'", auditLoggerClassName);
+                adapterClazz = Class.forName(auditLoggerClassName);
             }
 
             for (Constructor<?> constructor : adapterClazz.getConstructors()) {
                 if (constructor.getParameterTypes().length == 0) {
 
-                    log.info("Create '{}' AuditAdapter", adapterClazz.getName());
+                    log.info("Create '{}' AuditLogger", adapterClazz.getName());
                     return (AuditLogger) constructor.newInstance();
                 }
             }
-            throw new InitializationException(String.format("Cannot create AuditAdapter, '%s' must have default constructor", adapterClazz.getName()));
+            throw new InitializationException(String.format("Cannot create AuditLogger, '%s' must have default constructor", adapterClazz.getName()));
 
         } catch (ClassNotFoundException | ClassCastException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            log.error("Failed creating AuditAdapter", e);
-            throw new InitializationException(String.format("Cannot create AuditAdapter, '%s' must have default constructor and implement 'dk.gov.oio.saml.audit.AuditAdapter", adapterClazz.getName()), e);
+            log.error("Failed creating AuditLogger", e);
+            throw new InitializationException(String.format("Cannot create AuditLogger, '%s' must have default constructor and implement 'dk.gov.oio.saml.audit.AuditLogger'", adapterClazz.getName()), e);
         }
     }
 }
