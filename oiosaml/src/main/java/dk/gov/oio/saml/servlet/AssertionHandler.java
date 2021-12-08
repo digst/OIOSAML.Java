@@ -11,6 +11,7 @@ import javax.servlet.http.HttpSession;
 import dk.gov.oio.saml.audit.AuditService;
 import dk.gov.oio.saml.util.*;
 import org.joda.time.DateTime;
+import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.common.assertion.AssertionValidationException;
@@ -24,6 +25,7 @@ import dk.gov.oio.saml.session.AssertionWrapper;
 import dk.gov.oio.saml.session.AuthnRequestWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Element;
 
 public class AssertionHandler extends SAMLHandler {
     private static final Logger log = LoggerFactory.getLogger(AssertionHandler.class);
@@ -47,13 +49,13 @@ public class AssertionHandler extends SAMLHandler {
         }
         Response response = (Response) samlObject;
 
-        // Get assertion
-        AssertionService assertionService = new AssertionService();
-        Assertion assertion = assertionService.getAssertion(response);
-
-
-        // Get AuthnRequest with matching ID (inResponseTo)
-        AuthnRequestWrapper authnRequest = (AuthnRequestWrapper) session.getAttribute(Constants.SESSION_AUTHN_REQUEST);
+        // Log response
+        try {
+            Element element = SamlHelper.marshallObject(response);
+            log.debug("Response: {}", StringUtil.elementToString(element));
+        } catch (MarshallingException e) {
+            log.error("Could not marshall Response for logging purposes");
+        }
 
         // Get response status
         Status status = response.getStatus();
@@ -83,10 +85,21 @@ public class AssertionHandler extends SAMLHandler {
         // Log response
         log.info("Incoming Response - ID:'{}' InResponseTo:'{}' Issuer:'{}' Status:'{}' IssueInstant:'{}' Destination:'{}'", response.getID(), response.getInResponseTo(), issuer, responseStatus, instant, response.getDestination());
 
+        // Get AuthnRequest with matching ID (inResponseTo)
+        AuthnRequestWrapper authnRequest = (AuthnRequestWrapper) session.getAttribute(Constants.SESSION_AUTHN_REQUEST);
+
+        if (authnRequest == null) {
+            throw new InternalException("No AuthnRequest found on session");
+        }
+
+        // Get assertion
+        AssertionService assertionService = new AssertionService();
+        Assertion assertion = assertionService.getAssertion(response);
+
         // Audit log builder
         AuditService.Builder auditBuilder = RequestUtil
                 .createBasicAuditBuilder(httpServletRequest, "BSA6", "ValidateAssertion")
-                .withAuthnAttribute("AUTHN_REQUEST_ID", (null != authnRequest)? authnRequest.getId():null)
+                .withAuthnAttribute("AUTHN_REQUEST_ID", authnRequest.getId())
                 .withAuthnAttribute("RESPONSE_ID", response.getID())
                 .withAuthnAttribute("ASSERTION_ID", assertion.getID())
                 .withAuthnAttribute("IN_RESPONSE_TO", response.getInResponseTo())
@@ -99,10 +112,6 @@ public class AssertionHandler extends SAMLHandler {
         // Validate
         AssertionWrapper wrapper;
         try {
-            if (authnRequest == null) {
-                throw new InternalException("No AuthnRequest found on session");
-            }
-
             AssertionValidationService validationService = new AssertionValidationService();
             validationService.validate(httpServletRequest, messageContext, response, assertion, authnRequest);
 
@@ -113,7 +122,7 @@ public class AssertionHandler extends SAMLHandler {
             // Assertion needs to be validated before creating the wrapper
             wrapper = new AssertionWrapper(assertion);
 
-            log.info("Assertion: {}", wrapper);
+            log.debug("Assertion: {}", wrapper);
 
             auditBuilder
                     .withAuthnAttribute("RESULT", "VALID")
