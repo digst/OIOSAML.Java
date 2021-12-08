@@ -69,7 +69,7 @@ public class RequestUtil {
                 }
             }
             default:
-                log.error("Custom parameter protocol '{}' is malformed, should be [query|header|cookie|session]",name[0]);
+                log.error("Custom parameter protocol '{}' is malformed, should be [request|query|header|cookie|session]",name[0]);
         }
         return defaultValue;
     }
