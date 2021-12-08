@@ -20,14 +20,14 @@ public class AuditRequestUtil {
      *
      * @param request HTTP servlet request
      * @param parameter Parameter that is looked up on the request.
-     *                  <parameter> ::= <protocol>:<attribute>
-     *                  <protocol> ::= <query> | <header> | <cookie> | <session> | <request>
-     *                  <attribute> ::= Name of an attribute accessible from the selected protocol.
-     *                  <query> ::=	Access to GET and Form POST query parameters/attributes.
-     *                  <header> ::= Access to request Header names, as parameters/attributes.
-     *                  <cookie> ::= Access to request Cookie names, as parameters/attributes.
-     *                  <session> ::= Access to session values i.e. to access SessionId for logging.
-     *                  <request> ::= remoteHost | remoteAddr | remotePort | remoteUser
+     *                  parameter ::= protocol:attribute
+     *                  protocol ::= query | header | cookie | session | request
+     *                  attribute ::= Name of an attribute accessible from the selected protocol.
+     *                  query ::=	Access to GET and Form POST query parameters/attributes.
+     *                  header ::= Access to request Header names, as parameters/attributes.
+     *                  cookie ::= Access to request Cookie names, as parameters/attributes.
+     *                  session ::= Access to session values i.e. to access SessionId for logging.
+     *                  request ::= remoteHost | remoteAddr | remotePort | remoteUser
      *                  Ex. "header:User-Agent".
      * @param defaultValue default value if the parameter is not found
      * @return Attribute value from lookup or provided default value
@@ -107,10 +107,10 @@ public class AuditRequestUtil {
                 .withAuthnAttribute("ACTION", action)
                 .withAuthnAttribute("DESCRIPTION", description)
                 .withAuthnAttribute("IP", getAttributeFromRequest(request, OIOSAML3Service.getConfig().getAuditRequestAttributeIP(), request.getRemoteAddr()))
-                .withAuthnAttribute("PORT", getAttributeFromRequest(request, OIOSAML3Service.getConfig().getAuditRequestAttributePort(), Objects.toString(request.getRemotePort())))
-                .withAuthnAttribute("SESSION_ID", getAttributeFromRequest(request, OIOSAML3Service.getConfig().getAuditRequestAttributeSessionId(), Objects.toString(request.getSession().getId())))
-                .withAuthnAttribute("REQUESTED_SESSION_ID", Objects.toString(request.getRequestedSessionId()))
-                .withAuthnAttribute("USER", getAttributeFromRequest(request, OIOSAML3Service.getConfig().getAuditRequestAttributeServiceProviderUserId(), Objects.toString(request.getRemoteUser())))
+                .withAuthnAttribute("PORT", getAttributeFromRequest(request, OIOSAML3Service.getConfig().getAuditRequestAttributePort(), String.valueOf(request.getRemotePort())))
+                .withAuthnAttribute("SESSION_ID", getAttributeFromRequest(request, OIOSAML3Service.getConfig().getAuditRequestAttributeSessionId(), request.getSession().getId()))
+                .withAuthnAttribute("REQUESTED_SESSION_ID", request.getRequestedSessionId())
+                .withAuthnAttribute("USER", getAttributeFromRequest(request, OIOSAML3Service.getConfig().getAuditRequestAttributeServiceProviderUserId(), request.getRemoteUser()))
                 .withAuthnAttribute("USER-AGENT", getAttributeFromRequest(request, "header:User-Agent",
                         getAttributeFromRequest(request, "header:Sec-Ch-Ua", "None")));
 

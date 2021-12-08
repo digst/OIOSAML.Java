@@ -167,10 +167,10 @@ public class AssertionHandler extends SAMLHandler {
         session.setAttribute(Constants.SESSION_NAME_ID_FORMAT, nameID.getFormat());
 
         // Redirect
-        Object attribute = session.getAttribute(Constants.SESSION_REQUESTED_PATH);
+        String attribute = Objects.toString(session.getAttribute(Constants.SESSION_REQUESTED_PATH),"");
 
         // redirect to SESSION_REQUESTED_PATH or to login page if not found
-        String url = StringUtil.defaultIfEmpty(Objects.toString(attribute),
+        String url = StringUtil.defaultIfEmpty(attribute,
                 StringUtil.getUrl(httpServletRequest, OIOSAML3Service.getConfig().getLoginPage()));
 
         OIOSAML3Service.getAuditService().auditLog(AuditRequestUtil

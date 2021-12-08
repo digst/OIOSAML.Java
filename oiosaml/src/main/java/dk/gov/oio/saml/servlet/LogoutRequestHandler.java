@@ -53,15 +53,9 @@ public class LogoutRequestHandler extends SAMLHandler {
 
                     log.info("Outgoing LogoutRequest - ID:'{}' Issuer:'{}' IssueInstant:'{}' SessionIndexes:'{}' Destination:'{}'",
                             logoutRequest.getID(),
-                            logoutRequest.getIssuer() != null ?
-                                    logoutRequest.getIssuer().getValue() : "",
-                            logoutRequest.getIssueInstant() != null ?
-                                    logoutRequest.getIssueInstant().toString() : "",
-                            logoutRequest.getSessionIndexes()
-                                    .stream()
-                                    .map(sessionIndex -> sessionIndex.getSessionIndex())
-                                    .collect(Collectors
-                                            .joining(", ", "[", "]")),
+                            getIssuer(logoutRequest),
+                            getIssueInstant(logoutRequest),
+                            getSessionIndexes(logoutRequest),
                             logoutRequest.getDestination());
 
                     sendGet(httpServletResponse, messageContext);
@@ -87,15 +81,9 @@ public class LogoutRequestHandler extends SAMLHandler {
 
         log.info("Incoming LogoutRequest - ID:'{}' Issuer:'{}' IssueInstant:'{}' SessionIndexes:'{}' Destination:'{}'",
                 logoutRequest.getID(),
-                logoutRequest.getIssuer() != null ?
-                        logoutRequest.getIssuer().getValue() : "",
-                logoutRequest.getIssueInstant() != null ?
-                        logoutRequest.getIssueInstant().toString() : "",
-                logoutRequest.getSessionIndexes()
-                        .stream()
-                        .map(sessionIndex -> sessionIndex.getSessionIndex())
-                        .collect(Collectors
-                                .joining(", ", "[", "]")),
+                getIssuer(logoutRequest),
+                getIssueInstant(logoutRequest),
+                getSessionIndexes(logoutRequest),
                 logoutRequest.getDestination());
 
 
@@ -120,15 +108,9 @@ public class LogoutRequestHandler extends SAMLHandler {
 
             log.info("Outgoing LogoutRequest - ID:'{}' Issuer:'{}' IssueInstant:'{}' SessionIndexes:'{}' Destination:'{}'",
                     logoutRequest.getID(),
-                    logoutRequest.getIssuer() != null ?
-                            logoutRequest.getIssuer().getValue() : "",
-                    logoutRequest.getIssueInstant() != null ?
-                            logoutRequest.getIssueInstant().toString() : "",
-                    logoutRequest.getSessionIndexes()
-                            .stream()
-                            .map(sessionIndex -> sessionIndex.getSessionIndex())
-                            .collect(Collectors
-                                    .joining(", ", "[", "]")),
+                    getIssuer(logoutRequest),
+                    getIssueInstant(logoutRequest),
+                    getSessionIndexes(logoutRequest),
                     logoutRequest.getDestination());
 
             sendPost(httpServletResponse, messageContext);
@@ -136,6 +118,24 @@ public class LogoutRequestHandler extends SAMLHandler {
 		catch (InitializationException | ComponentInitializationException | MessageEncodingException e) {
 			throw new InternalException(e);
 		}
+    }
+
+    private String getIssuer(LogoutRequest logoutRequest) {
+        return logoutRequest.getIssuer() != null ?
+                logoutRequest.getIssuer().getValue() : "";
+    }
+
+    private String getIssueInstant(LogoutRequest logoutRequest) {
+        return logoutRequest.getIssueInstant() != null ?
+                logoutRequest.getIssueInstant().toString() : "";
+    }
+
+    private String getSessionIndexes(LogoutRequest logoutRequest) {
+        return logoutRequest.getSessionIndexes()
+                .stream()
+                .map(sessionIndex -> sessionIndex.getSessionIndex())
+                .collect(Collectors
+                        .joining(", ", "[", "]"));
     }
 
     @Override
