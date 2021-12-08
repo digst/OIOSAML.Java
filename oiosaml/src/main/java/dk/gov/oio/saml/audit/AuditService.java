@@ -61,8 +61,7 @@ public class AuditService {
     private AuditLogger createAuditLogger(String auditLoggerClassName) throws InitializationException {
         Class<?> adapterClazz = Slf4JAuditLogger.class;
         try {
-            if (null != auditLoggerClassName && auditLoggerClassName.length() > 0) {
-
+            if (StringUtil.isNotEmpty(auditLoggerClassName)) {
                 log.info("Initializing AuditLogger '{}'", auditLoggerClassName);
                 adapterClazz = Class.forName(auditLoggerClassName);
             }

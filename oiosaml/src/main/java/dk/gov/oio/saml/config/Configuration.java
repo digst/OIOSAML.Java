@@ -1,5 +1,6 @@
 package dk.gov.oio.saml.config;
 
+import dk.gov.oio.saml.util.StringUtil;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
 
 import dk.gov.oio.saml.util.InternalException;
@@ -378,77 +379,32 @@ public class Configuration {
         private String auditRequestAttributeServiceProviderUserId;
 
         public Configuration build() throws InternalException {
-            if (spEntityID == null || spEntityID.length() == 0) {
+            if (StringUtil.isEmpty(spEntityID)) {
                 throw new InternalException("Cannot create configuration without SP's entityID");
             }
 
-            if (baseUrl == null || baseUrl.length() == 0) {
+            if (StringUtil.isEmpty(baseUrl)) {
                 throw new InternalException("Cannot create configuration without knowing the Base URL");
             }
 
-            if (idpEntityID == null) {
+            if (StringUtil.isEmpty(idpEntityID)) {
                 throw new InternalException("Cannot create configuration without IdP's entityID");
             }
 
-            if ((idpMetadataUrl == null || idpMetadataUrl.length() == 0) &&
-                (idpMetadataFile == null || idpMetadataFile.length() == 0)) {
+            if (StringUtil.isEmpty(idpMetadataUrl) && StringUtil.isEmpty(idpMetadataFile)) {
                 throw new InternalException("Cannot create configuration without IdP Metadata URL or File location");
             }
 
-            if (keystoreLocation == null || keystoreLocation.length() == 0) {
+            if (StringUtil.isEmpty(keystoreLocation)) {
                 throw new InternalException("Cannot create configuration without knowing the location of the keystore");
             }
 
-            if (keystorePassword == null || keystorePassword.length() == 0) {
+            if (StringUtil.isEmpty(keystorePassword)) {
                 throw new InternalException("Cannot create configuration without knowing the password to the keystore");
             }
 
-            if (keyAlias == null || keyAlias.length() == 0) {
+            if (StringUtil.isEmpty(keyAlias)) {
                 throw new InternalException("Cannot create configuration without knowing the alias used inside the keystore");
-            }
-
-            if (servletRoutingPathPrefix == null || servletRoutingPathPrefix.length() == 0) {
-                servletRoutingPathPrefix = "saml";
-            }
-
-            if (servletRoutingPathSuffixError == null || servletRoutingPathSuffixError.length() == 0) {
-                servletRoutingPathSuffixError = "error";
-            }
-
-            if (servletRoutingPathSuffixMetadata == null || servletRoutingPathSuffixMetadata.length() == 0) {
-                servletRoutingPathSuffixMetadata = "metadata";
-            }
-
-            if (servletRoutingPathSuffixLogout == null || servletRoutingPathSuffixLogout.length() == 0) {
-                servletRoutingPathSuffixLogout = "logout";
-            }
-
-            if (servletRoutingPathSuffixLogoutResponse == null || servletRoutingPathSuffixLogoutResponse.length() == 0) {
-                servletRoutingPathSuffixLogoutResponse = "logoutResponse";
-            }
-
-            if (servletRoutingPathSuffixAssertion == null || servletRoutingPathSuffixAssertion.length() == 0) {
-                servletRoutingPathSuffixAssertion = "assertionConsumer";
-            }
-
-            if (auditLoggerClassName == null || auditLoggerClassName.length() == 0) {
-                auditLoggerClassName = "dk.gov.oio.saml.audit.Slf4JAuditLogger";
-            }
-
-            if (auditRequestAttributeIP == null || auditRequestAttributeIP.length() == 0) {
-                auditRequestAttributeIP = "request:remoteAddr";
-            }
-
-            if (auditRequestAttributePort == null || auditRequestAttributePort.length() == 0) {
-                auditRequestAttributePort = "request:remotePort";
-            }
-
-            if (auditRequestAttributeServiceProviderUserId == null || auditRequestAttributeServiceProviderUserId.length() == 0) {
-                auditRequestAttributeServiceProviderUserId = "request:remoteUser";
-            }
-
-            if (auditRequestAttributeSessionId == null || auditRequestAttributeSessionId.length() == 0) {
-                auditRequestAttributeSessionId = "request:sessionId";
             }
 
             // Create configuration
@@ -461,17 +417,17 @@ public class Configuration {
             configuration.keystoreLocation = this.keystoreLocation;
             configuration.keystorePassword = this.keystorePassword;
             configuration.keyAlias = this.keyAlias;
-            configuration.servletRoutingPathPrefix = this.servletRoutingPathPrefix;
-            configuration.servletRoutingPathSuffixError = this.servletRoutingPathSuffixError;
-            configuration.servletRoutingPathSuffixMetadata = this.servletRoutingPathSuffixMetadata;
-            configuration.servletRoutingPathSuffixLogout = this.servletRoutingPathSuffixLogout;
-            configuration.servletRoutingPathSuffixLogoutResponse = this.servletRoutingPathSuffixLogoutResponse;
-            configuration.servletRoutingPathSuffixAssertion = this.servletRoutingPathSuffixAssertion;
-            configuration.auditLoggerClassName = this.auditLoggerClassName;
-            configuration.auditRequestAttributeIP = this.auditRequestAttributeIP;
-            configuration.auditRequestAttributePort = this.auditRequestAttributePort;
-            configuration.auditRequestAttributeSessionId = this.auditRequestAttributeSessionId;
-            configuration.auditRequestAttributeServiceProviderUserId = this.auditRequestAttributeServiceProviderUserId;
+            configuration.servletRoutingPathPrefix = StringUtil.defaultIfEmpty(this.servletRoutingPathPrefix,"saml");
+            configuration.servletRoutingPathSuffixError = StringUtil.defaultIfEmpty(this.servletRoutingPathSuffixError, "error");
+            configuration.servletRoutingPathSuffixMetadata = StringUtil.defaultIfEmpty(this.servletRoutingPathSuffixMetadata, "metadata");
+            configuration.servletRoutingPathSuffixLogout = StringUtil.defaultIfEmpty(this.servletRoutingPathSuffixLogout, "logout");
+            configuration.servletRoutingPathSuffixLogoutResponse = StringUtil.defaultIfEmpty(this.servletRoutingPathSuffixLogoutResponse, "logoutResponse");
+            configuration.servletRoutingPathSuffixAssertion = StringUtil.defaultIfEmpty(this.servletRoutingPathSuffixAssertion, "assertionConsumer");
+            configuration.auditLoggerClassName = StringUtil.defaultIfEmpty(this.auditLoggerClassName, "dk.gov.oio.saml.audit.Slf4JAuditLogger");
+            configuration.auditRequestAttributeIP = StringUtil.defaultIfEmpty(this.auditRequestAttributeIP, "request:remoteAddr");
+            configuration.auditRequestAttributePort = StringUtil.defaultIfEmpty(this.auditRequestAttributePort, "request:remotePort");
+            configuration.auditRequestAttributeSessionId = StringUtil.defaultIfEmpty(this.auditRequestAttributeSessionId, "request:remoteUser");
+            configuration.auditRequestAttributeServiceProviderUserId = StringUtil.defaultIfEmpty(this.auditRequestAttributeServiceProviderUserId, "request:sessionId");
 
             return configuration;
         }

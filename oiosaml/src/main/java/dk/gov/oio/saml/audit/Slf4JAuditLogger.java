@@ -30,6 +30,6 @@ public class Slf4JAuditLogger implements AuditLogger {
     @Override
     public void auditLog(String message) {
         // Separate this log from existing logging
-        log.info(audit, "AUDIT LOGGER:\n{}", message);
+        log.info(audit, "AUDIT: {}", message);
     }
 }

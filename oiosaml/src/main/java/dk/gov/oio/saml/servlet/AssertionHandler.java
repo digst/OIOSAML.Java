@@ -97,7 +97,7 @@ public class AssertionHandler extends SAMLHandler {
         Assertion assertion = assertionService.getAssertion(response);
 
         // Audit log builder
-        AuditService.Builder auditBuilder = RequestUtil
+        AuditService.Builder auditBuilder = AuditRequestUtil
                 .createBasicAuditBuilder(httpServletRequest, "BSA6", "ValidateAssertion")
                 .withAuthnAttribute("AUTHN_REQUEST_ID", authnRequest.getId())
                 .withAuthnAttribute("RESPONSE_ID", response.getID())
@@ -140,7 +140,7 @@ public class AssertionHandler extends SAMLHandler {
             OIOSAML3Service.getAuditService().auditLog(auditBuilder);
         }
 
-        OIOSAML3Service.getAuditService().auditLog(RequestUtil
+        OIOSAML3Service.getAuditService().auditLog(AuditRequestUtil
                 .createBasicAuditBuilder(httpServletRequest, "BSA7", "CreateSession")
                 .withAuthnAttribute("SP_SESSION_ID", session.getId())
                 .withAuthnAttribute("SP_SESSION_TIMEOUT", String.valueOf(session.getMaxInactiveInterval())));
@@ -170,9 +170,10 @@ public class AssertionHandler extends SAMLHandler {
         Object attribute = session.getAttribute(Constants.SESSION_REQUESTED_PATH);
 
         // redirect to SESSION_REQUESTED_PATH or to login page if not found
-        String url = Objects.toString(attribute, StringUtil.getUrl(httpServletRequest, OIOSAML3Service.getConfig().getLoginPage()));
+        String url = StringUtil.defaultIfEmpty(Objects.toString(attribute),
+                StringUtil.getUrl(httpServletRequest, OIOSAML3Service.getConfig().getLoginPage()));
 
-        OIOSAML3Service.getAuditService().auditLog(RequestUtil
+        OIOSAML3Service.getAuditService().auditLog(AuditRequestUtil
                 .createBasicAuditBuilder(httpServletRequest, "BSA8", "SendRedirect")
                 .withAuthnAttribute("URL_REDIRECT",url));
 
@@ -182,7 +183,7 @@ public class AssertionHandler extends SAMLHandler {
 	private String getSessionIndex(Assertion assertion) {
         if (assertion.getAuthnStatements() != null && assertion.getAuthnStatements().size() > 0) {
         	for (AuthnStatement authnStatement : assertion.getAuthnStatements()) {
-        		if (authnStatement.getSessionIndex() != null && authnStatement.getSessionIndex().length() > 0) {
+        		if (StringUtil.isNotEmpty(authnStatement.getSessionIndex())) {
         			return authnStatement.getSessionIndex();
         		}
         	}

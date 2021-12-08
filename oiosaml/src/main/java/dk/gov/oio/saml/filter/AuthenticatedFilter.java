@@ -106,7 +106,7 @@ public class AuthenticatedFilter implements Filter {
                 MessageContext<SAMLObject> authnRequest = authnRequestService.createMessageWithAuthnRequest(isPassive, forceAuthn, requiredNsisLevel, attributeProfile);
 
                 //Audit logging
-                OIOSAML3Service.getAuditService().auditLog(RequestUtil
+                OIOSAML3Service.getAuditService().auditLog(AuditRequestUtil
                         .createBasicAuditBuilder(req, "BSA1", "AuthnRequest")
                         .withAuthnAttribute("AUTHN_REQUEST_ID", ((AuthnRequest)authnRequest.getMessage()).getID())
                         .withAuthnAttribute("URL", req.getContextPath()));
@@ -218,7 +218,7 @@ public class AuthenticatedFilter implements Filter {
         encoder.setHttpServletResponse(res);
 
         try {
-            OIOSAML3Service.getAuditService().auditLog(RequestUtil
+            OIOSAML3Service.getAuditService().auditLog(AuditRequestUtil
                     .createBasicAuditBuilder(req, "BSA2", "SendAuthnRequest")
                     .withAuthnAttribute("AUTHN_REQUEST_ID", ((AuthnRequest)authnRequest.getMessage()).getID()));
 

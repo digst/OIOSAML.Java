@@ -8,8 +8,18 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.StringWriter;
 
+/**
+ * Utility class related to string operations in the OIOSAML library.
+ */
 public class StringUtil {
 
+	/**
+	 * Constructs context path + page (URL) string, from the request,
+	 * by appending page to the context path.
+	 * @param request Servlet request
+	 * @param page page or context to append to the context path
+	 * @return Context path + page (URL)
+	 */
     public static String getUrl(HttpServletRequest request, String page) {
 		String url = (request.getContextPath() != null) ? request.getContextPath() : "/";
 
@@ -98,5 +108,39 @@ public class StringUtil {
 			}
 		}
 		return sb.toString();
+	}
+
+	/**
+	 * Check if input string is empty
+	 * @param input any string
+	 * @return true if input string is null, empty or only contain whitespaces
+	 */
+	public static boolean isEmpty(String input) {
+		if (null == input || input.trim().isEmpty()) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Check if input string is not empty
+	 * @param input any string
+	 * @return false if input string is null, empty or only contain whitespaces otherwise true
+	 */
+	public static boolean isNotEmpty(String input) {
+		return !isEmpty(input);
+	}
+
+	/**
+	 * Return default string if input string is empty
+	 * @param input any string
+	 * @param defaultString string to return if input is empty
+	 * @return input unless input string is null, empty or only contain whitespaces, then return default string
+	 */
+	public static String defaultIfEmpty(String input, String defaultString) {
+		if (null == input || input.trim().isEmpty()) {
+			return defaultString;
+		}
+		return input;
 	}
 }

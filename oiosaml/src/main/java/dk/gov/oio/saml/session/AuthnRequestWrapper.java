@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dk.gov.oio.saml.model.NSISLevel;
+import dk.gov.oio.saml.util.StringUtil;
 import org.joda.time.DateTime;
 import org.opensaml.saml.saml2.core.AuthnContextClassRef;
 import org.opensaml.saml.saml2.core.AuthnRequest;
@@ -13,26 +14,26 @@ import dk.gov.oio.saml.util.InternalException;
 import org.opensaml.saml.saml2.core.Issuer;
 
 public class AuthnRequestWrapper implements Serializable {
-	private static final long serialVersionUID = -6155927753076931485L;
-	private String id;
-	private boolean forceAuthn;
-	private boolean passive;
-	private NSISLevel requestedNsisLevel;
-	private List<String> authnContextClassRefValues;
-	private String issuer = "";
-	private String issueInstant = "";
-	private String destination;
+    private static final long serialVersionUID = -6155927753076931485L;
+    private String id;
+    private boolean forceAuthn;
+    private boolean passive;
+    private NSISLevel requestedNsisLevel;
+    private List<String> authnContextClassRefValues;
+    private String issuer;
+    private String issueInstant;
+    private String destination;
 
-	public AuthnRequestWrapper(AuthnRequest authnRequest, NSISLevel requestedNsisLevel) throws InternalException {
-		// get ContextClassRefs
-		authnContextClassRefValues = new ArrayList<String>();
+    public AuthnRequestWrapper(AuthnRequest authnRequest, NSISLevel requestedNsisLevel) throws InternalException {
+        // get ContextClassRefs
+        authnContextClassRefValues = new ArrayList<String>();
         if (authnRequest.getRequestedAuthnContext() != null) {
             List<AuthnContextClassRef> authnContextClassRefs = authnRequest.getRequestedAuthnContext().getAuthnContextClassRefs();
 
             for (AuthnContextClassRef authnContextClassRef : authnContextClassRefs) {
                 String value = authnContextClassRef.getAuthnContextClassRef();
-                if (value != null && value.length() > 0) {
-                	getAuthnContextClassRefValues().add(value);
+                if (StringUtil.isNotEmpty(value)) {
+                    getAuthnContextClassRefValues().add(value);
                 }
             }
         }
@@ -41,52 +42,47 @@ public class AuthnRequestWrapper implements Serializable {
         this.passive = authnRequest.isPassive();
         this.forceAuthn = authnRequest.isForceAuthn();
         this.requestedNsisLevel = requestedNsisLevel;
+        this.destination = authnRequest.getDestination();
 
-		this.destination = authnRequest.getDestination();
+        Issuer issuer = authnRequest.getIssuer();
+        this.issuer = (issuer != null) ? issuer.getValue() : "";
 
-		Issuer issuer = authnRequest.getIssuer();
-		if (issuer != null) {
-			this.issuer = issuer.getValue();
-		}
+        DateTime issueInstant = authnRequest.getIssueInstant();
+        this.issueInstant = (issueInstant != null) ? issueInstant.toString() : "";
 
-		DateTime issueInstant = authnRequest.getIssueInstant();
-		if (issueInstant != null) {
-			this.issueInstant = issueInstant.toString();
-		}
+        // get id
+        this.id = authnRequest.getID();
+    }
 
-		// get id
-		this.id = authnRequest.getID();
-	}
+    public String getId() {
+        return id;
+    }
 
-	public String getId() {
-		return id;
-	}
+    public List<String> getAuthnContextClassRefValues() {
+        return authnContextClassRefValues;
+    }
 
-	public List<String> getAuthnContextClassRefValues() {
-		return authnContextClassRefValues;
-	}
+    public boolean isForceAuthn() {
+        return forceAuthn;
+    }
 
-	public boolean isForceAuthn() {
-		return forceAuthn;
-	}
+    public boolean isPassive() {
+        return passive;
+    }
 
-	public boolean isPassive() {
-		return passive;
-	}
+    public NSISLevel getRequestedNsisLevel() {
+        return requestedNsisLevel;
+    }
 
-	public NSISLevel getRequestedNsisLevel() {
-		return requestedNsisLevel;
-	}
+    public String getIssuer() {
+        return issuer;
+    }
 
-	public String getIssuer() {
-		return issuer;
-	}
+    public String getIssueInstant() {
+        return issueInstant;
+    }
 
-	public String getIssueInstant() {
-		return issueInstant;
-	}
-
-	public String getDestination() {
-		return destination;
-	}
+    public String getDestination() {
+        return destination;
+    }
 }

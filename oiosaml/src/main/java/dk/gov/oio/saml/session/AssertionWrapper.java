@@ -265,8 +265,6 @@ public class AssertionWrapper implements Serializable {
 
 	@Override
 	public String toString() {
-		return "AssertionWrapper{" +
-				"assertion='" + assertion + '\'' +
-				'}';
+		return String.format("AssertionWrapper{assertion='%s'}", assertion);
 	}
 }

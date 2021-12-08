@@ -9,23 +9,31 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Objects;
 
-public class RequestUtil {
-    private static final Logger log = LoggerFactory.getLogger(RequestUtil.class);
+/**
+ * Utility class for creating content from the servlet request for the audit log.
+ */
+public class AuditRequestUtil {
+    private static final Logger log = LoggerFactory.getLogger(AuditRequestUtil.class);
 
     /**
      * Lookup an attribute with the name parameter on the request.
      *
      * @param request HTTP servlet request
      * @param parameter Parameter that is looked up on the request.
-     *                  Parameter MUST have the format [Protocol:Name].
-     *                  Protocol MUST be one of: [query|header|cookie|session].
-     *                  Name is the attribute name/id.
+     *                  <parameter> ::= <protocol>:<attribute>
+     *                  <protocol> ::= <query> | <header> | <cookie> | <session> | <request>
+     *                  <attribute> ::= Name of an attribute accessible from the selected protocol.
+     *                  <query> ::=	Access to GET and Form POST query parameters/attributes.
+     *                  <header> ::= Access to request Header names, as parameters/attributes.
+     *                  <cookie> ::= Access to request Cookie names, as parameters/attributes.
+     *                  <session> ::= Access to session values i.e. to access SessionId for logging.
+     *                  <request> ::= remoteHost | remoteAddr | remotePort | remoteUser
      *                  Ex. "header:User-Agent".
      * @param defaultValue default value if the parameter is not found
      * @return Attribute value from lookup or provided default value
      */
     public static String getAttributeFromRequest(HttpServletRequest request, String parameter, String defaultValue) {
-        if (null == parameter || parameter.length() == 0 ) {
+        if (StringUtil.isEmpty(parameter)) {
             return defaultValue;
         }
         String[] name = Objects.toString(parameter, "").split(":", 2);
@@ -41,35 +49,46 @@ public class RequestUtil {
             case "session":
                 return Objects.toString(request.getSession().getAttribute(name[1]), defaultValue);
             case "query":
-                String[] parameterValues = request.getParameterValues(name[1]);
-                return (null != parameterValues && parameterValues.length > 0)?
-                        String.join(",", parameterValues) : defaultValue;
-            case "cookie": {
-                for (Cookie cookie : request.getCookies()) {
-                    if (cookie.getName().equals(name[1])) {
-                        return Objects.toString(cookie.getValue(),defaultValue);
-                    }
-                }
-                return defaultValue;
-            }
-            case "request": {
-                switch (name[1]) {
-                    case "remoteHost" :
-                        return Objects.toString(request.getRemoteHost(), defaultValue);
-                    case "remoteAddr" :
-                        return Objects.toString(request.getRemoteAddr(), defaultValue);
-                    case "remotePort" :
-                        return Objects.toString(String.valueOf(request.getRemotePort()), defaultValue);
-                    case "remoteUser" :
-                        return Objects.toString(request.getRemoteUser(), defaultValue);
-                    case "sessionId" :
-                        return Objects.toString(request.getSession().getId(), defaultValue);
-                    default:
-                        log.error("Request parameter '{}' is missing, should be [remoteHost|remoteAddr|remotePort|remoteUser]",name[1]);
-                }
-            }
+                return getQueryAttributeFromRequest(request, name[1], defaultValue);
+            case "cookie":
+                return getCookieAttributeFromRequest(request, name[1], defaultValue);
+            case "request":
+                return getRequestAttributeFromRequest(request, name[1], defaultValue);
             default:
                 log.error("Custom parameter protocol '{}' is malformed, should be [request|query|header|cookie|session]",name[0]);
+        }
+        return defaultValue;
+    }
+
+    private static String getQueryAttributeFromRequest(HttpServletRequest request, String parameter, String defaultValue) {
+        String[] parameterValues = request.getParameterValues(parameter);
+        return (null != parameterValues && parameterValues.length > 0)?
+                String.join(",", parameterValues) : defaultValue;
+    }
+
+    private static String getCookieAttributeFromRequest(HttpServletRequest request, String parameter, String defaultValue) {
+        for (Cookie cookie : request.getCookies()) {
+            if (cookie.getName().equals(parameter)) {
+                return Objects.toString(cookie.getValue(),defaultValue);
+            }
+        }
+        return defaultValue;
+    }
+
+    private static String getRequestAttributeFromRequest(HttpServletRequest request, String parameter, String defaultValue) {
+        switch (parameter) {
+            case "remoteHost" :
+                return Objects.toString(request.getRemoteHost(), defaultValue);
+            case "remoteAddr" :
+                return Objects.toString(request.getRemoteAddr(), defaultValue);
+            case "remotePort" :
+                return Objects.toString(String.valueOf(request.getRemotePort()), defaultValue);
+            case "remoteUser" :
+                return Objects.toString(request.getRemoteUser(), defaultValue);
+            case "sessionId" :
+                return Objects.toString(request.getSession().getId(), defaultValue);
+            default:
+                log.error("Request parameter '{}' is missing, should be [remoteHost|remoteAddr|remotePort|remoteUser]",parameter);
         }
         return defaultValue;
     }

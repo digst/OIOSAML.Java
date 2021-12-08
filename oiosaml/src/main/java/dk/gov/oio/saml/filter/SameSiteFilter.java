@@ -1,5 +1,7 @@
 package dk.gov.oio.saml.filter;
 
+import dk.gov.oio.saml.util.StringUtil;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
@@ -86,7 +88,7 @@ public class SameSiteFilter implements Filter {
 
             boolean firstCookie = true;
             for (String header : headers) {
-                if (header == null || header.length() == 0) {
+                if (StringUtil.isEmpty(header)) {
                     continue;
                 }
 
