@@ -126,7 +126,8 @@ public class AssertionHandler extends SAMLHandler {
 
             auditBuilder
                     .withAuthnAttribute("RESULT", "VALID")
-                    .withAuthnAttribute("SIGNATURE", wrapper.getSigningCredentialEntityId())
+                    .withAuthnAttribute("SIGNATURE_REFERENCE", assertion.getSignatureReferenceID())
+                    .withAuthnAttribute("SIGNATURE_ENTITY", wrapper.getSigningCredentialEntityId())
                     .withAuthnAttribute("ASSURANCE_LEVEL", wrapper.getAssuranceLevel())
                     .withAuthnAttribute("NSIS_LEVEL", wrapper.getNsisLevel().getName())
                     .withAuthnAttribute("SUBJECT_NAME_ID", wrapper.getSubjectNameId());
