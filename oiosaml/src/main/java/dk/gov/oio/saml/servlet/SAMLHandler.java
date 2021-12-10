@@ -30,7 +30,6 @@ public abstract class SAMLHandler {
     public abstract void handleGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ExternalException, InternalException, InitializationException;
     public abstract void handlePost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ExternalException, InternalException, IOException;
     public void handleSOAP(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ExternalException, InternalException, IOException {
-        // Fail with access exception
         httpServletResponse.sendError(HttpStatus.SC_FORBIDDEN);
     }
 
@@ -76,9 +75,8 @@ public abstract class SAMLHandler {
 
     MessageContext<SAMLObject> decodeSOAP(HttpServletRequest httpServletRequest) throws InternalException, ExternalException {
         try {
-            if (log.isDebugEnabled()) {
-                log.debug("Decoding message as HTTP SOAP11");
-            }
+            log.debug("Decoding message as HTTP SOAP11");
+
             HTTPSOAP11Decoder decoder = new HTTPSOAP11Decoder();
             decoder.setHttpServletRequest(httpServletRequest);
 
@@ -124,9 +122,7 @@ public abstract class SAMLHandler {
     }
 
     void sendSOAP(HttpServletResponse httpServletResponse, MessageContext<SAMLObject> message) throws ComponentInitializationException, MessageEncodingException {
-        if (log.isDebugEnabled()) {
-            log.debug("Encoding and sending message (HTTPPost)");
-        }
+        log.debug("Encoding and sending message (SOAP)");
 
         HTTPSOAP11Encoder encoder = new HTTPSOAP11Encoder();
 
