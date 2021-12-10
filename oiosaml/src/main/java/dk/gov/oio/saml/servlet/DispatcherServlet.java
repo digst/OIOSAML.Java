@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import dk.gov.oio.saml.util.StringUtil;
 import org.apache.log4j.Logger;
 import org.opensaml.core.config.InitializationException;
 
@@ -214,7 +215,11 @@ public class DispatcherServlet extends HttpServlet {
         }
 
         try {
-            samlHandler.handlePost(req, res);
+            if (StringUtil.isNotEmpty(req.getHeader("SOAPAction"))) {
+                samlHandler.handleSOAP(req, res);
+            } else {
+                samlHandler.handlePost(req, res);
+            }
 		}
 		catch (ExternalException | InternalException e) {
         	log.error("Unexpected error during SAML processing", e);

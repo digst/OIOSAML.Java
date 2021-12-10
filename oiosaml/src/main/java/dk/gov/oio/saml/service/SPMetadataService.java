@@ -135,6 +135,14 @@ public class SPMetadataService {
         singleLogoutService.setLocation(config.getServletLogoutURL());
         singleLogoutService.setResponseLocation(config.getServletLogoutResponseURL());
 
+        // Create SLO endpoint for SOAP
+        singleLogoutService = SamlHelper.build(SingleLogoutService.class);
+        spssoDescriptor.getSingleLogoutServices().add(singleLogoutService);
+
+        singleLogoutService.setBinding(SAMLConstants.SAML2_SOAP11_BINDING_URI);
+        singleLogoutService.setLocation(config.getServletLogoutURL());
+        singleLogoutService.setResponseLocation(config.getServletLogoutResponseURL());
+
         String contactEmail = config.getContactEmail();
         if (contactEmail != null && !"".equals(contactEmail)) {
             EmailAddress emailAddress = SamlHelper.build(EmailAddress.class);

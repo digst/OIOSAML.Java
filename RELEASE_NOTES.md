@@ -1,6 +1,7 @@
 # OIO SAML 3 (Artifact ID: oiosaml3.java)
 
 ## 3.0.3 (planned)
+- NLRFIM-120: Support SOAP bindings in Java OIO SAML 3
 
 ## 3.0.2
 - NLRFIM-124: ResponseLocation is optional cf. section 2.2.2 in OASIS SAML 2 Metadata and hence if attribute is not present NULL check must be performed.

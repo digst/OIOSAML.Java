@@ -113,4 +113,41 @@ public class LogoutRequestHandler extends SAMLHandler {
     public void handlePost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ExternalException, InternalException, IOException {
         handleGet(httpServletRequest, httpServletResponse);
     }
+
+    @Override
+    public void handleSOAP(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ExternalException, InternalException, IOException {
+        log.debug("Handling SOAP LogoutRequest");
+
+        //TODO: When updated from NLRFIM-109 - refactor class so that biz logic is separated from handling the protocol
+
+        // IdP Initiated, generate response
+        MessageContext<SAMLObject> context = decodeSOAP(httpServletRequest);
+        LogoutRequest logoutRequest = getSamlObject(context, LogoutRequest.class);
+
+        // TODO log as above + debug
+        log.info("Incoming LogoutRequest - ID:'{}' Issuer:'{}' IssueInstant:'{}' SessionIndexes:'{}' Destination:'{}'");
+
+        // Validate logout request, we log the user out not matter what, but we should log if the request is wrong
+        
+        // Delete session
+        httpServletRequest.getSession().invalidate();
+        if (log.isDebugEnabled()) {
+            log.debug("Session invalidated");
+        }
+
+        // Create LogoutResponse
+        try {
+            IdPMetadataService metadataService = IdPMetadataService.getInstance();
+            String logoutResponseEndpoint = metadataService.getLogoutResponseEndpoint(); // Has to be from the specific IdP that verified the user
+            MessageContext<SAMLObject> messageContext = LogoutResponseService.createMessageWithLogoutResponse(logoutRequest, logoutResponseEndpoint);
+
+            // TODO log as above + debug
+            log.info("Outgoing LogoutRequest - ID:'{}' Issuer:'{}' IssueInstant:'{}' SessionIndexes:'{}' Destination:'{}'");
+
+            sendSOAP(httpServletResponse, messageContext);
+        }
+        catch (InitializationException | ComponentInitializationException | MessageEncodingException e) {
+            throw new InternalException(e);
+        }
+    }
 }

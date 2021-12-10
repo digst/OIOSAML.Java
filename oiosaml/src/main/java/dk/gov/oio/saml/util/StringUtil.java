@@ -24,4 +24,25 @@ public class StringUtil {
 		
 		return url;
 	}
+
+	/**
+	 * Check if input string is empty
+	 * @param input any string
+	 * @return true if input string is null, empty or only contain whitespaces
+	 */
+	public static boolean isEmpty(String input) {
+		if (null == input || input.trim().isEmpty()) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Check if input string is not empty
+	 * @param input any string
+	 * @return false if input string is null, empty or only contain whitespaces otherwise true
+	 */
+	public static boolean isNotEmpty(String input) {
+		return !isEmpty(input);
+	}
 }
