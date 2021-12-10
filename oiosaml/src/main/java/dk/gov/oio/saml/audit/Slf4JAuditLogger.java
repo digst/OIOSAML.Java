@@ -25,7 +25,7 @@ public class Slf4JAuditLogger implements AuditLogger {
     /**
      * Audit log a message, e.g. AuthnRequest or Assertion from SAML
      *
-     * @param message
+     * @param message log message in JSON format, created with AuditService.Builder
      */
     @Override
     public void auditLog(String message) {
