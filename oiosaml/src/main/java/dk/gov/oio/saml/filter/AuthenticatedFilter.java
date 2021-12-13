@@ -40,16 +40,16 @@ public class AuthenticatedFilter implements Filter {
     
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-    	HashMap<String, String> config = getConfig(filterConfig);
+        HashMap<String, String> config = getConfig(filterConfig);
         
-    	String isPassiveStr = config.get(Constants.IS_PASSIVE);
-    	String isForceAuthnStr = config.get(Constants.FORCE_AUTHN);
+        String isPassiveStr = config.get(Constants.IS_PASSIVE);
+        String isForceAuthnStr = config.get(Constants.FORCE_AUTHN);
 
         isPassive = (isPassiveStr != null) ? Boolean.parseBoolean(isPassiveStr) : false;
         forceAuthn = (isForceAuthnStr != null) ? Boolean.parseBoolean(isForceAuthnStr) : false;
 
         if (isPassive && forceAuthn) {
-        	log.warn("IsPassive and forceAuthn Cannot both be true");
+            log.warn("IsPassive and forceAuthn Cannot both be true");
         }
         
         try {
@@ -112,24 +112,24 @@ public class AuthenticatedFilter implements Filter {
                         .withAuthnAttribute("URL", req.getContextPath()));
 
                 sendAuthnRequest(req, res, authnRequest, requiredNsisLevel);
-			}
-			else {
-				try {
-					putAssertionOnThreadLocal(session);
-
-					// User already authenticated to the correct level
-	                chain.doFilter(req, res);
-				}
-				finally {
-					removeAssertionFromThreadLocal();
-				}
             }
-		}
-		catch (Exception e) {
-			log.warn("Unexpected error in authentication filter", e);
+            else {
+                try {
+                    putAssertionOnThreadLocal(session);
 
-			throw new ServletException(e);
-		}
+                    // User already authenticated to the correct level
+                    chain.doFilter(req, res);
+                }
+                finally {
+                    removeAssertionFromThreadLocal();
+                }
+            }
+        }
+        catch (Exception e) {
+            log.warn("Unexpected error in authentication filter", e);
+
+            throw new ServletException(e);
+        }
     }
 
     private NSISLevel tryExtractNSISLevel(HttpSession session, NSISLevel defaultValue) {
@@ -174,16 +174,16 @@ public class AuthenticatedFilter implements Filter {
         return requiredNsisLevel.equalOrLesser(authenticatedNsisLevel);
     }
 
-	@Override
+    @Override
     public void destroy() {
-		;
+        ;
     }
 
     private void removeAssertionFromThreadLocal() {
-    	AssertionWrapperHolder.clear();
-	}
+        AssertionWrapperHolder.clear();
+    }
 
-	private void putAssertionOnThreadLocal(HttpSession session) {
+    private void putAssertionOnThreadLocal(HttpSession session) {
         Object assertionObject = session.getAttribute(Constants.SESSION_ASSERTION);
         if (assertionObject != null && assertionObject instanceof AssertionWrapper) {
             AssertionWrapperHolder.set((AssertionWrapper) assertionObject);
@@ -193,9 +193,9 @@ public class AuthenticatedFilter implements Filter {
             }
         }
         else {
-        	log.warn("No assertion available on session");
+            log.warn("No assertion available on session");
         }
-	}
+    }
 
     private void sendAuthnRequest(HttpServletRequest req, HttpServletResponse res, MessageContext<SAMLObject> authnRequest, NSISLevel requestedNsisLevel) throws InternalException {
         try {

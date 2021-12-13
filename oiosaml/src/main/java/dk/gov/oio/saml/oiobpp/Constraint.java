@@ -12,9 +12,9 @@ import javax.xml.bind.annotation.XmlValue;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Constraint", propOrder = { "value" })
 public class Constraint implements Serializable {
-	private static final long serialVersionUID = -9146150254468938758L;
+    private static final long serialVersionUID = -9146150254468938758L;
 
-	@XmlValue
+    @XmlValue
     protected String value;
 
     @XmlAttribute(name = "Name", required = true)

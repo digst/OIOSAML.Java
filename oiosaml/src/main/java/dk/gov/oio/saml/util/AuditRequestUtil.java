@@ -23,7 +23,7 @@ public class AuditRequestUtil {
      *                  parameter ::= protocol:attribute
      *                  protocol ::= query | header | cookie | session | request
      *                  attribute ::= Name of an attribute accessible from the selected protocol.
-     *                  query ::=	Access to GET and Form POST query parameters/attributes.
+     *                  query ::=    Access to GET and Form POST query parameters/attributes.
      *                  header ::= Access to request Header names, as parameters/attributes.
      *                  cookie ::= Access to request Cookie names, as parameters/attributes.
      *                  session ::= Access to session values i.e. to access SessionId for logging.

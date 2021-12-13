@@ -13,7 +13,7 @@ public class Constants {
     public static final String SESSION_ASSERTION = "oiosaml.assertion";
     public static final String SESSION_ERROR_TYPE = "oiosaml.error.type";
     public static final String SESSION_ERROR_MESSAGE = "oiosaml.error.message";
-	public static final String SESSION_SESSION_INDEX = "oiosaml.session.index";
+    public static final String SESSION_SESSION_INDEX = "oiosaml.session.index";
 
     // Configuration constants for DispatcherServlet (required)
     public static final String SP_ENTITY_ID = "oiosaml.servlet.entityid";
@@ -26,7 +26,7 @@ public class Constants {
     public static final String IDP_METADATA_URL = "oiosaml.servlet.idp.metadata.url";
 
     // Configuration constants for DispatcherServlet (optional, has default values)
-	public static final String EXTERNAL_CONFIGURATION_FILE = "oiosaml.servlet.configurationfile";
+    public static final String EXTERNAL_CONFIGURATION_FILE = "oiosaml.servlet.configurationfile";
     public static final String OIOSAML_VALIDATION_ENABLED = "oiosaml.servlet.profile.validation.enabled";
     public static final String OIOSAML_ASSURANCE_LEVEL_ALLOWED = "oiosaml.servlet.profile.validation.assurancelevel.allowed";
     public static final String OIOSAML_ASSURANCE_LEVEL_MINIMUM = "oiosaml.servlet.profile.validation.assurancelevel.minimum";
@@ -59,8 +59,8 @@ public class Constants {
     public static final String OCSP_CHECK_ENABLED = "oiosaml.servlet.revocation.ocsp.check.enabled";
 
     // Configuration constants for AuthenticationFilter
-	public static final String IS_PASSIVE = "oiosaml.filter.ispassive.enabled";
-	public static final String FORCE_AUTHN = "oiosaml.filter.forceauthn.enabled";
+    public static final String IS_PASSIVE = "oiosaml.filter.ispassive.enabled";
+    public static final String FORCE_AUTHN = "oiosaml.filter.forceauthn.enabled";
     public static final String REQUIRED_NSIS_LEVEL = "oiosaml.filter.nsis.required";
     public static final String ATTRIBUTE_PROFILE = "oiosaml.filter.attribute.profile";
 

@@ -20,73 +20,73 @@ import dk.gov.oio.saml.util.TestConstants;
 @ExtendWith(MockServerExtension.class)
 @MockServerSettings(ports = { 8081 })
 public class IdpMetadataServiceTest extends BaseServiceTest {
-	private MockServerClient idp;
+    private MockServerClient idp;
 
-	public IdpMetadataServiceTest(MockServerClient idp) {
-		this.idp = idp;
-	}
+    public IdpMetadataServiceTest(MockServerClient idp) {
+        this.idp = idp;
+    }
 
-	@BeforeEach
-	public void resetMetadata() {
-		IdPMetadataService.getInstance().clear(TestConstants.IDP_ENTITY_ID);
-	}
+    @BeforeEach
+    public void resetMetadata() {
+        IdPMetadataService.getInstance().clear(TestConstants.IDP_ENTITY_ID);
+    }
 
-	@DisplayName("Test retrieving metadata from file")
-	@Test
-	public void testGetMetadataFromFile() throws Exception {
-		// Metadata file path
-		ClassLoader classLoader = IdpMetadataServiceTest.class.getClassLoader();
-		String fileLocation = classLoader.getResource("test-metadata.xml").getFile();
-		Configuration config = OIOSAML3Service.getConfig();
-		config.setIdpMetadataFile(fileLocation);
+    @DisplayName("Test retrieving metadata from file")
+    @Test
+    public void testGetMetadataFromFile() throws Exception {
+        // Metadata file path
+        ClassLoader classLoader = IdpMetadataServiceTest.class.getClassLoader();
+        String fileLocation = classLoader.getResource("test-metadata.xml").getFile();
+        Configuration config = OIOSAML3Service.getConfig();
+        config.setIdpMetadataFile(fileLocation);
 
-		// Get metadata
-		EntityDescriptor entityDescriptor = IdPMetadataService.getInstance().getIdPMetadata().getEntityDescriptor();
-		Assertions.assertNotNull(entityDescriptor);
-		Assertions.assertEquals(TestConstants.IDP_ENTITY_ID, entityDescriptor.getEntityID());
+        // Get metadata
+        EntityDescriptor entityDescriptor = IdPMetadataService.getInstance().getIdPMetadata().getEntityDescriptor();
+        Assertions.assertNotNull(entityDescriptor);
+        Assertions.assertEquals(TestConstants.IDP_ENTITY_ID, entityDescriptor.getEntityID());
 
-		// Cleanup
-		config.setIdpMetadataFile(null);
-	}
+        // Cleanup
+        config.setIdpMetadataFile(null);
+    }
 
-	@DisplayName("Test retrieving metadata")
-	@Test
-	public void testGetMetadata() throws Exception {
-		// Make sure Mock idp is setup to return correct data
-		idp
-			.when(
-				request()
-					.withMethod("GET")
-					.withPath("/saml/metadata"),
-					Times.exactly(1)
-			)
-			.respond(
-				response()
-				   .withStatusCode(200)
-				   .withBody(TestConstants.IDP_METADATA));
-		
-		EntityDescriptor entityDescriptor = IdPMetadataService.getInstance().getIdPMetadata().getEntityDescriptor();
-		Assertions.assertNotNull(entityDescriptor);
-		Assertions.assertEquals(TestConstants.IDP_ENTITY_ID, entityDescriptor.getEntityID());
-	}
-	
-	@DisplayName("Test retrieving incorrect metadata")
-	@Test
-	public void testGetIncorrectMetadata() throws Exception {
-		// Make sure Mock idp is setup to return incorrect data
-		idp.when(
-				request()
-					.withMethod("GET")
-					.withPath("/saml/metadata"),
-					Times.exactly(1)
-			)
-			.respond(
-				response()
-				   .withStatusCode(200)
-				   .withBody(TestConstants.BAD_IDP_METADATA));
+    @DisplayName("Test retrieving metadata")
+    @Test
+    public void testGetMetadata() throws Exception {
+        // Make sure Mock idp is setup to return correct data
+        idp
+            .when(
+                request()
+                    .withMethod("GET")
+                    .withPath("/saml/metadata"),
+                    Times.exactly(1)
+            )
+            .respond(
+                response()
+                   .withStatusCode(200)
+                   .withBody(TestConstants.IDP_METADATA));
+        
+        EntityDescriptor entityDescriptor = IdPMetadataService.getInstance().getIdPMetadata().getEntityDescriptor();
+        Assertions.assertNotNull(entityDescriptor);
+        Assertions.assertEquals(TestConstants.IDP_ENTITY_ID, entityDescriptor.getEntityID());
+    }
+    
+    @DisplayName("Test retrieving incorrect metadata")
+    @Test
+    public void testGetIncorrectMetadata() throws Exception {
+        // Make sure Mock idp is setup to return incorrect data
+        idp.when(
+                request()
+                    .withMethod("GET")
+                    .withPath("/saml/metadata"),
+                    Times.exactly(1)
+            )
+            .respond(
+                response()
+                   .withStatusCode(200)
+                   .withBody(TestConstants.BAD_IDP_METADATA));
 
-		// we should get NULL back, if the EntityId does not match
-		EntityDescriptor entityDescriptor = IdPMetadataService.getInstance().getIdPMetadata().getEntityDescriptor();
-		Assertions.assertNull(entityDescriptor);
-	}
+        // we should get NULL back, if the EntityId does not match
+        EntityDescriptor entityDescriptor = IdPMetadataService.getInstance().getIdPMetadata().getEntityDescriptor();
+        Assertions.assertNull(entityDescriptor);
+    }
 }
