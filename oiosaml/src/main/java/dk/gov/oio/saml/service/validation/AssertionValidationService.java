@@ -8,7 +8,8 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.handler.MessageHandlerException;
@@ -47,7 +48,7 @@ import dk.gov.oio.saml.util.SamlHelper;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 
 public class AssertionValidationService {
-    private static final Logger log = Logger.getLogger(AssertionValidationService.class);
+    private static final Logger log = LoggerFactory.getLogger(AssertionValidationService.class);
 
     public void validate(HttpServletRequest httpServletRequest, MessageContext<SAMLObject> messageContext, Response response, Assertion assertion, AuthnRequestWrapper authnRequest) throws AssertionValidationException, InternalException, ExternalException {
         validateDestination(httpServletRequest, messageContext);
@@ -220,7 +221,7 @@ public class AssertionValidationService {
         Configuration configuration = OIOSAML3Service.getConfig();
         String assuranceLevel = attributes.get(Constants.ASSURANCE_LEVEL);
         if(authnRequest.getRequestedNsisLevel() == NSISLevel.NONE && assuranceLevel != null) {
-            log.info("Assurance level of " + assuranceLevel + " received. Accepting, requested NSIS LoA was NONE");
+            log.info("Assurance level of {} received. Accepting, requested NSIS LoA was NONE", assuranceLevel);
             return;
         }
 
@@ -229,7 +230,7 @@ public class AssertionValidationService {
         }
 
         if(configuration.isAssuranceLevelSufficient(assuranceLevel)) {
-            log.info("Assurance level of " + assuranceLevel + " received instead of NSIS LoA. Accepted because of configuration");
+            log.info("Assurance level of {} received instead of NSIS LoA. Accepted because of configuration", assuranceLevel);
             return;
         }
 

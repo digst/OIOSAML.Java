@@ -1,6 +1,7 @@
 package dk.gov.oio.saml.service;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.xml.io.MarshallingException;
@@ -30,16 +31,15 @@ import org.opensaml.xmlsec.signature.support.Signer;
 import javax.xml.crypto.dsig.CanonicalizationMethod;
 
 public class LogoutResponseService {
-	private static final Logger log = Logger.getLogger(LogoutResponseService.class);
+	private static final Logger log = LoggerFactory.getLogger(LogoutResponseService.class);
 
 	public void validateLogoutResponse() {
 		return;
 	}
 
 	public static MessageContext<SAMLObject> createMessageWithLogoutResponse(LogoutRequest logoutRequest, String destination) throws InitializationException, InternalException {
-		if (log.isDebugEnabled()) {
-			log.debug("Create and sign logout response message for  request id '" + logoutRequest.getID() + "'");
-		}
+		log.debug("Create and sign logout response message for  request id '{}'", logoutRequest.getID());
+
 		// Create message context
 		MessageContext<SAMLObject> messageContext = new MessageContext<>();
 
@@ -67,17 +67,14 @@ public class LogoutResponseService {
 	}
 
 	private static LogoutResponse createLogoutResponse(String destination, LogoutRequest logoutRequest) throws InitializationException {
-		if (log.isDebugEnabled()) {
-			log.debug("Create logout response message for  request id '" + logoutRequest.getID() + "'");
-		}
+		log.debug("Create logout response message for  request id '{}'", logoutRequest.getID());
+
 		LogoutResponse logoutResponse = SamlHelper.build(LogoutResponse.class);
 
 		RandomIdentifierGenerationStrategy randomIdentifierGenerator = new RandomIdentifierGenerationStrategy();
 		String id = randomIdentifierGenerator.generateIdentifier();
 
-		if (log.isDebugEnabled()) {
-			log.debug("Created logout response id '" + id + "' for  request id '" + logoutRequest.getID() + "'");
-		}
+ 		log.debug("Created logout response id '{}' for  request id '{}'", id, logoutRequest.getID());
 
 		logoutResponse.setID(id);
 		logoutResponse.setDestination(destination);
@@ -100,9 +97,7 @@ public class LogoutResponseService {
 	}
 
 	private static LogoutResponse signResponse(LogoutResponse logoutResponse) {
-		if (log.isDebugEnabled()) {
-			log.debug("Signing logout response message with id '" + logoutResponse.getID() + "'");
-		}
+		log.debug("Signing logout response message with id '{}'", logoutResponse.getID());
 		try {
 			Signature signature = SamlHelper.build(Signature.class);
 
@@ -121,7 +116,7 @@ public class LogoutResponseService {
 			Signer.signObject(signature);
 
 		} catch (SignatureException | InitializationException | InternalException | MarshallingException e) {
-			log.error("Signing of '" + logoutResponse.getID() + "' failed", e);
+			log.error("Signing of '{}' failed", logoutResponse.getID(), e);
 		}
 		return logoutResponse;
 	}

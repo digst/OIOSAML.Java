@@ -1,18 +1,11 @@
 package dk.gov.oio.saml.session;
 
 import java.io.Serializable;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
+import dk.gov.oio.saml.util.StringUtil;
 import org.joda.time.DateTime;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.Assertion;
@@ -28,6 +21,8 @@ import org.opensaml.saml.saml2.core.Subject;
 import org.opensaml.saml.saml2.core.SubjectConfirmation;
 import org.opensaml.saml.saml2.core.SubjectConfirmationData;
 import org.opensaml.saml.saml2.core.impl.AssertionMarshaller;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 import dk.gov.oio.saml.model.NSISLevel;
@@ -38,6 +33,7 @@ import dk.gov.oio.saml.util.InternalException;
 import dk.gov.oio.saml.util.SamlHelper;
 
 public class AssertionWrapper implements Serializable {
+	private static final Logger log = LoggerFactory.getLogger(AssertionWrapper.class);
 	private static final long serialVersionUID = -338227958970338958L;
 	private String assertion;
 	private String id;
@@ -54,13 +50,14 @@ public class AssertionWrapper implements Serializable {
 	private DateTime confirmationTime;
 	private DateTime conditionTimeNotBefore;
 	private DateTime conditionTimeNotOnOrAfter;
+	private String signingCredentialEntityId;
 
 	public AssertionWrapper(Assertion assertion) throws InternalException {
 		// getAssertion()
 		AssertionMarshaller marshaller = new AssertionMarshaller();
 		try {
 			Element element = marshaller.marshall(assertion);
-			this.assertion = elementToString(element);
+			this.assertion = StringUtil.elementToString(element);
 		}
 		catch (MarshallingException e) {
 			throw new InternalException(e);
@@ -159,29 +156,13 @@ public class AssertionWrapper implements Serializable {
 			}
 		}
 
+		// getSigningCredentialEntityId()
+		if (null != assertion.getSignature() && null != assertion.getSignature().getSigningCredential()) {
+			this.signingCredentialEntityId = assertion.getSignature().getSigningCredential().getEntityId();
+		}
+
 		// getID()
 		this.id = assertion.getID();
-	}
-
-	private static String elementToString(Element element) {
-		try {
-			Source source = new DOMSource(element);
-			TransformerFactory transFactory = TransformerFactory.newInstance();
-			Transformer transformer = transFactory.newTransformer();
-			StringWriter buffer = new StringWriter();
-
-			transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-			transformer.transform(source, new StreamResult(buffer));
-
-			return buffer.toString();
-		}
-		catch (Exception ex) {
-			return null;
-		}
 	}
 
 	public String getAssertion() {
@@ -276,5 +257,14 @@ public class AssertionWrapper implements Serializable {
 
 	public DateTime getConditionTimeNotOnOrAfter() {
 		return conditionTimeNotOnOrAfter;
+	}
+
+	public String getSigningCredentialEntityId() {
+		return signingCredentialEntityId;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("AssertionWrapper{assertion='%s'}", assertion);
 	}
 }

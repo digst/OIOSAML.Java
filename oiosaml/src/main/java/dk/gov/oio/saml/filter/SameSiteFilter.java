@@ -1,5 +1,7 @@
 package dk.gov.oio.saml.filter;
 
+import dk.gov.oio.saml.util.StringUtil;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
@@ -18,13 +20,11 @@ public class SameSiteFilter implements Filter {
 	private static final String SAMESITE_COOKIE_HEADER = "Set-Cookie";
 	private static final String SAMESITE_ATTRIBITE_NAME = "SameSite";
 	private static final String SAMESITE_NONE_VALUE = "None";
-    
+
     public void init(FilterConfig filterConfig) throws ServletException {
-    	;
     }
-    
+
     public void destroy() {
-    	;
     }
 
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
@@ -88,7 +88,7 @@ public class SameSiteFilter implements Filter {
 
             boolean firstCookie = true;
             for (String header : headers) {
-                if (header == null || header.length() == 0) {
+                if (StringUtil.isEmpty(header)) {
                     continue;
                 }
 

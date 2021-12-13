@@ -13,7 +13,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
+import dk.gov.oio.saml.util.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opensaml.core.config.InitializationException;
 
 import dk.gov.oio.saml.config.Configuration;
@@ -24,134 +26,130 @@ import dk.gov.oio.saml.util.ExternalException;
 import dk.gov.oio.saml.util.InternalException;
 
 public class DispatcherServlet extends HttpServlet {
-	private static final long serialVersionUID = -9177718057493368235L;
-	private static final Logger log = Logger.getLogger(DispatcherServlet.class);
+    private static final long serialVersionUID = -9177718057493368235L;
+    private static final Logger log = LoggerFactory.getLogger(DispatcherServlet.class);
     private Map<String, SAMLHandler> handlers;
     private boolean initialized = false;
 
     @Override
     public void init(ServletConfig servletConfig) throws ServletException {
-        if (log.isDebugEnabled()) {
-            log.debug("Initializing DispatcherServlet");
-        }
+        log.debug("Initializing DispatcherServlet");
 
         super.init(servletConfig);
         initServlet();
 
-        if (log.isDebugEnabled()) {
-            log.debug("Initialized DispatcherServlet");
-        }
+        log.debug("Initialized DispatcherServlet");
     }
 
     private void handleOptionalValues(Map<String, String> config, Configuration configuration) {
         String value = config.get(Constants.OIOSAML_VALIDATION_ENABLED);
-        if (value != null && value.length() > 0) {
+        if (StringUtil.isNotEmpty(value)) {
             configuration.setValidationEnabled("true".equals(value));
         }
 
         value = config.get(Constants.OIOSAML_ASSURANCE_LEVEL_ALLOWED);
-        if(value != null && value.length() > 0) {
+        if(StringUtil.isNotEmpty(value)) {
             configuration.setAssuranceLevelAllowed("true".equals(value));
         }
 
         value = config.get(Constants.OIOSAML_ASSURANCE_LEVEL_MINIMUM);
-        if (value != null && value.length() > 0) {
+        if (StringUtil.isNotEmpty(value)) {
             try {
                 Integer i = Integer.parseInt(value);
                 configuration.setMinimumAssuranceLevel(i);
             }
             catch (Exception ex) {
-                log.error("Invalid value " + Constants.OIOSAML_ASSURANCE_LEVEL_MINIMUM + " = " + value, ex);
+                log.error("Invalid value {} = {}", Constants.OIOSAML_ASSURANCE_LEVEL_MINIMUM, value, ex);
             }
         }
         
         value = config.get(Constants.SUPPORT_SELF_SIGNED);
-        if (value != null && value.length() > 0) {
+        if (StringUtil.isNotEmpty(value)) {
             configuration.setSupportSelfSigned("true".equals(value));
         }
         
         value = config.get(Constants.CRL_CHECK_ENABLED);
-        if (value != null && value.length() > 0) {
+        if (StringUtil.isNotEmpty(value)) {
             configuration.setCRLCheckEnabled("true".equals(value));
         }
         
         value = config.get(Constants.OCSP_CHECK_ENABLED);
-        if (value != null && value.length() > 0) {
+        if (StringUtil.isNotEmpty(value)) {
             configuration.setOcspCheckEnabled("true".equals(value));
         }
 
         value = config.get(Constants.METADATA_NAMEID_FORMAT);
-        if (value != null && value.length() > 0) {
-        	configuration.setNameIDFormat(value);
+        if (StringUtil.isNotEmpty(value)) {
+            configuration.setNameIDFormat(value);
         }
 
         value = config.get(Constants.METADATA_CONTACT_EMAIL);
-        if (value != null && value.length() > 0) {
-        	configuration.setContactEmail(value);
+        if (StringUtil.isNotEmpty(value)) {
+            configuration.setContactEmail(value);
         }
         
         value = config.get(Constants.ERROR_PAGE);
-        if (value != null && value.length() > 0) {
-        	configuration.setErrorPage(value);
+        if (StringUtil.isNotEmpty(value)) {
+            configuration.setErrorPage(value);
         }
         
         value = config.get(Constants.LOGIN_PAGE);
-        if (value != null && value.length() > 0) {
-        	configuration.setLoginPage(value);
+        if (StringUtil.isNotEmpty(value)) {
+            configuration.setLoginPage(value);
         }
         
         value = config.get(Constants.LOGOUT_PAGE);
-        if (value != null && value.length() > 0) {
-        	configuration.setLogoutPage(value);
+        if (StringUtil.isNotEmpty(value)) {
+            configuration.setLogoutPage(value);
         }
         
         value = config.get(Constants.IDP_METADATA_MIN_REFRESH);
-        if (value != null && value.length() > 0) {
-        	try {
-        		Integer i = Integer.parseInt(value);
-        		configuration.setIdpMetadataMinRefreshDelay(i);
-        	}
-        	catch (Exception ex) {
-        		log.error("Invalid value " + Constants.IDP_METADATA_MIN_REFRESH + " = " + value, ex);
-        	}
+        if (StringUtil.isNotEmpty(value)) {
+            try {
+                Integer i = Integer.parseInt(value);
+                configuration.setIdpMetadataMinRefreshDelay(i);
+            }
+            catch (Exception ex) {
+                log.error("Invalid value {} = {}", Constants.IDP_METADATA_MIN_REFRESH, value, ex);
+            }
         }
         
         value = config.get(Constants.IDP_METADATA_MAX_REFRESH);
-        if (value != null && value.length() > 0) {
-        	try {
-        		Integer i = Integer.parseInt(value);
-        		configuration.setIdpMetadataMaxRefreshDelay(i);
-        	}
-        	catch (Exception ex) {
-        		log.error("Invalid value " + Constants.IDP_METADATA_MAX_REFRESH + " = " + value, ex);
-        	}
+        if (StringUtil.isNotEmpty(value)) {
+            try {
+                Integer i = Integer.parseInt(value);
+                configuration.setIdpMetadataMaxRefreshDelay(i);
+            }
+            catch (Exception ex) {
+                log.error("Invalid value {} = {}", Constants.IDP_METADATA_MAX_REFRESH, value, ex);
+            }
         }
 
         value = config.get(Constants.SECONDARY_KEY_ALIAS);
-        if (value != null && value.length() > 0) {
-        	configuration.setSecondaryKeyAlias(value);
+        if (StringUtil.isNotEmpty(value)) {
+            configuration.setSecondaryKeyAlias(value);
         }
 
         value = config.get(Constants.SECONDARY_KEYSTORE_LOCATION);
-        if (value != null && value.length() > 0) {
-        	configuration.setSecondaryKeystoreLocation(value);
+        if (StringUtil.isNotEmpty(value)) {
+            configuration.setSecondaryKeystoreLocation(value);
         }
 
         value = config.get(Constants.SECONDARY_KEYSTORE_PASSWORD);
-        if (value != null && value.length() > 0) {
-        	configuration.setSecondaryKeystorePassword(value);
+        if (StringUtil.isNotEmpty(value)) {
+            configuration.setSecondaryKeystorePassword(value);
         }
         
         value = config.get(Constants.SIGNATURE_ALGORITHM);
-        if (value != null && value.length() > 0) {
-        	configuration.setSignatureAlgorithm(value);
+        if (StringUtil.isNotEmpty(value)) {
+            configuration.setSignatureAlgorithm(value);
         }
-	}
+    }
 
-	@Override
+    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         if (log.isDebugEnabled()) {
-            log.debug("Received GET (" + req.getServletPath() + req.getContextPath() + ")");
+            log.debug("Received GET ({}{})", req.getServletPath(), req.getContextPath());
         }
 
         if (!initialized) {
@@ -165,31 +163,29 @@ public class DispatcherServlet extends HttpServlet {
 
         SAMLHandler samlHandler = handlers.get(action);
         if (samlHandler == null) {
-        	log.error("No handler registered for action: " + action);
-        	
-        	ErrorHandler.handle(req, res, ERROR_TYPE.CONFIGURATION_ERROR, "No handler registered for action: " + action);
-        	return;
+            log.error("No handler registered for action: {}", action);
+            
+            ErrorHandler.handle(req, res, ERROR_TYPE.CONFIGURATION_ERROR, "No handler registered for action: " + action);
+            return;
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("Selected MessageHandler: " + samlHandler.getClass().getName());
-        }
+        log.debug("Selected MessageHandler: {}", samlHandler.getClass().getName());
 
-		try {
-			samlHandler.handleGet(req, res);
-		}
-		catch (ExternalException | InternalException | InitializationException e) {
-        	log.error("Unexpected error during SAML processing", e);
-        	
-        	ErrorHandler.handle(req, res, ERROR_TYPE.EXCEPTION, e.getMessage());
-        	return;
+        try {
+            samlHandler.handleGet(req, res);
+        }
+        catch (ExternalException | InternalException | InitializationException e) {
+            log.error("Unexpected error during SAML processing", e);
+            
+            ErrorHandler.handle(req, res, ERROR_TYPE.EXCEPTION, e.getMessage());
+            return;
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         if (log.isDebugEnabled()) {
-            log.debug("Received GET (" + req.getServletPath() + req.getContextPath() + ")");
+            log.debug("Received GET ({}{})", req.getServletPath(), req.getContextPath());
         }
 
         if (!initialized) {
@@ -203,25 +199,23 @@ public class DispatcherServlet extends HttpServlet {
 
         SAMLHandler samlHandler = handlers.get(action);
         if (samlHandler == null) {
-        	log.error("No handler registered for action: " + action);
-        	
-        	ErrorHandler.handle(req, res, ERROR_TYPE.CONFIGURATION_ERROR, "No handler registered for action: " + action);
-        	return;
+            log.error("No handler registered for action: {}", action);
+            
+            ErrorHandler.handle(req, res, ERROR_TYPE.CONFIGURATION_ERROR, "No handler registered for action: " + action);
+            return;
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("Selected MessageHandler: " + samlHandler.getClass().getName());
-        }
+        log.debug("Selected MessageHandler: {}", samlHandler.getClass().getName());
 
         try {
             samlHandler.handlePost(req, res);
-		}
-		catch (ExternalException | InternalException e) {
-        	log.error("Unexpected error during SAML processing", e);
-        	
-        	ErrorHandler.handle(req, res, ERROR_TYPE.EXCEPTION, e.getMessage());
-        	return;
-		}
+        }
+        catch (ExternalException | InternalException e) {
+            log.error("Unexpected error during SAML processing", e);
+            
+            ErrorHandler.handle(req, res, ERROR_TYPE.EXCEPTION, e.getMessage());
+            return;
+        }
     }
 
     @Override
@@ -245,23 +239,23 @@ public class DispatcherServlet extends HttpServlet {
 
         // load external configuration if one is supplied
         String externalConfigurationFile = configMap.get(Constants.EXTERNAL_CONFIGURATION_FILE);
-        if (externalConfigurationFile != null && externalConfigurationFile.length() > 0) {
-        	try (InputStream is = getClass().getClassLoader().getResourceAsStream(externalConfigurationFile)) {
+        if (StringUtil.isNotEmpty(externalConfigurationFile)) {
+            try (InputStream is = getClass().getClassLoader().getResourceAsStream(externalConfigurationFile)) {
                 Properties p = new Properties();
                 p.load(is);
                 
                 @SuppressWarnings("unchecked")
-				Enumeration<String> enums = (Enumeration<String>) p.propertyNames();
+                Enumeration<String> enums = (Enumeration<String>) p.propertyNames();
                 while (enums.hasMoreElements()) {
                   String key = enums.nextElement();
                   String value = p.getProperty(key);
                   
                   configMap.put(key,  value);
                 }
-        	}
-        	catch (Exception ex) {
-        		log.error("Failed to load external configuration file: " + externalConfigurationFile, ex);
-        	}
+            }
+            catch (Exception ex) {
+                log.error("Failed to load external configuration file: {}", externalConfigurationFile, ex);
+            }
         }
 
         return configMap;
@@ -269,7 +263,7 @@ public class DispatcherServlet extends HttpServlet {
     
     // Should make sure all handlers are initialized and added to the list
     private void initServlet() throws ServletException {
-    	if (!initialized) {
+        if (!initialized) {
             // convert to more useful map
             Map<String, String> config = getInitConfig();
 
@@ -290,6 +284,11 @@ public class DispatcherServlet extends HttpServlet {
                         .setServletRoutingPathSuffixLogout(config.get(Constants.SP_ROUTING_LOGOUT))
                         .setServletRoutingPathSuffixLogoutResponse(config.get(Constants.SP_ROUTING_LOGOUT_RESPONSE))
                         .setServletRoutingPathSuffixAssertion(config.get(Constants.SP_ROUTING_ASSERTION))
+                        .setAuditLoggerClassName(config.get(Constants.SP_AUDIT_CLASSNAME))
+                        .setAuditRequestAttributeIP(config.get(Constants.SP_AUDIT_ATTRIBUTE_IP))
+                        .setAuditRequestAttributePort(config.get(Constants.SP_AUDIT_ATTRIBUTE_PORT))
+                        .setAuditRequestAttributeServiceProviderUserId(config.get(Constants.SP_AUDIT_ATTRIBUTE_USER_ID))
+                        .setAuditRequestAttributeSessionId(config.get(Constants.SP_AUDIT_ATTRIBUTE_SESSION_ID))
                         .build();
 
                 handleOptionalValues(config, configuration);
@@ -308,6 +307,6 @@ public class DispatcherServlet extends HttpServlet {
             catch (InternalException | InitializationException e) {
                 throw new ServletException(e);
             }
-    	}
+        }
     }
 }

@@ -5,7 +5,8 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.decoder.MessageDecodingException;
@@ -22,16 +23,15 @@ import net.shibboleth.utilities.java.support.component.ComponentInitializationEx
 import net.shibboleth.utilities.java.support.velocity.VelocityEngine;
 
 public abstract class SAMLHandler {
-    private static final Logger log = Logger.getLogger(SAMLHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(SAMLHandler.class);
 
     public abstract void handleGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ExternalException, InternalException, InitializationException;
     public abstract void handlePost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ExternalException, InternalException, IOException;
 
     MessageContext<SAMLObject> decodeGet(HttpServletRequest httpServletRequest) throws InternalException, ExternalException {
         try {
-            if (log.isDebugEnabled()) {
-                log.debug("Decoding message as HTTPRedirect");
-            }
+            log.debug("Decoding message as HTTPRedirect");
+
             HTTPRedirectDeflateDecoder decoder = new HTTPRedirectDeflateDecoder();
             decoder.setHttpServletRequest(httpServletRequest);
 
@@ -49,9 +49,8 @@ public abstract class SAMLHandler {
 
     MessageContext<SAMLObject> decodePost(HttpServletRequest httpServletRequest) throws InternalException, ExternalException {
         try {
-            if (log.isDebugEnabled()) {
-                log.debug("Decoding message as HTTP Post");
-            }
+            log.debug("Decoding message as HTTP Post");
+
             HTTPPostDecoder decoder = new HTTPPostDecoder();
             decoder.setHttpServletRequest(httpServletRequest);
 
@@ -68,9 +67,7 @@ public abstract class SAMLHandler {
     }
 
     void sendGet(HttpServletResponse httpServletResponse, MessageContext<SAMLObject> message) throws ComponentInitializationException, MessageEncodingException {
-        if (log.isDebugEnabled()) {
-            log.debug("Encoding, deflating and sending message (HTTPRedirect)");
-        }
+        log.debug("Encoding, deflating and sending message (HTTPRedirect)");
 
         HTTPRedirectDeflateEncoder encoder = new HTTPRedirectDeflateEncoder();
 
@@ -82,9 +79,7 @@ public abstract class SAMLHandler {
     }
 
     void sendPost(HttpServletResponse httpServletResponse, MessageContext<SAMLObject> message) throws ComponentInitializationException, MessageEncodingException {
-        if (log.isDebugEnabled()) {
-            log.debug("Encoding and sending message (HTTPPost)");
-        }
+        log.debug("Encoding and sending message (HTTPPost)");
 
         HTTPPostEncoder encoder = new HTTPPostEncoder();
 

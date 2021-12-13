@@ -23,7 +23,8 @@ import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.TrustStrategy;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.bouncycastle.util.encoders.Base64;
 import org.joda.time.DateTime;
 import org.opensaml.core.config.InitializationException;
@@ -49,7 +50,7 @@ import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import net.shibboleth.utilities.java.support.xml.BasicParserPool;
 
 public class IdPMetadata {
-    private static final Logger log = Logger.getLogger(IdPMetadata.class);
+    private static final Logger log = LoggerFactory.getLogger(IdPMetadata.class);
     private List<X509Certificate> validEncryptionCertificates = new ArrayList<>();
     private List<X509Certificate> validSigningCertificates = new ArrayList<>();
     private List<X509Certificate> validUnspecifiedCertificates = new ArrayList<>();
@@ -72,9 +73,7 @@ public class IdPMetadata {
 
         // If last scheduled refresh failed, Refresh now to give up to date metadata
         if (!resolver.wasLastRefreshSuccess()) {
-            if (log.isDebugEnabled()) {
-                log.debug("Last Metadata was not successful, Refreshing metadata.");
-            }
+            log.debug("Last Metadata was not successful, Refreshing metadata.");
 
             try {
                 resolver.refresh();

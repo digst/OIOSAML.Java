@@ -6,7 +6,7 @@
 	<artifactId>oiosaml3.java</artifactId>
 	<name>OIOSAML for Java v3</name>
 	<packaging>jar</packaging>
-	<version>3.0.3-SNAPSHOT</version>
+	<version>3.1.0-SNAPSHOT</version>
 	<description>SAML Servlet Filter, configured to work with the danish SAML profile OIOSAML 3.0.0</description>
 	<url>https://digitaliser.dk/group/42063/resources</url>
 
@@ -153,9 +153,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.17</version>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.32</version>
 		</dependency>
 
 		<dependency>
@@ -211,13 +211,28 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- used by some of the OpenSAML classes -->
+		<!-- Use nop SLF4J logger in unit tests to silence log output-->
 		<dependency>
-			<groupId>commons-logging</groupId>
-			<artifactId>commons-logging</artifactId>
-			<version>1.2</version>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-nop</artifactId>
+			<version>1.7.32</version>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+			<version>1.7.32</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>log4j-over-slf4j</artifactId>
+			<version>1.7.32</version>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<distributionManagement>

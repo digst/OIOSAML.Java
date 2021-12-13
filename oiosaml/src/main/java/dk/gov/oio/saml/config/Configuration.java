@@ -1,5 +1,6 @@
 package dk.gov.oio.saml.config;
 
+import dk.gov.oio.saml.util.StringUtil;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
 
 import dk.gov.oio.saml.util.InternalException;
@@ -15,6 +16,11 @@ public class Configuration {
     private String servletRoutingPathSuffixLogout; // The endpoint suffix for logout
     private String servletRoutingPathSuffixLogoutResponse; // The endpoint suffix for logout response
     private String servletRoutingPathSuffixAssertion; // The endpoint suffix for assertion
+    private String auditLoggerClassName; // Class name of SP's implementation of the AuditLogger adapter
+    private String auditRequestAttributeIP; // Replace IP in audit request with value from attribute [protocol:name]
+    private String auditRequestAttributePort; // Replace IP in audit request with value from attribute [protocol:name]
+    private String auditRequestAttributeSessionId; // Replace SessionId in audit request with value from attribute [protocol:name]
+    private String auditRequestAttributeServiceProviderUserId; // Replace ServiceProviderUserId in audit request with value from attribute [protocol:name]
     private boolean validationEnabled = true;
     private boolean isAssuranceLevelAllowed = false;
     private int minimumAssuranceLevel = 3;
@@ -310,6 +316,46 @@ public class Configuration {
         this.ocspCheckEnabled = ocspCheckEnabled;
     }
 
+    public String getAuditLoggerClassName() {
+        return this.auditLoggerClassName;
+    }
+
+    public void setAuditLoggerClassName(String auditLoggerClassName) {
+        this.auditLoggerClassName = auditLoggerClassName;
+    }
+
+    public String getAuditRequestAttributeIP() {
+        return auditRequestAttributeIP;
+    }
+
+    public void setAuditRequestAttributeIP(String auditRequestAttributeIP) {
+        this.auditRequestAttributeIP = auditRequestAttributeIP;
+    }
+
+    public String getAuditRequestAttributePort() {
+        return auditRequestAttributePort;
+    }
+
+    public void setAuditRequestAttributePort(String auditRequestAttributePort) {
+        this.auditRequestAttributePort = auditRequestAttributePort;
+    }
+
+    public String getAuditRequestAttributeSessionId() {
+        return auditRequestAttributeSessionId;
+    }
+
+    public void setAuditRequestAttributeSessionId(String auditRequestAttributeSessionId) {
+        this.auditRequestAttributeSessionId = auditRequestAttributeSessionId;
+    }
+
+    public String getAuditRequestAttributeServiceProviderUserId() {
+        return auditRequestAttributeServiceProviderUserId;
+    }
+
+    public void setAuditRequestAttributeServiceProviderUserId(String auditRequestAttributeServiceProviderUserId) {
+        this.auditRequestAttributeServiceProviderUserId = auditRequestAttributeServiceProviderUserId;
+    }
+
     // Configuration builder for mandatory fields
     public static class Builder {
         private String spEntityID;
@@ -326,59 +372,39 @@ public class Configuration {
         private String servletRoutingPathSuffixLogout;
         private String servletRoutingPathSuffixLogoutResponse;
         private String servletRoutingPathSuffixAssertion;
+        private String auditLoggerClassName;
+        private String auditRequestAttributeIP;
+        private String auditRequestAttributePort;
+        private String auditRequestAttributeSessionId;
+        private String auditRequestAttributeServiceProviderUserId;
 
         public Configuration build() throws InternalException {
-            if (spEntityID == null || spEntityID.length() == 0) {
+            if (StringUtil.isEmpty(spEntityID)) {
                 throw new InternalException("Cannot create configuration without SP's entityID");
             }
 
-            if (baseUrl == null || baseUrl.length() == 0) {
+            if (StringUtil.isEmpty(baseUrl)) {
                 throw new InternalException("Cannot create configuration without knowing the Base URL");
             }
 
-            if (idpEntityID == null) {
+            if (StringUtil.isEmpty(idpEntityID)) {
                 throw new InternalException("Cannot create configuration without IdP's entityID");
             }
 
-            if ((idpMetadataUrl == null || idpMetadataUrl.length() == 0) &&
-                (idpMetadataFile == null || idpMetadataFile.length() == 0)) {
+            if (StringUtil.isEmpty(idpMetadataUrl) && StringUtil.isEmpty(idpMetadataFile)) {
                 throw new InternalException("Cannot create configuration without IdP Metadata URL or File location");
             }
 
-            if (keystoreLocation == null || keystoreLocation.length() == 0) {
+            if (StringUtil.isEmpty(keystoreLocation)) {
                 throw new InternalException("Cannot create configuration without knowing the location of the keystore");
             }
 
-            if (keystorePassword == null || keystorePassword.length() == 0) {
+            if (StringUtil.isEmpty(keystorePassword)) {
                 throw new InternalException("Cannot create configuration without knowing the password to the keystore");
             }
 
-            if (keyAlias == null || keyAlias.length() == 0) {
+            if (StringUtil.isEmpty(keyAlias)) {
                 throw new InternalException("Cannot create configuration without knowing the alias used inside the keystore");
-            }
-
-            if (servletRoutingPathPrefix == null || servletRoutingPathPrefix.length() == 0) {
-                servletRoutingPathPrefix = "saml";
-            }
-
-            if (servletRoutingPathSuffixError == null || servletRoutingPathSuffixError.length() == 0) {
-                servletRoutingPathSuffixError = "error";
-            }
-
-            if (servletRoutingPathSuffixMetadata == null || servletRoutingPathSuffixMetadata.length() == 0) {
-                servletRoutingPathSuffixMetadata = "metadata";
-            }
-
-            if (servletRoutingPathSuffixLogout == null || servletRoutingPathSuffixLogout.length() == 0) {
-                servletRoutingPathSuffixLogout = "logout";
-            }
-
-            if (servletRoutingPathSuffixLogoutResponse == null || servletRoutingPathSuffixLogoutResponse.length() == 0) {
-                servletRoutingPathSuffixLogoutResponse = "logoutResponse";
-            }
-
-            if (servletRoutingPathSuffixAssertion == null || servletRoutingPathSuffixAssertion.length() == 0) {
-                servletRoutingPathSuffixAssertion = "assertionConsumer";
             }
 
             // Create configuration
@@ -391,12 +417,17 @@ public class Configuration {
             configuration.keystoreLocation = this.keystoreLocation;
             configuration.keystorePassword = this.keystorePassword;
             configuration.keyAlias = this.keyAlias;
-            configuration.servletRoutingPathPrefix = this.servletRoutingPathPrefix;
-            configuration.servletRoutingPathSuffixError = this.servletRoutingPathSuffixError;
-            configuration.servletRoutingPathSuffixMetadata = this.servletRoutingPathSuffixMetadata;
-            configuration.servletRoutingPathSuffixLogout = this.servletRoutingPathSuffixLogout;
-            configuration.servletRoutingPathSuffixLogoutResponse = this.servletRoutingPathSuffixLogoutResponse;
-            configuration.servletRoutingPathSuffixAssertion = this.servletRoutingPathSuffixAssertion;
+            configuration.servletRoutingPathPrefix = StringUtil.defaultIfEmpty(this.servletRoutingPathPrefix,"saml");
+            configuration.servletRoutingPathSuffixError = StringUtil.defaultIfEmpty(this.servletRoutingPathSuffixError, "error");
+            configuration.servletRoutingPathSuffixMetadata = StringUtil.defaultIfEmpty(this.servletRoutingPathSuffixMetadata, "metadata");
+            configuration.servletRoutingPathSuffixLogout = StringUtil.defaultIfEmpty(this.servletRoutingPathSuffixLogout, "logout");
+            configuration.servletRoutingPathSuffixLogoutResponse = StringUtil.defaultIfEmpty(this.servletRoutingPathSuffixLogoutResponse, "logoutResponse");
+            configuration.servletRoutingPathSuffixAssertion = StringUtil.defaultIfEmpty(this.servletRoutingPathSuffixAssertion, "assertionConsumer");
+            configuration.auditLoggerClassName = StringUtil.defaultIfEmpty(this.auditLoggerClassName, "dk.gov.oio.saml.audit.Slf4JAuditLogger");
+            configuration.auditRequestAttributeIP = StringUtil.defaultIfEmpty(this.auditRequestAttributeIP, "request:remoteAddr");
+            configuration.auditRequestAttributePort = StringUtil.defaultIfEmpty(this.auditRequestAttributePort, "request:remotePort");
+            configuration.auditRequestAttributeSessionId = StringUtil.defaultIfEmpty(this.auditRequestAttributeSessionId, "request:remoteUser");
+            configuration.auditRequestAttributeServiceProviderUserId = StringUtil.defaultIfEmpty(this.auditRequestAttributeServiceProviderUserId, "request:sessionId");
 
             return configuration;
         }
@@ -468,6 +499,31 @@ public class Configuration {
         
         public Builder setServletRoutingPathSuffixAssertion(String servletRoutingPathSuffixAssertion) {
             this.servletRoutingPathSuffixAssertion=servletRoutingPathSuffixAssertion;
+            return this;
+        }
+
+        public Builder setAuditLoggerClassName(String auditLoggerClassName) {
+            this.auditLoggerClassName = auditLoggerClassName;
+            return this;
+        }
+
+        public Builder setAuditRequestAttributeIP(String auditRequestAttributeIP) {
+            this.auditRequestAttributeIP=auditRequestAttributeIP;
+            return this;
+        }
+
+        public Builder setAuditRequestAttributePort(String auditRequestAttributePort) {
+            this.auditRequestAttributePort=auditRequestAttributePort;
+            return this;
+        }
+
+        public Builder setAuditRequestAttributeSessionId(String auditRequestAttributeSessionId) {
+            this.auditRequestAttributeSessionId=auditRequestAttributeSessionId;
+            return this;
+        }
+
+        public Builder setAuditRequestAttributeServiceProviderUserId(String auditRequestAttributeServiceProviderUserId) {
+            this.auditRequestAttributeServiceProviderUserId=auditRequestAttributeServiceProviderUserId;
             return this;
         }
     }

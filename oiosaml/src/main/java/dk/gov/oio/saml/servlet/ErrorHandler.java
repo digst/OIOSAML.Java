@@ -20,7 +20,7 @@ public class ErrorHandler extends SAMLHandler {
     @Override
     public void handleGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, InitializationException, InternalException {
     	Configuration config = OIOSAML3Service.getConfig();
-    	if (config.getErrorPage() != null && config.getErrorPage().length() > 0) {
+    	if (StringUtil.isNotEmpty(config.getErrorPage())) {
     		String url = StringUtil.getUrl(httpServletRequest, config.getErrorPage());
 
     		httpServletResponse.sendRedirect(url);
