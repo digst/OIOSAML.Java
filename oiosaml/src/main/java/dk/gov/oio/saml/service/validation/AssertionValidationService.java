@@ -132,25 +132,25 @@ public class AssertionValidationService {
         validateStatus(response);
         validateInResponseTo(response, authnRequest);
 
-    	// specific OIOSAML 3.0 validation is configurable, and can be disabled
+        // specific OIOSAML 3.0 validation is configurable, and can be disabled
         Configuration config = OIOSAML3Service.getConfig();
         if (config.isValidationEnabled()) {
-	        // Successful responses SHOULD NOT be directly signed.
-	        if (response.isSigned()) {
-	            log.warn("Successful responses SHOULD NOT be directly signed.");
-	        }
-	
-	        // Successful responses MUST contain exactly one encrypted SAML Assertion
-	        List<Assertion> assertions = response.getAssertions();
-	        if (assertions != null && assertions.size() != 0) {
-	            throw new AssertionValidationException("MUST contain exactly one SAML Assertion, which should be encrypted");
-	        }
-	
-	        // Assertions transferred via the user agent MUST be encrypted and transmitted via a EncryptedAssertion element
-	        List<EncryptedAssertion> encryptedAssertions = response.getEncryptedAssertions();
-	        if (encryptedAssertions == null || encryptedAssertions.size() != 1) {
-	            throw new AssertionValidationException("MUST contain exactly one SAML Assertion");
-	        }
+            // Successful responses SHOULD NOT be directly signed.
+            if (response.isSigned()) {
+                log.warn("Successful responses SHOULD NOT be directly signed.");
+            }
+    
+            // Successful responses MUST contain exactly one encrypted SAML Assertion
+            List<Assertion> assertions = response.getAssertions();
+            if (assertions != null && assertions.size() != 0) {
+                throw new AssertionValidationException("MUST contain exactly one SAML Assertion, which should be encrypted");
+            }
+    
+            // Assertions transferred via the user agent MUST be encrypted and transmitted via a EncryptedAssertion element
+            List<EncryptedAssertion> encryptedAssertions = response.getEncryptedAssertions();
+            if (encryptedAssertions == null || encryptedAssertions.size() != 1) {
+                throw new AssertionValidationException("MUST contain exactly one SAML Assertion");
+            }
         }
     }
 
@@ -159,10 +159,10 @@ public class AssertionValidationService {
 
         validateIssuer(assertion);
 
-    	// specific OIOSAML 3.0 validation is configurable, and can be disabled
+        // specific OIOSAML 3.0 validation is configurable, and can be disabled
         Configuration config = OIOSAML3Service.getConfig();
         if (config.isValidationEnabled()) {
-        	validateSubject(assertion, authnRequest);
+            validateSubject(assertion, authnRequest);
         }
 
         validateAudienceRestriction(assertion);

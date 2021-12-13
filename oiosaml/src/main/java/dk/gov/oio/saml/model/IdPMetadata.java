@@ -99,7 +99,7 @@ public class IdPMetadata {
     }
 
     public X509Certificate getValidX509Certificate(UsageType usageType) throws InternalException, ExternalException {
-    	doRevocationCheck();
+        doRevocationCheck();
 
         X509Certificate result = null;
         if (UsageType.ENCRYPTION.equals(usageType)) {
@@ -187,7 +187,7 @@ public class IdPMetadata {
         return lastCRLCheck;
     }
 
-	private void doRevocationCheck() throws ExternalException, InternalException {
+    private void doRevocationCheck() throws ExternalException, InternalException {
         Configuration config = OIOSAML3Service.getConfig();
         if (config.isCRLCheckEnabled() || config.isOcspCheckEnabled()) {
             DateTime lastUpdate = resolver.getLastUpdate();
@@ -238,7 +238,7 @@ public class IdPMetadata {
             validUnspecified.addAll(getAllX509CertificatesWithUsageType(null));
             validUnspecifiedCertificates = validUnspecified;
         }
-	}
+    }
 
     private void initMetadataResolver() throws InternalException, ExternalException {
         // If no Resolver exists for this ServiceProvider, create it.
@@ -263,10 +263,10 @@ public class IdPMetadata {
                     File file = null;
                     URL url = getClass().getClassLoader().getResource(metadataFilePath);
                     if (url != null) {
-                    	file = new File(url.toURI());
+                        file = new File(url.toURI());
                     }
                     else {
-                    	file = new File(metadataFilePath);
+                        file = new File(metadataFilePath);
                     }
 
                     if (!file.exists()) {

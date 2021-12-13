@@ -103,15 +103,15 @@ public class IdpUtil {
     }
 
     public static Response createResponse(
-    		boolean encrypted,
-    		boolean validCert,
-    		boolean validSignature,
-    		String subjectNameID,
-    		String recipientEntityId,
-    		String assertionConsumerUrl,
-    		String inResponseToId) throws Exception {
+            boolean encrypted,
+            boolean validCert,
+            boolean validSignature,
+            String subjectNameID,
+            String recipientEntityId,
+            String assertionConsumerUrl,
+            String inResponseToId) throws Exception {
 
-    	DateTime issueInstant = new DateTime();
+        DateTime issueInstant = new DateTime();
 
         Response response = buildSAMLObject(Response.class);
         response.setDestination(assertionConsumerUrl);
@@ -134,11 +134,11 @@ public class IdpUtil {
         Assertion assertion = createAssertion(issueInstant, subjectNameID, recipientEntityId, assertionConsumerUrl);
         SignAssertion(assertion, validSignature);
         if (encrypted) {
-        	EncryptedAssertion encryptedAssertion = encryptAssertion(assertion, validCert);
+            EncryptedAssertion encryptedAssertion = encryptAssertion(assertion, validCert);
             response.getEncryptedAssertions().add(encryptedAssertion);
         }
         else {
-        	response.getAssertions().add(assertion);
+            response.getAssertions().add(assertion);
         }
 
         return response;
@@ -252,7 +252,7 @@ public class IdpUtil {
     }
 
     private static EncryptedAssertion encryptAssertion(Assertion assertion, boolean validCert) throws Exception {
-    	X509Certificate certificate = getSPCertificate(validCert);
+        X509Certificate certificate = getSPCertificate(validCert);
 
         Credential keyEncryptionCredential = new BasicX509Credential(certificate);
         DataEncryptionParameters encParams = new DataEncryptionParameters();
@@ -277,9 +277,9 @@ public class IdpUtil {
 
         CertificateFactory instance = CertificateFactory.getInstance("X.509");
         return (X509Certificate) instance.generateCertificate(fis);
-	}
+    }
 
-	private static void SignAssertion(Assertion assertion, boolean validSignature) throws Exception {
+    private static void SignAssertion(Assertion assertion, boolean validSignature) throws Exception {
         Signature signature = buildSAMLObject(Signature.class);
 
         BasicX509Credential x509Credential = getX509Credential(validSignature);
@@ -384,7 +384,7 @@ public class IdpUtil {
     }
     
     @SuppressWarnings("unchecked")
-	private static <T> T buildSAMLObject(final Class<T> clazz) {
+    private static <T> T buildSAMLObject(final Class<T> clazz) {
         T object = null;
 
         try {
@@ -405,8 +405,8 @@ public class IdpUtil {
         ClassLoader classLoader = IdpUtil.class.getClassLoader();
         FileInputStream fis = new FileInputStream(classLoader.getResource(resourceName).getFile());
 
-    	KeyStore ks = KeyStore.getInstance("PKCS12");
-    	ks.load(fis, "Test1234".toCharArray());
+        KeyStore ks = KeyStore.getInstance("PKCS12");
+        ks.load(fis, "Test1234".toCharArray());
 
         Map<String, String> passwords = new HashMap<>();
         passwords.put(ks.aliases().nextElement(), "Test1234");

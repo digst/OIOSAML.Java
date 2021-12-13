@@ -181,15 +181,15 @@ public class AssertionHandler extends SAMLHandler {
         httpServletResponse.sendRedirect(url);
     }
 
-	private String getSessionIndex(Assertion assertion) {
+    private String getSessionIndex(Assertion assertion) {
         if (assertion.getAuthnStatements() != null && assertion.getAuthnStatements().size() > 0) {
-        	for (AuthnStatement authnStatement : assertion.getAuthnStatements()) {
-        		if (StringUtil.isNotEmpty(authnStatement.getSessionIndex())) {
-        			return authnStatement.getSessionIndex();
-        		}
-        	}
+            for (AuthnStatement authnStatement : assertion.getAuthnStatements()) {
+                if (StringUtil.isNotEmpty(authnStatement.getSessionIndex())) {
+                    return authnStatement.getSessionIndex();
+                }
+            }
         }
 
         return null;
-	}
+    }
 }

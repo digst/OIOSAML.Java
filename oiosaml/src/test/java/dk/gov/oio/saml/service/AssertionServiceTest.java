@@ -13,11 +13,11 @@ import dk.gov.oio.saml.util.TestConstants;
 
 public class AssertionServiceTest extends BaseServiceTest {
 
-	@DisplayName("Test retrieving encrypted Assertion")
-	@Test
-	public void testGetEncryptedAssertion() throws Exception {
-		String nameID = "https://data.gov.dk/model/core/edi/person/uuid/37a5a1aa-67ce-4f70-b7c0-b8e678d585f7";
-		
+    @DisplayName("Test retrieving encrypted Assertion")
+    @Test
+    public void testGetEncryptedAssertion() throws Exception {
+        String nameID = "https://data.gov.dk/model/core/edi/person/uuid/37a5a1aa-67ce-4f70-b7c0-b8e678d585f7";
+        
         AssertionService assertionService = new AssertionService();
         Assertion assertion = assertionService.getAssertion(IdpUtil.createResponse(true, true, true, nameID, TestConstants.SP_ENTITY_ID, TestConstants.SP_ASSERTION_CONSUMER_URL, UUID.randomUUID().toString()));
 
@@ -25,26 +25,26 @@ public class AssertionServiceTest extends BaseServiceTest {
         // but at least validate a single field, to ensure decryption worked as intended
         Assertions.assertNotNull(assertion);
         Assertions.assertEquals(nameID, assertion.getSubject().getNameID().getValue());
-	}
-	
-	@DisplayName("Test retrieving plaintext Assertion")
-	@Test
-	public void testGetPlaintextAssertion() throws Exception {
+    }
+    
+    @DisplayName("Test retrieving plaintext Assertion")
+    @Test
+    public void testGetPlaintextAssertion() throws Exception {
         AssertionService assertionService = new AssertionService();
         Assertion assertion = assertionService.getAssertion(IdpUtil.createResponse(false, true, true,  "NAMEID", TestConstants.SP_ENTITY_ID, TestConstants.SP_ASSERTION_CONSUMER_URL, UUID.randomUUID().toString()));
 
         // assert that we get something back
         Assertions.assertNotNull(assertion);
-	}
-	
-	@DisplayName("Test retrieving badly formatted plaintext Assertion")
-	@Test
-	public void testGetBadlyEncryptedAssertion() throws Exception {
+    }
+    
+    @DisplayName("Test retrieving badly formatted plaintext Assertion")
+    @Test
+    public void testGetBadlyEncryptedAssertion() throws Exception {
         AssertionService assertionService = new AssertionService();
 
-		// Get Assertion, should fail since encryption certificate is not valid
-		Assertions.assertThrows(ExternalException.class , () -> {
-        	assertionService.getAssertion(IdpUtil.createResponse(true, false, true,  "NAMEID", TestConstants.SP_ENTITY_ID, TestConstants.SP_ASSERTION_CONSUMER_URL, UUID.randomUUID().toString()));
-		});
-	}
+        // Get Assertion, should fail since encryption certificate is not valid
+        Assertions.assertThrows(ExternalException.class , () -> {
+            assertionService.getAssertion(IdpUtil.createResponse(true, false, true,  "NAMEID", TestConstants.SP_ENTITY_ID, TestConstants.SP_ASSERTION_CONSUMER_URL, UUID.randomUUID().toString()));
+        });
+    }
 }

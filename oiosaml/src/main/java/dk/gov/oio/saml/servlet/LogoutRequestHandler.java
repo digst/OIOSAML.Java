@@ -92,11 +92,11 @@ public class LogoutRequestHandler extends SAMLHandler {
             }
 
             // if not logged in, just forward to front-page
-			Configuration config = OIOSAML3Service.getConfig();
-			String url = StringUtil.getUrl(httpServletRequest, config.getLogoutPage());			
+            Configuration config = OIOSAML3Service.getConfig();
+            String url = StringUtil.getUrl(httpServletRequest, config.getLogoutPage());            
 
             log.warn("User not logged in, redirecting to " + url);
-			httpServletResponse.sendRedirect(url);
+            httpServletResponse.sendRedirect(url);
             return;
         }
 
@@ -162,10 +162,10 @@ public class LogoutRequestHandler extends SAMLHandler {
                     logoutRequest.getDestination());
 
             sendPost(httpServletResponse, messageContext);
-		}
-		catch (InitializationException | ComponentInitializationException | MessageEncodingException e) {
-			throw new InternalException(e);
-		}
+        }
+        catch (InitializationException | ComponentInitializationException | MessageEncodingException e) {
+            throw new InternalException(e);
+        }
     }
 
     private String getIssuer(LogoutRequest logoutRequest) {

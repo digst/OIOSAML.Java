@@ -6,11 +6,11 @@ import org.junit.runner.RunWith;
 
 @RunWith(JUnitPlatform.class)
 @SelectPackages( {
-	"dk.gov.oio.saml.filter",
-	"dk.gov.oio.saml.oiobpp",
-	"dk.gov.oio.saml.service",
-	"dk.gov.oio.saml.service.validation",
-	"dk.gov.oio.saml.servlet"
+    "dk.gov.oio.saml.filter",
+    "dk.gov.oio.saml.oiobpp",
+    "dk.gov.oio.saml.service",
+    "dk.gov.oio.saml.service.validation",
+    "dk.gov.oio.saml.servlet"
 })
 public class TestSuite {
 
