@@ -72,41 +72,41 @@ public class SPMetadataService {
         // NameID Format
         NameIDFormat nameIDFormat = SamlHelper.build(NameIDFormat.class);
         nameIDFormat.setFormat(config.getNameIDFormat());
-		spssoDescriptor.getNameIDFormats().add(nameIDFormat);
+        spssoDescriptor.getNameIDFormats().add(nameIDFormat);
 
-		// set requested attributes
-		ServiceName serviceName = SamlHelper.build(ServiceName.class);
-		serviceName.setXMLLang("da");
-		serviceName.setValue(config.getSpEntityID());
+        // set requested attributes
+        ServiceName serviceName = SamlHelper.build(ServiceName.class);
+        serviceName.setXMLLang("da");
+        serviceName.setValue(config.getSpEntityID());
 
-		// These are needed for NemLogin-2, might not be needed in the future
-		AttributeConsumingService attributeConsumingService = SamlHelper.build(AttributeConsumingService.class);
-		attributeConsumingService.setIsDefault(true);
-		attributeConsumingService.getNames().add(serviceName);
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/specVersion", true));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/bootstrapToken", false));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/privilegesIntermediate", false));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/concept/core/nsis/loa", true));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/concept/core/nsis/ial", false));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/concept/core/nsis/aal", false));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/fullName", false));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/firstName", false));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/lastName", false));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/email", false));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/cprNumber", false));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/age", false));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/cprUuid", false));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/dateOfBirth", false));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/person/pid", false));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/uuid/persistent", false));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/rid", false));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/cvr", true));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/orgName", true));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/productionUnit", false));
-		attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/seNumber", false));
-	      
-		spssoDescriptor.getAttributeConsumingServices().add(attributeConsumingService);
-		
+        // These are needed for NemLogin-2, might not be needed in the future
+        AttributeConsumingService attributeConsumingService = SamlHelper.build(AttributeConsumingService.class);
+        attributeConsumingService.setIsDefault(true);
+        attributeConsumingService.getNames().add(serviceName);
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/specVersion", true));
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/bootstrapToken", false));
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/privilegesIntermediate", false));
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/concept/core/nsis/loa", true));
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/concept/core/nsis/ial", false));
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/concept/core/nsis/aal", false));
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/fullName", false));
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/firstName", false));
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/lastName", false));
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/email", false));
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/cprNumber", false));
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/age", false));
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/cprUuid", false));
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/dateOfBirth", false));
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/person/pid", false));
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/uuid/persistent", false));
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/rid", false));
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/cvr", true));
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/orgName", true));
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/productionUnit", false));
+        attributeConsumingService.getRequestAttributes().add(buildRequiredAttribute("https://data.gov.dk/model/core/eid/professional/seNumber", false));
+          
+        spssoDescriptor.getAttributeConsumingServices().add(attributeConsumingService);
+        
         // Encryption and Signing descriptors
         List<KeyDescriptor> keyDescriptors = spssoDescriptor.getKeyDescriptors();
         keyDescriptors.addAll(getKeyDescriptors());
@@ -160,16 +160,16 @@ public class SPMetadataService {
     }
 
     private RequestedAttribute buildRequiredAttribute(String attribute, boolean required) {
-		RequestedAttribute requestedAttribute = SamlHelper.build(RequestedAttribute.class);
-		requestedAttribute.setName(attribute);
-		requestedAttribute.setFriendlyName("");
-		requestedAttribute.setNameFormat("urn:oasis:names:tc:SAML:2.0:attrname-format:uri");
-		requestedAttribute.setIsRequired(required);
+        RequestedAttribute requestedAttribute = SamlHelper.build(RequestedAttribute.class);
+        requestedAttribute.setName(attribute);
+        requestedAttribute.setFriendlyName("");
+        requestedAttribute.setNameFormat("urn:oasis:names:tc:SAML:2.0:attrname-format:uri");
+        requestedAttribute.setIsRequired(required);
 
-		return requestedAttribute;
-	}
+        return requestedAttribute;
+    }
 
-	private String marshallMetadata(EntityDescriptor entityDescriptor) throws InternalException {
+    private String marshallMetadata(EntityDescriptor entityDescriptor) throws InternalException {
         try {
             EntityDescriptorMarshaller entityDescriptorMarshaller = new EntityDescriptorMarshaller();
             Element element = entityDescriptorMarshaller.marshall(entityDescriptor);

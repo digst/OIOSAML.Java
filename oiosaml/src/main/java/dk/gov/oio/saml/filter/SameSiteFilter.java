@@ -1,5 +1,7 @@
 package dk.gov.oio.saml.filter;
 
+import dk.gov.oio.saml.util.StringUtil;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
@@ -15,16 +17,14 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
 public class SameSiteFilter implements Filter {
-	private static final String SAMESITE_COOKIE_HEADER = "Set-Cookie";
-	private static final String SAMESITE_ATTRIBITE_NAME = "SameSite";
-	private static final String SAMESITE_NONE_VALUE = "None";
-    
+    private static final String SAMESITE_COOKIE_HEADER = "Set-Cookie";
+    private static final String SAMESITE_ATTRIBITE_NAME = "SameSite";
+    private static final String SAMESITE_NONE_VALUE = "None";
+
     public void init(FilterConfig filterConfig) throws ServletException {
-    	;
     }
-    
+
     public void destroy() {
-    	;
     }
 
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
@@ -32,12 +32,12 @@ public class SameSiteFilter implements Filter {
             chain.doFilter(request, new SameSiteWrapper((HttpServletResponse) response));
         }
         else {
-        	chain.doFilter(request, response);
+            chain.doFilter(request, response);
         }
     }
     
     private class SameSiteWrapper extends HttpServletResponseWrapper {
-    	private HttpServletResponse response;
+        private HttpServletResponse response;
         
         public SameSiteWrapper(HttpServletResponse resp) {
             super(resp);
@@ -54,28 +54,28 @@ public class SameSiteFilter implements Filter {
         
         @Override
         public PrintWriter getWriter() throws IOException {
-        	fixSameSiteCookies();
+            fixSameSiteCookies();
 
             return super.getWriter();
         }
         
         @Override
         public void sendError(int sc, String msg) throws IOException {
-        	fixSameSiteCookies();
+            fixSameSiteCookies();
 
             super.sendError(sc, msg);
         }
         
         @Override
         public void sendRedirect(String location) throws IOException {
-        	fixSameSiteCookies();
+            fixSameSiteCookies();
 
             super.sendRedirect(location);
         }
         
         @Override
         public ServletOutputStream getOutputStream() throws IOException {
-        	fixSameSiteCookies();
+            fixSameSiteCookies();
 
             return super.getOutputStream();
         }
@@ -83,12 +83,12 @@ public class SameSiteFilter implements Filter {
         private void fixSameSiteCookies() {
             Collection<String> headers = response.getHeaders(SAMESITE_COOKIE_HEADER);
             if (headers == null || headers.size() == 0) {
-            	return;
+                return;
             }
 
             boolean firstCookie = true;
             for (String header : headers) {
-                if (header == null || header.length() == 0) {
+                if (StringUtil.isEmpty(header)) {
                     continue;
                 }
 

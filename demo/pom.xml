@@ -8,7 +8,7 @@
     <parent>
         <artifactId>oiosaml3-parent</artifactId>
         <groupId>dk.digst</groupId>
-        <version>3.0.3-SNAPSHOT</version>
+        <version>3.1.0-SNAPSHOT</version>
     </parent>
 
     <build>
@@ -53,14 +53,33 @@
         <dependency>
             <groupId>dk.digst</groupId>
             <artifactId>oiosaml3.java</artifactId>
-            <version>3.0.3-SNAPSHOT</version>
+            <version>3.1.0-SNAPSHOT</version>
+        </dependency>
+
+        <!-- Write all logging to Log4j2 -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <version>2.15.0</version>
         </dependency>
 
         <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>1.2</version>
-            <scope>compile</scope>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.32</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>1.7.32</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+            <version>1.7.32</version>
+        </dependency>
+
     </dependencies>
 </project>

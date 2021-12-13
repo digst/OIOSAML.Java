@@ -25,38 +25,38 @@ import org.xml.sax.SAXException;
 
 public class MetadataHandlerTest {
 
-	@DisplayName("Test that SP returns valid metadata from handler endpoint")
-	@Test
-	public void testMetadata() throws IOException, UnmarshallingException, SAXException, ParserConfigurationException, XMLParserException, InternalException, InitializationException {
-		HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+    @DisplayName("Test that SP returns valid metadata from handler endpoint")
+    @Test
+    public void testMetadata() throws IOException, UnmarshallingException, SAXException, ParserConfigurationException, XMLParserException, InternalException, InitializationException {
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
 
-		PrintWriter writer = Mockito.mock(PrintWriter.class);
+        PrintWriter writer = Mockito.mock(PrintWriter.class);
 
-		HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
-		Mockito.when(response.getWriter()).thenReturn(writer);
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        Mockito.when(response.getWriter()).thenReturn(writer);
 
-		MetadataHandler metadataHandler = new MetadataHandler();
-		metadataHandler.handleGet(request, response);
+        MetadataHandler metadataHandler = new MetadataHandler();
+        metadataHandler.handleGet(request, response);
 
-		Mockito.verify(response).setContentType("application/xml");
+        Mockito.verify(response).setContentType("application/xml");
 
-		ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
-		Mockito.verify(writer).print(argument.capture());
+        ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
+        Mockito.verify(writer).print(argument.capture());
 
-		// Take "sent" metadata and parse is to a EntityDescriptor object
-		Object metadataRaw = argument.getValue();
-		Assertions.assertNotNull(metadataRaw);
-		Assertions.assertTrue(metadataRaw instanceof String);
-		String metadataStr = (String) metadataRaw;
-		Document doc = XMLObjectProviderRegistrySupport.getParserPool().parse(new StringReader(metadataStr));
+        // Take "sent" metadata and parse is to a EntityDescriptor object
+        Object metadataRaw = argument.getValue();
+        Assertions.assertNotNull(metadataRaw);
+        Assertions.assertTrue(metadataRaw instanceof String);
+        String metadataStr = (String) metadataRaw;
+        Document doc = XMLObjectProviderRegistrySupport.getParserPool().parse(new StringReader(metadataStr));
 
-		EntityDescriptorUnmarshaller metadataUnmarshaller = new EntityDescriptorUnmarshaller();
-		XMLObject unmarshall = metadataUnmarshaller.unmarshall(doc.getDocumentElement());
+        EntityDescriptorUnmarshaller metadataUnmarshaller = new EntityDescriptorUnmarshaller();
+        XMLObject unmarshall = metadataUnmarshaller.unmarshall(doc.getDocumentElement());
 
-		Assertions.assertNotNull(unmarshall);
-		Assertions.assertTrue(unmarshall instanceof EntityDescriptor);
+        Assertions.assertNotNull(unmarshall);
+        Assertions.assertTrue(unmarshall instanceof EntityDescriptor);
 
-		EntityDescriptor metadata = (EntityDescriptor) unmarshall;
-		Assertions.assertEquals(TestConstants.SP_ENTITY_ID, metadata.getEntityID());
-	}
+        EntityDescriptor metadata = (EntityDescriptor) unmarshall;
+        Assertions.assertEquals(TestConstants.SP_ENTITY_ID, metadata.getEntityID());
+    }
 }

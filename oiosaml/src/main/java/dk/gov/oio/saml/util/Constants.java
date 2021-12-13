@@ -13,17 +13,11 @@ public class Constants {
     public static final String SESSION_ASSERTION = "oiosaml.assertion";
     public static final String SESSION_ERROR_TYPE = "oiosaml.error.type";
     public static final String SESSION_ERROR_MESSAGE = "oiosaml.error.message";
-	public static final String SESSION_SESSION_INDEX = "oiosaml.session.index";
+    public static final String SESSION_SESSION_INDEX = "oiosaml.session.index";
 
     // Configuration constants for DispatcherServlet (required)
     public static final String SP_ENTITY_ID = "oiosaml.servlet.entityid";
     public static final String SP_BASE_URL = "oiosaml.servlet.baseurl";
-    public static final String SP_ROUTING_BASE = "oiosaml.servlet.routing.path.prefix";
-    public static final String SP_ROUTING_ERROR = "oiosaml.servlet.routing.path.suffix.error";
-    public static final String SP_ROUTING_METADATA = "oiosaml.servlet.routing.path.suffix.metadata";
-    public static final String SP_ROUTING_LOGOUT = "oiosaml.servlet.routing.path.suffix.logout";
-    public static final String SP_ROUTING_LOGOUT_RESPONSE = "oiosaml.servlet.routing.path.suffix.logoutResponse";
-    public static final String SP_ROUTING_ASSERTION = "oiosaml.servlet.routing.path.suffix.assertion";
     public static final String KEYSTORE_LOCATION = "oiosaml.servlet.keystore.location";
     public static final String KEYSTORE_PASSWORD = "oiosaml.servlet.keystore.password";
     public static final String KEY_ALIAS = "oiosaml.servlet.keystore.alias";
@@ -32,7 +26,7 @@ public class Constants {
     public static final String IDP_METADATA_URL = "oiosaml.servlet.idp.metadata.url";
 
     // Configuration constants for DispatcherServlet (optional, has default values)
-	public static final String EXTERNAL_CONFIGURATION_FILE = "oiosaml.servlet.configurationfile";
+    public static final String EXTERNAL_CONFIGURATION_FILE = "oiosaml.servlet.configurationfile";
     public static final String OIOSAML_VALIDATION_ENABLED = "oiosaml.servlet.profile.validation.enabled";
     public static final String OIOSAML_ASSURANCE_LEVEL_ALLOWED = "oiosaml.servlet.profile.validation.assurancelevel.allowed";
     public static final String OIOSAML_ASSURANCE_LEVEL_MINIMUM = "oiosaml.servlet.profile.validation.assurancelevel.minimum";
@@ -48,14 +42,25 @@ public class Constants {
     public static final String LOGOUT_PAGE = "oiosaml.servlet.secondary.page.logout";
     public static final String LOGIN_PAGE = "oiosaml.servlet.secondary.page.login";
     public static final String SUPPORT_SELF_SIGNED = "oiosaml.servlet.trust.selfsigned.certs";
+    public static final String SP_ROUTING_BASE = "oiosaml.servlet.routing.path.prefix";
+    public static final String SP_ROUTING_ERROR = "oiosaml.servlet.routing.path.suffix.error";
+    public static final String SP_ROUTING_METADATA = "oiosaml.servlet.routing.path.suffix.metadata";
+    public static final String SP_ROUTING_LOGOUT = "oiosaml.servlet.routing.path.suffix.logout";
+    public static final String SP_ROUTING_LOGOUT_RESPONSE = "oiosaml.servlet.routing.path.suffix.logoutResponse";
+    public static final String SP_ROUTING_ASSERTION = "oiosaml.servlet.routing.path.suffix.assertion";
+    public static final String SP_AUDIT_CLASSNAME = "oiosaml.servlet.audit.logger.classname";
+    public static final String SP_AUDIT_ATTRIBUTE_IP = "oiosaml.servlet.audit.logger.attribute.ip";
+    public static final String SP_AUDIT_ATTRIBUTE_PORT = "oiosaml.servlet.audit.logger.attribute.port";
+    public static final String SP_AUDIT_ATTRIBUTE_USER_ID = "oiosaml.servlet.audit.logger.attribute.userid";
+    public static final String SP_AUDIT_ATTRIBUTE_SESSION_ID = "oiosaml.servlet.audit.logger.attribute.sessionId";
 
     // Configuration constants for revocation check settings
     public static final String CRL_CHECK_ENABLED = "oiosaml.servlet.revocation.crl.check.enabled";
     public static final String OCSP_CHECK_ENABLED = "oiosaml.servlet.revocation.ocsp.check.enabled";
 
     // Configuration constants for AuthenticationFilter
-	public static final String IS_PASSIVE = "oiosaml.filter.ispassive.enabled";
-	public static final String FORCE_AUTHN = "oiosaml.filter.forceauthn.enabled";
+    public static final String IS_PASSIVE = "oiosaml.filter.ispassive.enabled";
+    public static final String FORCE_AUTHN = "oiosaml.filter.forceauthn.enabled";
     public static final String REQUIRED_NSIS_LEVEL = "oiosaml.filter.nsis.required";
     public static final String ATTRIBUTE_PROFILE = "oiosaml.filter.attribute.profile";
 

@@ -24,7 +24,7 @@
     <filter>
         <filter-name>SameSiteFilter</filter-name>
         <filter-class>dk.gov.oio.saml.filter.SameSiteFilter</filter-class>
-	</filter>
+    </filter>
 
     <filter>
         <filter-name>SubstantialFilter</filter-name>
@@ -73,7 +73,7 @@
         </init-param>
     </filter>
 
-	<!-- should be placed BEFORE the AuthenticationFilter to ensure it catches any sessions created -->
+    <!-- should be placed BEFORE the AuthenticationFilter to ensure it catches any sessions created -->
     <filter-mapping>
         <filter-name>SameSiteFilter</filter-name>
         <url-pattern>/*</url-pattern>

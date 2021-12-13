@@ -1,9 +1,9 @@
 package dk.gov.oio.saml.util;
 
 public class InternalException extends Exception {
-	private static final long serialVersionUID = -6887665292794106098L;
+    private static final long serialVersionUID = -6887665292794106098L;
 
-	public InternalException(String errorMessage) {
+    public InternalException(String errorMessage) {
         super(errorMessage);
     }
 

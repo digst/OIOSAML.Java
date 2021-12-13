@@ -23,7 +23,8 @@ import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.TrustStrategy;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.bouncycastle.util.encoders.Base64;
 import org.joda.time.DateTime;
 import org.opensaml.core.config.InitializationException;
@@ -49,7 +50,7 @@ import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import net.shibboleth.utilities.java.support.xml.BasicParserPool;
 
 public class IdPMetadata {
-    private static final Logger log = Logger.getLogger(IdPMetadata.class);
+    private static final Logger log = LoggerFactory.getLogger(IdPMetadata.class);
     private List<X509Certificate> validEncryptionCertificates = new ArrayList<>();
     private List<X509Certificate> validSigningCertificates = new ArrayList<>();
     private List<X509Certificate> validUnspecifiedCertificates = new ArrayList<>();
@@ -72,9 +73,7 @@ public class IdPMetadata {
 
         // If last scheduled refresh failed, Refresh now to give up to date metadata
         if (!resolver.wasLastRefreshSuccess()) {
-            if (log.isDebugEnabled()) {
-                log.debug("Last Metadata was not successful, Refreshing metadata.");
-            }
+            log.debug("Last Metadata was not successful, Refreshing metadata.");
 
             try {
                 resolver.refresh();
@@ -100,7 +99,7 @@ public class IdPMetadata {
     }
 
     public X509Certificate getValidX509Certificate(UsageType usageType) throws InternalException, ExternalException {
-    	doRevocationCheck();
+        doRevocationCheck();
 
         X509Certificate result = null;
         if (UsageType.ENCRYPTION.equals(usageType)) {
@@ -188,7 +187,7 @@ public class IdPMetadata {
         return lastCRLCheck;
     }
 
-	private void doRevocationCheck() throws ExternalException, InternalException {
+    private void doRevocationCheck() throws ExternalException, InternalException {
         Configuration config = OIOSAML3Service.getConfig();
         if (config.isCRLCheckEnabled() || config.isOcspCheckEnabled()) {
             DateTime lastUpdate = resolver.getLastUpdate();
@@ -239,7 +238,7 @@ public class IdPMetadata {
             validUnspecified.addAll(getAllX509CertificatesWithUsageType(null));
             validUnspecifiedCertificates = validUnspecified;
         }
-	}
+    }
 
     private void initMetadataResolver() throws InternalException, ExternalException {
         // If no Resolver exists for this ServiceProvider, create it.
@@ -264,10 +263,10 @@ public class IdPMetadata {
                     File file = null;
                     URL url = getClass().getClassLoader().getResource(metadataFilePath);
                     if (url != null) {
-                    	file = new File(url.toURI());
+                        file = new File(url.toURI());
                     }
                     else {
-                    	file = new File(metadataFilePath);
+                        file = new File(metadataFilePath);
                     }
 
                     if (!file.exists()) {

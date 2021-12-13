@@ -1,6 +1,7 @@
 package dk.gov.oio.saml.service;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.xml.io.MarshallingException;
@@ -30,99 +31,93 @@ import org.opensaml.xmlsec.signature.support.Signer;
 import javax.xml.crypto.dsig.CanonicalizationMethod;
 
 public class LogoutResponseService {
-	private static final Logger log = Logger.getLogger(LogoutResponseService.class);
+    private static final Logger log = LoggerFactory.getLogger(LogoutResponseService.class);
 
-	public void validateLogoutResponse() {
-		return;
-	}
+    public void validateLogoutResponse() {
+        return;
+    }
 
-	public static MessageContext<SAMLObject> createMessageWithLogoutResponse(LogoutRequest logoutRequest, String destination) throws InitializationException, InternalException {
-		if (log.isDebugEnabled()) {
-			log.debug("Create and sign logout response message for  request id '" + logoutRequest.getID() + "'");
-		}
-		// Create message context
-		MessageContext<SAMLObject> messageContext = new MessageContext<>();
+    public static MessageContext<SAMLObject> createMessageWithLogoutResponse(LogoutRequest logoutRequest, String destination) throws InitializationException, InternalException {
+        log.debug("Create and sign logout response message for  request id '{}'", logoutRequest.getID());
 
-		// Create AuthnRequest
-		LogoutResponse logoutResponse = signResponse(createLogoutResponse(destination, logoutRequest));
-		messageContext.setMessage(logoutResponse);
+        // Create message context
+        MessageContext<SAMLObject> messageContext = new MessageContext<>();
 
-		// Destination
-		SAMLPeerEntityContext peerEntityContext = messageContext.getSubcontext(SAMLPeerEntityContext.class, true);
-		SAMLEndpointContext endpointContext = peerEntityContext.getSubcontext(SAMLEndpointContext.class, true);
+        // Create AuthnRequest
+        LogoutResponse logoutResponse = signResponse(createLogoutResponse(destination, logoutRequest));
+        messageContext.setMessage(logoutResponse);
 
-		SingleSignOnService endpoint = SamlHelper.build(SingleSignOnService.class);
-		endpoint.setBinding(SAMLConstants.SAML2_POST_BINDING_URI);
-		endpoint.setLocation(destination);
+        // Destination
+        SAMLPeerEntityContext peerEntityContext = messageContext.getSubcontext(SAMLPeerEntityContext.class, true);
+        SAMLEndpointContext endpointContext = peerEntityContext.getSubcontext(SAMLEndpointContext.class, true);
 
-		endpointContext.setEndpoint(endpoint);
+        SingleSignOnService endpoint = SamlHelper.build(SingleSignOnService.class);
+        endpoint.setBinding(SAMLConstants.SAML2_POST_BINDING_URI);
+        endpoint.setLocation(destination);
 
-		// Signing info
-		SignatureSigningParameters signatureSigningParameters = new SignatureSigningParameters();
-		signatureSigningParameters.setSigningCredential(CredentialService.getInstance().getPrimaryBasicX509Credential());
-		signatureSigningParameters.setSignatureAlgorithm(OIOSAML3Service.getConfig().getSignatureAlgorithm());
-		messageContext.getSubcontext(SecurityParametersContext.class, true).setSignatureSigningParameters(signatureSigningParameters);
+        endpointContext.setEndpoint(endpoint);
 
-		return messageContext;
-	}
+        // Signing info
+        SignatureSigningParameters signatureSigningParameters = new SignatureSigningParameters();
+        signatureSigningParameters.setSigningCredential(CredentialService.getInstance().getPrimaryBasicX509Credential());
+        signatureSigningParameters.setSignatureAlgorithm(OIOSAML3Service.getConfig().getSignatureAlgorithm());
+        messageContext.getSubcontext(SecurityParametersContext.class, true).setSignatureSigningParameters(signatureSigningParameters);
 
-	private static LogoutResponse createLogoutResponse(String destination, LogoutRequest logoutRequest) throws InitializationException {
-		if (log.isDebugEnabled()) {
-			log.debug("Create logout response message for  request id '" + logoutRequest.getID() + "'");
-		}
-		LogoutResponse logoutResponse = SamlHelper.build(LogoutResponse.class);
+        return messageContext;
+    }
 
-		RandomIdentifierGenerationStrategy randomIdentifierGenerator = new RandomIdentifierGenerationStrategy();
-		String id = randomIdentifierGenerator.generateIdentifier();
+    private static LogoutResponse createLogoutResponse(String destination, LogoutRequest logoutRequest) throws InitializationException {
+        log.debug("Create logout response message for  request id '{}'", logoutRequest.getID());
 
-		if (log.isDebugEnabled()) {
-			log.debug("Created logout response id '" + id + "' for  request id '" + logoutRequest.getID() + "'");
-		}
+        LogoutResponse logoutResponse = SamlHelper.build(LogoutResponse.class);
 
-		logoutResponse.setID(id);
-		logoutResponse.setDestination(destination);
-		logoutResponse.setIssueInstant(new DateTime());
-		logoutResponse.setInResponseTo(logoutRequest.getID());
+        RandomIdentifierGenerationStrategy randomIdentifierGenerator = new RandomIdentifierGenerationStrategy();
+        String id = randomIdentifierGenerator.generateIdentifier();
 
-		// Create Issuer
-		Issuer issuer = SamlHelper.build(Issuer.class);
-		logoutResponse.setIssuer(issuer);
-		issuer.setValue(OIOSAML3Service.getConfig().getSpEntityID());
+         log.debug("Created logout response id '{}' for  request id '{}'", id, logoutRequest.getID());
 
-		Status status = SamlHelper.build(Status.class);
-		logoutResponse.setStatus(status);
+        logoutResponse.setID(id);
+        logoutResponse.setDestination(destination);
+        logoutResponse.setIssueInstant(new DateTime());
+        logoutResponse.setInResponseTo(logoutRequest.getID());
 
-		StatusCode statusCode = SamlHelper.build(StatusCode.class);
-		status.setStatusCode(statusCode);
-		statusCode.setValue("urn:oasis:names:tc:SAML:2.0:status:Success");
+        // Create Issuer
+        Issuer issuer = SamlHelper.build(Issuer.class);
+        logoutResponse.setIssuer(issuer);
+        issuer.setValue(OIOSAML3Service.getConfig().getSpEntityID());
 
-		return logoutResponse;
-	}
+        Status status = SamlHelper.build(Status.class);
+        logoutResponse.setStatus(status);
 
-	private static LogoutResponse signResponse(LogoutResponse logoutResponse) {
-		if (log.isDebugEnabled()) {
-			log.debug("Signing logout response message with id '" + logoutResponse.getID() + "'");
-		}
-		try {
-			Signature signature = SamlHelper.build(Signature.class);
+        StatusCode statusCode = SamlHelper.build(StatusCode.class);
+        status.setStatusCode(statusCode);
+        statusCode.setValue("urn:oasis:names:tc:SAML:2.0:status:Success");
 
-			BasicX509Credential x509Credential = CredentialService.getInstance().getPrimaryBasicX509Credential();
-			SignatureRSASHA256 signatureRSASHA256 = new SignatureRSASHA256();
+        return logoutResponse;
+    }
 
-			signature.setSigningCredential(x509Credential);
-			signature.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
-			signature.setSignatureAlgorithm(signatureRSASHA256.getURI());
-			signature.setKeyInfo(CredentialService.getInstance().getPublicKeyInfo(x509Credential));
+    private static LogoutResponse signResponse(LogoutResponse logoutResponse) {
+        log.debug("Signing logout response message with id '{}'", logoutResponse.getID());
+        try {
+            Signature signature = SamlHelper.build(Signature.class);
 
-			logoutResponse.setSignature(signature);
+            BasicX509Credential x509Credential = CredentialService.getInstance().getPrimaryBasicX509Credential();
+            SignatureRSASHA256 signatureRSASHA256 = new SignatureRSASHA256();
 
-			// Marshall and Sign
-			SamlHelper.marshallObject(logoutResponse);
-			Signer.signObject(signature);
+            signature.setSigningCredential(x509Credential);
+            signature.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
+            signature.setSignatureAlgorithm(signatureRSASHA256.getURI());
+            signature.setKeyInfo(CredentialService.getInstance().getPublicKeyInfo(x509Credential));
 
-		} catch (SignatureException | InitializationException | InternalException | MarshallingException e) {
-			log.error("Signing of '" + logoutResponse.getID() + "' failed", e);
-		}
-		return logoutResponse;
-	}
+            logoutResponse.setSignature(signature);
+
+            // Marshall and Sign
+            SamlHelper.marshallObject(logoutResponse);
+            Signer.signObject(signature);
+
+        } catch (SignatureException | InitializationException | InternalException | MarshallingException e) {
+            log.error("Signing of '{}' failed", logoutResponse.getID(), e);
+        }
+        return logoutResponse;
+    }
 }

@@ -3,7 +3,8 @@ package dk.gov.oio.saml.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.EncryptedAssertion;
@@ -24,7 +25,7 @@ import dk.gov.oio.saml.util.ExternalException;
 import dk.gov.oio.saml.util.InternalException;
 
 public class AssertionService {
-    private static final Logger log = Logger.getLogger(AssertionService.class);
+    private static final Logger log = LoggerFactory.getLogger(AssertionService.class);
 
     public Assertion getAssertion(Response response) throws InternalException, ExternalException {
         if (response.getEncryptedAssertions().size() > 0) {
@@ -39,10 +40,7 @@ public class AssertionService {
     }
 
     private Assertion decryptAssertion(EncryptedAssertion encryptedAssertion) throws InternalException, ExternalException {
-        if (log.isDebugEnabled()) {
-            log.debug("Decrypting Assertion");
-        }
-
+        log.debug("Decrypting Assertion");
         try {
             KeyInfoCredentialResolver keyResolver = null;
             try {

@@ -13,29 +13,29 @@ import dk.gov.oio.saml.util.TestConstants;
 @MockServerSettings(ports = { 8081 })
 public class BaseServiceTest {
 
-	@BeforeAll
-	public static void beforeAll(MockServerClient idp) throws Exception {
+    @BeforeAll
+    public static void beforeAll(MockServerClient idp) throws Exception {
         ClassLoader classLoader = AssertionServiceTest.class.getClassLoader();
         String keystoreLocation = classLoader.getResource("sp.pfx").getFile();
 
-		Configuration configuration = new Configuration.Builder()
-				.setSpEntityID(TestConstants.SP_ENTITY_ID)
-				.setBaseUrl(TestConstants.SP_BASE_URL)
-				.setServletRoutingPathPrefix(TestConstants.SP_ROUTING_BASE)
-				.setServletRoutingPathSuffixError(TestConstants.SP_ROUTING_ERROR)
-				.setServletRoutingPathSuffixMetadata(TestConstants.SP_ROUTING_METADATA)
-				.setServletRoutingPathSuffixLogout(TestConstants.SP_ROUTING_LOGOUT)
-				.setServletRoutingPathSuffixLogoutResponse(TestConstants.SP_ROUTING_LOGOUT_RESPONSE)
-				.setServletRoutingPathSuffixAssertion(TestConstants.SP_ROUTING_ASSERTION)
-				.setIdpEntityID(TestConstants.IDP_ENTITY_ID)
-				.setIdpMetadataUrl(TestConstants.IDP_METADATA_URL)
-				.setKeystoreLocation(keystoreLocation)
-				.setKeystorePassword("Test1234")
-				.setKeyAlias("1")
-				.build();
+        Configuration configuration = new Configuration.Builder()
+                .setSpEntityID(TestConstants.SP_ENTITY_ID)
+                .setBaseUrl(TestConstants.SP_BASE_URL)
+                .setServletRoutingPathPrefix(TestConstants.SP_ROUTING_BASE)
+                .setServletRoutingPathSuffixError(TestConstants.SP_ROUTING_ERROR)
+                .setServletRoutingPathSuffixMetadata(TestConstants.SP_ROUTING_METADATA)
+                .setServletRoutingPathSuffixLogout(TestConstants.SP_ROUTING_LOGOUT)
+                .setServletRoutingPathSuffixLogoutResponse(TestConstants.SP_ROUTING_LOGOUT_RESPONSE)
+                .setServletRoutingPathSuffixAssertion(TestConstants.SP_ROUTING_ASSERTION)
+                .setIdpEntityID(TestConstants.IDP_ENTITY_ID)
+                .setIdpMetadataUrl(TestConstants.IDP_METADATA_URL)
+                .setKeystoreLocation(keystoreLocation)
+                .setKeystorePassword("Test1234")
+                .setKeyAlias("1")
+                .build();
 
-		configuration.setCRLCheckEnabled(false);
-		configuration.setOcspCheckEnabled(false);
-		OIOSAML3Service.init(configuration);
-	}
+        configuration.setCRLCheckEnabled(false);
+        configuration.setOcspCheckEnabled(false);
+        OIOSAML3Service.init(configuration);
+    }
 }

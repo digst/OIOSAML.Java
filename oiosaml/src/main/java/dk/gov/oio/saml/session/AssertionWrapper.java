@@ -1,18 +1,11 @@
 package dk.gov.oio.saml.session;
 
 import java.io.Serializable;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
+import dk.gov.oio.saml.util.StringUtil;
 import org.joda.time.DateTime;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.Assertion;
@@ -28,6 +21,8 @@ import org.opensaml.saml.saml2.core.Subject;
 import org.opensaml.saml.saml2.core.SubjectConfirmation;
 import org.opensaml.saml.saml2.core.SubjectConfirmationData;
 import org.opensaml.saml.saml2.core.impl.AssertionMarshaller;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 import dk.gov.oio.saml.model.NSISLevel;
@@ -38,243 +33,238 @@ import dk.gov.oio.saml.util.InternalException;
 import dk.gov.oio.saml.util.SamlHelper;
 
 public class AssertionWrapper implements Serializable {
-	private static final long serialVersionUID = -338227958970338958L;
-	private String assertion;
-	private String id;
-	private String issuer;
-	private String sessionIndex;
-	private NSISLevel nsisLevel;
-	private String assuranceLevel;
-	private String subjectNameId;
-	private List<String> audiences;
-	private String authnContextClassRef;
-	private PrivilegeList privilegeList;
-	private Map<String, String> attributeValues;
-	private boolean sessionExpired;
-	private DateTime confirmationTime;
-	private DateTime conditionTimeNotBefore;
-	private DateTime conditionTimeNotOnOrAfter;
+    private static final Logger log = LoggerFactory.getLogger(AssertionWrapper.class);
+    private static final long serialVersionUID = -338227958970338958L;
+    private String assertion;
+    private String id;
+    private String issuer;
+    private String sessionIndex;
+    private NSISLevel nsisLevel;
+    private String assuranceLevel;
+    private String subjectNameId;
+    private List<String> audiences;
+    private String authnContextClassRef;
+    private PrivilegeList privilegeList;
+    private Map<String, String> attributeValues;
+    private boolean sessionExpired;
+    private DateTime confirmationTime;
+    private DateTime conditionTimeNotBefore;
+    private DateTime conditionTimeNotOnOrAfter;
+    private String signingCredentialEntityId;
 
-	public AssertionWrapper(Assertion assertion) throws InternalException {
-		// getAssertion()
-		AssertionMarshaller marshaller = new AssertionMarshaller();
-		try {
-			Element element = marshaller.marshall(assertion);
-			this.assertion = elementToString(element);
-		}
-		catch (MarshallingException e) {
-			throw new InternalException(e);
-		}
+    public AssertionWrapper(Assertion assertion) throws InternalException {
+        // getAssertion()
+        AssertionMarshaller marshaller = new AssertionMarshaller();
+        try {
+            Element element = marshaller.marshall(assertion);
+            this.assertion = StringUtil.elementToString(element);
+        }
+        catch (MarshallingException e) {
+            throw new InternalException(e);
+        }
 
-		// getAttributeValues()
-		List<AttributeStatement> attributeStatements = assertion.getAttributeStatements();
-		if (attributeStatements != null && attributeStatements.size() == 1) {
-			AttributeStatement attributeStatement = attributeStatements.get(0);
-			this.attributeValues = SamlHelper.extractAttributeValues(attributeStatement);
-		}
+        // getAttributeValues()
+        List<AttributeStatement> attributeStatements = assertion.getAttributeStatements();
+        if (attributeStatements != null && attributeStatements.size() == 1) {
+            AttributeStatement attributeStatement = attributeStatements.get(0);
+            this.attributeValues = SamlHelper.extractAttributeValues(attributeStatement);
+        }
 
-		// getNSISLevel()
-		NSISLevel level = NSISLevel.NONE;
-		if (attributeValues != null) {
-			String value = attributeValues.get(Constants.LOA);
-			level = NSISLevel.getNSISLevelFromAttributeValue(value, NSISLevel.NONE);
-			this.assuranceLevel = attributeValues.get(Constants.ASSURANCE_LEVEL); // NULL is acceptable
-		}
-		this.nsisLevel = level;
+        // getNSISLevel()
+        NSISLevel level = NSISLevel.NONE;
+        if (attributeValues != null) {
+            String value = attributeValues.get(Constants.LOA);
+            level = NSISLevel.getNSISLevelFromAttributeValue(value, NSISLevel.NONE);
+            this.assuranceLevel = attributeValues.get(Constants.ASSURANCE_LEVEL); // NULL is acceptable
+        }
+        this.nsisLevel = level;
 
-		// getIssuer()
-		Issuer issuerObj = assertion.getIssuer();
-		this.issuer = issuerObj != null ? issuerObj.getValue() : null;
+        // getIssuer()
+        Issuer issuerObj = assertion.getIssuer();
+        this.issuer = issuerObj != null ? issuerObj.getValue() : null;
 
-		// getSubjectNameID()
-		Subject subject = assertion.getSubject();
-		if (subject != null && subject.getNameID() != null) {
-			subjectNameId = subject.getNameID().getValue();
-		}
+        // getSubjectNameID()
+        Subject subject = assertion.getSubject();
+        if (subject != null && subject.getNameID() != null) {
+            subjectNameId = subject.getNameID().getValue();
+        }
 
-		Conditions conditions = assertion.getConditions();
-		if (conditions != null) {
-			// getAudience()
-			List<String> audiences = new ArrayList<>();
-			for (AudienceRestriction audienceRestriction : conditions.getAudienceRestrictions()) {
-				for (Audience audience : audienceRestriction.getAudiences()) {
-					audiences.add(audience.getAudienceURI());
-				}
-			}
+        Conditions conditions = assertion.getConditions();
+        if (conditions != null) {
+            // getAudience()
+            List<String> audiences = new ArrayList<>();
+            for (AudienceRestriction audienceRestriction : conditions.getAudienceRestrictions()) {
+                for (Audience audience : audienceRestriction.getAudiences()) {
+                    audiences.add(audience.getAudienceURI());
+                }
+            }
 
-			this.audiences = audiences;
+            this.audiences = audiences;
 
-			// getConditionTimeNotOnOrAfter()
-			this.conditionTimeNotOnOrAfter = conditions.getNotOnOrAfter();
+            // getConditionTimeNotOnOrAfter()
+            this.conditionTimeNotOnOrAfter = conditions.getNotOnOrAfter();
 
-			// getConditionTimeNotBefore()
-			this.conditionTimeNotBefore = conditions.getNotBefore();
-		}
+            // getConditionTimeNotBefore()
+            this.conditionTimeNotBefore = conditions.getNotBefore();
+        }
 
-		// getConfirmationTime()
-		if (assertion.getSubject() != null && assertion.getSubject().getSubjectConfirmations() != null && !assertion.getSubject().getSubjectConfirmations().isEmpty()) {
+        // getConfirmationTime()
+        if (assertion.getSubject() != null && assertion.getSubject().getSubjectConfirmations() != null && !assertion.getSubject().getSubjectConfirmations().isEmpty()) {
 
-			for (SubjectConfirmation subjectConfirmation : assertion.getSubject().getSubjectConfirmations()) {
-				SubjectConfirmationData data = subjectConfirmation.getSubjectConfirmationData();
-				if (data != null && data.getNotOnOrAfter() != null) {
-					this.confirmationTime = data.getNotOnOrAfter();
-				}
-			}
-		}
+            for (SubjectConfirmation subjectConfirmation : assertion.getSubject().getSubjectConfirmations()) {
+                SubjectConfirmationData data = subjectConfirmation.getSubjectConfirmationData();
+                if (data != null && data.getNotOnOrAfter() != null) {
+                    this.confirmationTime = data.getNotOnOrAfter();
+                }
+            }
+        }
 
-		if (assertion.getAuthnStatements() != null) {
-			if (assertion.getAuthnStatements().size() > 0) {
-				// We only look into the first AuthnStatement
-				AuthnStatement authnStatement = assertion.getAuthnStatements().get(0);
+        if (assertion.getAuthnStatements() != null) {
+            if (assertion.getAuthnStatements().size() > 0) {
+                // We only look into the first AuthnStatement
+                AuthnStatement authnStatement = assertion.getAuthnStatements().get(0);
 
-				// getSessionIndex()
-				this.sessionIndex = authnStatement.getSessionIndex();
+                // getSessionIndex()
+                this.sessionIndex = authnStatement.getSessionIndex();
 
-				// isSessionExpired()
-				boolean sessionExpired = false;
-				if (authnStatement.getSessionNotOnOrAfter() != null) {
-					sessionExpired = authnStatement.getSessionNotOnOrAfter().isBeforeNow();
-				}
-				else {
-					sessionExpired = false;
-				}
-				this.sessionExpired = sessionExpired;
+                // isSessionExpired()
+                boolean sessionExpired = false;
+                if (authnStatement.getSessionNotOnOrAfter() != null) {
+                    sessionExpired = authnStatement.getSessionNotOnOrAfter().isBeforeNow();
+                }
+                else {
+                    sessionExpired = false;
+                }
+                this.sessionExpired = sessionExpired;
 
-				// getAuthnContextClassRef()
-				AuthnContext authnContext = authnStatement.getAuthnContext();
-				if (authnContext != null) {
-					AuthnContextClassRef authnContextClassRef = authnContext.getAuthnContextClassRef();
-					if (authnContextClassRef != null) {
-						this.authnContextClassRef = authnContextClassRef.getAuthnContextClassRef();
-					}
-				}
-			}
-		}
+                // getAuthnContextClassRef()
+                AuthnContext authnContext = authnStatement.getAuthnContext();
+                if (authnContext != null) {
+                    AuthnContextClassRef authnContextClassRef = authnContext.getAuthnContextClassRef();
+                    if (authnContextClassRef != null) {
+                        this.authnContextClassRef = authnContextClassRef.getAuthnContextClassRef();
+                    }
+                }
+            }
+        }
 
-		// getPrivilegeList()
-		if (attributeValues != null) {
-			String attributeValue = attributeValues.get(Constants.PRIVILEGE_ATTRIBUTE);
-			if (attributeValue != null) {
-				this.privilegeList = OIOBPPUtil.parse(attributeValue);
-			}
-		}
+        // getPrivilegeList()
+        if (attributeValues != null) {
+            String attributeValue = attributeValues.get(Constants.PRIVILEGE_ATTRIBUTE);
+            if (attributeValue != null) {
+                this.privilegeList = OIOBPPUtil.parse(attributeValue);
+            }
+        }
 
-		// getID()
-		this.id = assertion.getID();
-	}
+        // getSigningCredentialEntityId()
+        if (null != assertion.getSignature() && null != assertion.getSignature().getSigningCredential()) {
+            this.signingCredentialEntityId = assertion.getSignature().getSigningCredential().getEntityId();
+        }
 
-	private static String elementToString(Element element) {
-		try {
-			Source source = new DOMSource(element);
-			TransformerFactory transFactory = TransformerFactory.newInstance();
-			Transformer transformer = transFactory.newTransformer();
-			StringWriter buffer = new StringWriter();
+        // getID()
+        this.id = assertion.getID();
+    }
 
-			transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-			transformer.transform(source, new StreamResult(buffer));
+    public String getAssertion() {
+        return assertion;
+    }
+    
+    public String getAssertionAsHtml() {
+        return htmlEscape(assertion);
+    }
+    
+    private static String htmlEscape(String input) {
+        StringBuilder escaped = new StringBuilder();
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
 
-			return buffer.toString();
-		}
-		catch (Exception ex) {
-			return null;
-		}
-	}
+            switch (c) {
+                case '<':
+                    escaped.append("&lt;");
+                    break;
+                case '>':
+                    escaped.append("&gt;");
+                    break;
+                case '"':
+                    escaped.append("&quot;");
+                    break;
+                case '&':
+                    escaped.append("&amp;");
+                    break;
+                case '\'':
+                    escaped.append("&#39;");
+                    break;
+                default:
+                    escaped.append(c);
+                    break;
+            }
+        }
 
-	public String getAssertion() {
-		return assertion;
-	}
-	
-	public String getAssertionAsHtml() {
-		return htmlEscape(assertion);
-	}
-	
-	private static String htmlEscape(String input) {
-		StringBuilder escaped = new StringBuilder();
-		for (int i = 0; i < input.length(); i++) {
-			char c = input.charAt(i);
+        return escaped.toString();
+    }
+    
+    public NSISLevel getNsisLevel() {
+        return nsisLevel;
+    }
 
-			switch (c) {
-				case '<':
-					escaped.append("&lt;");
-					break;
-				case '>':
-					escaped.append("&gt;");
-					break;
-				case '"':
-					escaped.append("&quot;");
-					break;
-				case '&':
-					escaped.append("&amp;");
-					break;
-				case '\'':
-					escaped.append("&#39;");
-					break;
-				default:
-					escaped.append(c);
-					break;
-			}
-		}
+    public String getAssuranceLevel() {
+        return assuranceLevel;
+    }
 
-		return escaped.toString();
-	}
-	
-	public NSISLevel getNsisLevel() {
-		return nsisLevel;
-	}
+    public String getID() {
+        return id;
+    }
 
-	public String getAssuranceLevel() {
-		return assuranceLevel;
-	}
+    public String getIssuer() {
+        return issuer;
+    }
 
-	public String getID() {
-		return id;
-	}
+    public String getSessionIndex() {
+        return sessionIndex;
+    }
 
-	public String getIssuer() {
-		return issuer;
-	}
+    public String getSubjectNameId() {
+        return subjectNameId;
+    }
 
-	public String getSessionIndex() {
-		return sessionIndex;
-	}
+    public List<String> getAudiences() {
+        return audiences;
+    }
 
-	public String getSubjectNameId() {
-		return subjectNameId;
-	}
+    public String getAuthnContextClassRef() {
+        return authnContextClassRef;
+    }
 
-	public List<String> getAudiences() {
-		return audiences;
-	}
+    public PrivilegeList getPrivilegeList() {
+        return privilegeList;
+    }
 
-	public String getAuthnContextClassRef() {
-		return authnContextClassRef;
-	}
+    public Map<String, String> getAttributeValues() {
+        return attributeValues;
+    }
 
-	public PrivilegeList getPrivilegeList() {
-		return privilegeList;
-	}
+    public boolean isSessionExpired() {
+        return sessionExpired;
+    }
 
-	public Map<String, String> getAttributeValues() {
-		return attributeValues;
-	}
+    public DateTime getConfirmationTime() {
+        return confirmationTime;
+    }
 
-	public boolean isSessionExpired() {
-		return sessionExpired;
-	}
+    public DateTime getConditionTimeNotBefore() {
+        return conditionTimeNotBefore;
+    }
 
-	public DateTime getConfirmationTime() {
-		return confirmationTime;
-	}
+    public DateTime getConditionTimeNotOnOrAfter() {
+        return conditionTimeNotOnOrAfter;
+    }
 
-	public DateTime getConditionTimeNotBefore() {
-		return conditionTimeNotBefore;
-	}
+    public String getSigningCredentialEntityId() {
+        return signingCredentialEntityId;
+    }
 
-	public DateTime getConditionTimeNotOnOrAfter() {
-		return conditionTimeNotOnOrAfter;
-	}
+    @Override
+    public String toString() {
+        return String.format("AssertionWrapper{assertion='%s'}", assertion);
+    }
 }

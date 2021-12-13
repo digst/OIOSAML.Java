@@ -46,7 +46,7 @@ public class ValidationService {
     }
 
     @SuppressWarnings("unchecked")
-	private boolean validateDestination(HttpServletRequest request, MessageContext<SAMLObject> messageContext) {
+    private boolean validateDestination(HttpServletRequest request, MessageContext<SAMLObject> messageContext) {
         log.debug("Started destination validation");
         ReceivedEndpointSecurityHandler endpointSecurityHandler = new ReceivedEndpointSecurityHandler();
         try {
@@ -61,7 +61,7 @@ public class ValidationService {
     }
 
     @SuppressWarnings("unchecked")
-	private boolean validateLifetime(MessageContext<SAMLObject> messageContext) {
+    private boolean validateLifetime(MessageContext<SAMLObject> messageContext) {
         log.debug("Started message lifetime validation");
         MessageLifetimeSecurityHandler lifetimeHandler = new MessageLifetimeSecurityHandler();
         lifetimeHandler.setClockSkew(60 * 5 * 1000);

@@ -11,7 +11,6 @@ import java.util.List;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -30,7 +29,6 @@ import org.mockserver.matchers.Times;
 
 import dk.gov.oio.saml.config.Configuration;
 import dk.gov.oio.saml.model.NSISLevel;
-import dk.gov.oio.saml.service.AssertionServiceTest;
 import dk.gov.oio.saml.service.OIOSAML3Service;
 import dk.gov.oio.saml.session.AuthnRequestWrapper;
 import dk.gov.oio.saml.util.Constants;
@@ -40,397 +38,397 @@ import dk.gov.oio.saml.util.TestConstants;
 @MockServerSettings(ports = { 8081 })
 public class AuthenticatedFilterTest {
 
-	@BeforeAll
-	public static void beforeAll(MockServerClient idp) throws Exception {
+    @BeforeAll
+    public static void beforeAll(MockServerClient idp) throws Exception {
         Configuration configuration = new Configuration.Builder()
-				.setSpEntityID(TestConstants.SP_ENTITY_ID)
-				.setBaseUrl(TestConstants.SP_BASE_URL)
-				.setServletRoutingPathPrefix(TestConstants.SP_ROUTING_BASE)
-				.setServletRoutingPathSuffixError(TestConstants.SP_ROUTING_ERROR)
-				.setServletRoutingPathSuffixMetadata(TestConstants.SP_ROUTING_METADATA)
-				.setServletRoutingPathSuffixLogout(TestConstants.SP_ROUTING_LOGOUT)
-				.setServletRoutingPathSuffixLogoutResponse(TestConstants.SP_ROUTING_LOGOUT_RESPONSE)
-				.setServletRoutingPathSuffixAssertion(TestConstants.SP_ROUTING_ASSERTION)
-				.setIdpEntityID(TestConstants.IDP_ENTITY_ID)
-				.setIdpMetadataUrl(TestConstants.IDP_METADATA_URL)
-				.setKeystoreLocation("sp.pfx")
-				.setKeystorePassword("Test1234")
-				.setKeyAlias("1")
-				.build();
+                .setSpEntityID(TestConstants.SP_ENTITY_ID)
+                .setBaseUrl(TestConstants.SP_BASE_URL)
+                .setServletRoutingPathPrefix(TestConstants.SP_ROUTING_BASE)
+                .setServletRoutingPathSuffixError(TestConstants.SP_ROUTING_ERROR)
+                .setServletRoutingPathSuffixMetadata(TestConstants.SP_ROUTING_METADATA)
+                .setServletRoutingPathSuffixLogout(TestConstants.SP_ROUTING_LOGOUT)
+                .setServletRoutingPathSuffixLogoutResponse(TestConstants.SP_ROUTING_LOGOUT_RESPONSE)
+                .setServletRoutingPathSuffixAssertion(TestConstants.SP_ROUTING_ASSERTION)
+                .setIdpEntityID(TestConstants.IDP_ENTITY_ID)
+                .setIdpMetadataUrl(TestConstants.IDP_METADATA_URL)
+                .setKeystoreLocation("sp.pfx")
+                .setKeystorePassword("Test1234")
+                .setKeyAlias("1")
+                .build();
 
-		OIOSAML3Service.init(configuration);
-		
-		// make sure IdP responds with useful metadata
-		idp
-			.when(
-				request()
-					.withMethod("GET")
-					.withPath("/saml/metadata"),
-					Times.exactly(1)
-			)
-			.respond(
-				response()
-				   .withStatusCode(200)
-				   .withBody(TestConstants.IDP_METADATA));
-	}
-	
-	@DisplayName("NSIS Substantial login with no existing session")
-	@Test
-	public void loginSubstantial() throws Exception {
-		AuthenticatedFilter filter = new AuthenticatedFilter();
-		filter.init(getConfig(false, false, "SUBSTANTIAL"));
+        OIOSAML3Service.init(configuration);
+        
+        // make sure IdP responds with useful metadata
+        idp
+            .when(
+                request()
+                    .withMethod("GET")
+                    .withPath("/saml/metadata"),
+                    Times.exactly(1)
+            )
+            .respond(
+                response()
+                   .withStatusCode(200)
+                   .withBody(TestConstants.IDP_METADATA));
+    }
+    
+    @DisplayName("NSIS Substantial login with no existing session")
+    @Test
+    public void loginSubstantial() throws Exception {
+        AuthenticatedFilter filter = new AuthenticatedFilter();
+        filter.init(getConfig(false, false, "SUBSTANTIAL"));
 
-		// mock session with state: not logged in at any NSIS level
-		HttpSession session = Mockito.mock(HttpSession.class);
-		Mockito.when(session.getAttribute(Constants.SESSION_NSIS_LEVEL)).thenReturn(null);
-		Mockito.when(session.getAttribute(Constants.SESSION_AUTHENTICATED)).thenReturn(null);
+        // mock session with state: not logged in at any NSIS level
+        HttpSession session = Mockito.mock(HttpSession.class);
+        Mockito.when(session.getAttribute(Constants.SESSION_NSIS_LEVEL)).thenReturn(null);
+        Mockito.when(session.getAttribute(Constants.SESSION_AUTHENTICATED)).thenReturn(null);
 
-		// mock request
-		HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-		Mockito.when(request.getSession()).thenReturn(session);
+        // mock request
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getSession()).thenReturn(session);
 
-		// mock response objects to verify behavior later
-		HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
-		FilterChain chain = Mockito.mock(FilterChain.class);
+        // mock response objects to verify behavior later
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        FilterChain chain = Mockito.mock(FilterChain.class);
 
-		// invoke method to be tested
-		filter.doFilter(request, response, chain);
-		
-		// verify that the filterChain was not invoked
-		Mockito.verify(chain, Mockito.times(0)).doFilter(request, response);
+        // invoke method to be tested
+        filter.doFilter(request, response, chain);
+        
+        // verify that the filterChain was not invoked
+        Mockito.verify(chain, Mockito.times(0)).doFilter(request, response);
 
-		// capture AUTHN_REQUEST stored on session for inspection
-		ArgumentCaptor<Object> argument = ArgumentCaptor.forClass(Object.class);
-		Mockito.verify(session).setAttribute(Mockito.eq(Constants.SESSION_AUTHN_REQUEST), argument.capture());
+        // capture AUTHN_REQUEST stored on session for inspection
+        ArgumentCaptor<Object> argument = ArgumentCaptor.forClass(Object.class);
+        Mockito.verify(session).setAttribute(Mockito.eq(Constants.SESSION_AUTHN_REQUEST), argument.capture());
 
-		// verify that we have an authnRequest on the session
-		Object storedAuthnRequest = argument.getValue();
-		Assertions.assertNotNull(storedAuthnRequest);
-		Assertions.assertTrue(storedAuthnRequest instanceof AuthnRequestWrapper);		
-		AuthnRequestWrapper authnRequest = (AuthnRequestWrapper) storedAuthnRequest;
+        // verify that we have an authnRequest on the session
+        Object storedAuthnRequest = argument.getValue();
+        Assertions.assertNotNull(storedAuthnRequest);
+        Assertions.assertTrue(storedAuthnRequest instanceof AuthnRequestWrapper);        
+        AuthnRequestWrapper authnRequest = (AuthnRequestWrapper) storedAuthnRequest;
 
-		// verify that the AuthnRequest is requesting SUBSTANTIAL
-		Assertions.assertNotNull(authnRequest.getAuthnContextClassRefValues());
-		Assertions.assertTrue(authnRequest.getAuthnContextClassRefValues().size() >= 1);
+        // verify that the AuthnRequest is requesting SUBSTANTIAL
+        Assertions.assertNotNull(authnRequest.getAuthnContextClassRefValues());
+        Assertions.assertTrue(authnRequest.getAuthnContextClassRefValues().size() >= 1);
 
-		boolean foundSubstantialRequest = false;
-		for (String authnContextClassRef : authnRequest.getAuthnContextClassRefValues()) {
-			if (NSISLevel.SUBSTANTIAL.getUrl().equals(authnContextClassRef)) {
-				foundSubstantialRequest = true;
-				break;
-			}
-		}
-		Assertions.assertTrue(foundSubstantialRequest);
-	}
-	
-	@DisplayName("NSIS Substantial login with existing session on NSIS Low")
-	@Test
-	public void loginSubstantialWithExistingLow() throws Exception {
-		AuthenticatedFilter filter = new AuthenticatedFilter();
-		filter.init(getConfig(false, false, "SUBSTANTIAL"));
+        boolean foundSubstantialRequest = false;
+        for (String authnContextClassRef : authnRequest.getAuthnContextClassRefValues()) {
+            if (NSISLevel.SUBSTANTIAL.getUrl().equals(authnContextClassRef)) {
+                foundSubstantialRequest = true;
+                break;
+            }
+        }
+        Assertions.assertTrue(foundSubstantialRequest);
+    }
+    
+    @DisplayName("NSIS Substantial login with existing session on NSIS Low")
+    @Test
+    public void loginSubstantialWithExistingLow() throws Exception {
+        AuthenticatedFilter filter = new AuthenticatedFilter();
+        filter.init(getConfig(false, false, "SUBSTANTIAL"));
 
-		// mock session with state: not logged in at any NSIS level
-		HttpSession session = Mockito.mock(HttpSession.class);
-		Mockito.when(session.getAttribute(Constants.SESSION_NSIS_LEVEL)).thenReturn(NSISLevel.LOW);
-		Mockito.when(session.getAttribute(Constants.SESSION_AUTHENTICATED)).thenReturn("true");
+        // mock session with state: not logged in at any NSIS level
+        HttpSession session = Mockito.mock(HttpSession.class);
+        Mockito.when(session.getAttribute(Constants.SESSION_NSIS_LEVEL)).thenReturn(NSISLevel.LOW);
+        Mockito.when(session.getAttribute(Constants.SESSION_AUTHENTICATED)).thenReturn("true");
 
-		// mock request
-		HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-		Mockito.when(request.getSession()).thenReturn(session);
+        // mock request
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getSession()).thenReturn(session);
 
-		// mock response objects to verify behavior later
-		HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
-		FilterChain chain = Mockito.mock(FilterChain.class);
+        // mock response objects to verify behavior later
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        FilterChain chain = Mockito.mock(FilterChain.class);
 
-		// invoke method to be tested
-		filter.doFilter(request, response, chain);
-		
-		// verify that the filterChain was not invoked
-		Mockito.verify(chain, Mockito.times(0)).doFilter(request, response);
+        // invoke method to be tested
+        filter.doFilter(request, response, chain);
+        
+        // verify that the filterChain was not invoked
+        Mockito.verify(chain, Mockito.times(0)).doFilter(request, response);
 
-		// capture AUTHN_REQUEST stored on session for inspection
-		ArgumentCaptor<Object> argument = ArgumentCaptor.forClass(Object.class);
-		Mockito.verify(session).setAttribute(Mockito.eq(Constants.SESSION_AUTHN_REQUEST), argument.capture());
+        // capture AUTHN_REQUEST stored on session for inspection
+        ArgumentCaptor<Object> argument = ArgumentCaptor.forClass(Object.class);
+        Mockito.verify(session).setAttribute(Mockito.eq(Constants.SESSION_AUTHN_REQUEST), argument.capture());
 
-		// verify that we have an authnRequest on the session
-		Object storedAuthnRequest = argument.getValue();
-		Assertions.assertNotNull(storedAuthnRequest);
-		Assertions.assertTrue(storedAuthnRequest instanceof AuthnRequestWrapper);		
-		AuthnRequestWrapper authnRequest = (AuthnRequestWrapper) storedAuthnRequest;
+        // verify that we have an authnRequest on the session
+        Object storedAuthnRequest = argument.getValue();
+        Assertions.assertNotNull(storedAuthnRequest);
+        Assertions.assertTrue(storedAuthnRequest instanceof AuthnRequestWrapper);        
+        AuthnRequestWrapper authnRequest = (AuthnRequestWrapper) storedAuthnRequest;
 
-		// verify that the AuthnRequest is requesting SUBSTANTIAL
-		Assertions.assertNotNull(authnRequest.getAuthnContextClassRefValues());
-		Assertions.assertTrue(authnRequest.getAuthnContextClassRefValues().size() >= 1);
+        // verify that the AuthnRequest is requesting SUBSTANTIAL
+        Assertions.assertNotNull(authnRequest.getAuthnContextClassRefValues());
+        Assertions.assertTrue(authnRequest.getAuthnContextClassRefValues().size() >= 1);
 
-		boolean foundSubstantialRequest = false;
-		for (String authnContextClassRef : authnRequest.getAuthnContextClassRefValues()) {
-			if (NSISLevel.SUBSTANTIAL.getUrl().equals(authnContextClassRef)) {
-				foundSubstantialRequest = true;
-				break;
-			}
-		}
-		Assertions.assertTrue(foundSubstantialRequest);
-	}
-	
-	@DisplayName("NSIS Substantial login with existing Substantial session")
-	@Test
-	public void ssoWithSubstantial() throws Exception {
-		AuthenticatedFilter filter = new AuthenticatedFilter();
-		filter.init(getConfig(false, false, "SUBSTANTIAL"));
+        boolean foundSubstantialRequest = false;
+        for (String authnContextClassRef : authnRequest.getAuthnContextClassRefValues()) {
+            if (NSISLevel.SUBSTANTIAL.getUrl().equals(authnContextClassRef)) {
+                foundSubstantialRequest = true;
+                break;
+            }
+        }
+        Assertions.assertTrue(foundSubstantialRequest);
+    }
+    
+    @DisplayName("NSIS Substantial login with existing Substantial session")
+    @Test
+    public void ssoWithSubstantial() throws Exception {
+        AuthenticatedFilter filter = new AuthenticatedFilter();
+        filter.init(getConfig(false, false, "SUBSTANTIAL"));
 
-		// mock session with state: logged in at NSIS level SUBSTANTIAL
-		HttpSession session = Mockito.mock(HttpSession.class);
-		Mockito.when(session.getAttribute(Constants.SESSION_NSIS_LEVEL)).thenReturn(NSISLevel.SUBSTANTIAL);
-		Mockito.when(session.getAttribute(Constants.SESSION_AUTHENTICATED)).thenReturn("true");
+        // mock session with state: logged in at NSIS level SUBSTANTIAL
+        HttpSession session = Mockito.mock(HttpSession.class);
+        Mockito.when(session.getAttribute(Constants.SESSION_NSIS_LEVEL)).thenReturn(NSISLevel.SUBSTANTIAL);
+        Mockito.when(session.getAttribute(Constants.SESSION_AUTHENTICATED)).thenReturn("true");
 
-		// mock request
-		HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-		Mockito.when(request.getSession()).thenReturn(session);
+        // mock request
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getSession()).thenReturn(session);
 
-		// mock response objects to verify behavior later
-		HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
-		FilterChain chain = Mockito.mock(FilterChain.class);
+        // mock response objects to verify behavior later
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        FilterChain chain = Mockito.mock(FilterChain.class);
 
-		// invoke method to be tested
-		filter.doFilter(request, response, chain);
-		
-		// verify that the filterChain was invoked (SSO)
-		Mockito.verify(chain, Mockito.times(1)).doFilter(request, response);
-	}
-	
-	@DisplayName("Login with existing session (no NSIS)")
-	@Test
-	public void ssoWithNoNSISLevel() throws Exception {
-		AuthenticatedFilter filter = new AuthenticatedFilter();
-		filter.init(getConfig(false, false, null));
+        // invoke method to be tested
+        filter.doFilter(request, response, chain);
+        
+        // verify that the filterChain was invoked (SSO)
+        Mockito.verify(chain, Mockito.times(1)).doFilter(request, response);
+    }
+    
+    @DisplayName("Login with existing session (no NSIS)")
+    @Test
+    public void ssoWithNoNSISLevel() throws Exception {
+        AuthenticatedFilter filter = new AuthenticatedFilter();
+        filter.init(getConfig(false, false, null));
 
-		// mock session with state: logged in, but no NSIS level set
-		HttpSession session = Mockito.mock(HttpSession.class);
-		Mockito.when(session.getAttribute(Constants.SESSION_NSIS_LEVEL)).thenReturn(null);
-		Mockito.when(session.getAttribute(Constants.SESSION_AUTHENTICATED)).thenReturn("true");
-		
-		// mock request
-		HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-		Mockito.when(request.getSession()).thenReturn(session);
+        // mock session with state: logged in, but no NSIS level set
+        HttpSession session = Mockito.mock(HttpSession.class);
+        Mockito.when(session.getAttribute(Constants.SESSION_NSIS_LEVEL)).thenReturn(null);
+        Mockito.when(session.getAttribute(Constants.SESSION_AUTHENTICATED)).thenReturn("true");
+        
+        // mock request
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getSession()).thenReturn(session);
 
-		// mock response objects to verify behavior later
-		HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
-		FilterChain chain = Mockito.mock(FilterChain.class);
+        // mock response objects to verify behavior later
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        FilterChain chain = Mockito.mock(FilterChain.class);
 
-		// invoke method to be tested
-		filter.doFilter(request, response, chain);
-		
-		// verify that the filterChain was invoked (SSO)
-		Mockito.verify(chain, Mockito.times(1)).doFilter(request, response);
-	}
-	
-	@DisplayName("Login with no NSIS level requested")
-	@Test
-	public void loginWithNoNSISLevel() throws Exception {
-		AuthenticatedFilter filter = new AuthenticatedFilter();
-		filter.init(getConfig(false, false, null));
+        // invoke method to be tested
+        filter.doFilter(request, response, chain);
+        
+        // verify that the filterChain was invoked (SSO)
+        Mockito.verify(chain, Mockito.times(1)).doFilter(request, response);
+    }
+    
+    @DisplayName("Login with no NSIS level requested")
+    @Test
+    public void loginWithNoNSISLevel() throws Exception {
+        AuthenticatedFilter filter = new AuthenticatedFilter();
+        filter.init(getConfig(false, false, null));
 
-		// mock session with state: not logged in at any NSIS level
-		HttpSession session = Mockito.mock(HttpSession.class);
-		Mockito.when(session.getAttribute(Constants.SESSION_NSIS_LEVEL)).thenReturn(null);
-		Mockito.when(session.getAttribute(Constants.SESSION_AUTHENTICATED)).thenReturn(null);
-		
-		// mock request
-		HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-		Mockito.when(request.getSession()).thenReturn(session);
+        // mock session with state: not logged in at any NSIS level
+        HttpSession session = Mockito.mock(HttpSession.class);
+        Mockito.when(session.getAttribute(Constants.SESSION_NSIS_LEVEL)).thenReturn(null);
+        Mockito.when(session.getAttribute(Constants.SESSION_AUTHENTICATED)).thenReturn(null);
+        
+        // mock request
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getSession()).thenReturn(session);
 
-		// mock response objects to verify behavior later
-		HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
-		FilterChain chain = Mockito.mock(FilterChain.class);
+        // mock response objects to verify behavior later
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        FilterChain chain = Mockito.mock(FilterChain.class);
 
-		// invoke method to be tested
-		filter.doFilter(request, response, chain);
-		
-		// verify that the filterChain was not invoked
-		Mockito.verify(chain, Mockito.times(0)).doFilter(request, response);
-		
-		// capture AUTHN_REQUEST stored on session for inspection
-		ArgumentCaptor<Object> argument = ArgumentCaptor.forClass(Object.class);
-		Mockito.verify(session).setAttribute(Mockito.eq(Constants.SESSION_AUTHN_REQUEST), argument.capture());
+        // invoke method to be tested
+        filter.doFilter(request, response, chain);
+        
+        // verify that the filterChain was not invoked
+        Mockito.verify(chain, Mockito.times(0)).doFilter(request, response);
+        
+        // capture AUTHN_REQUEST stored on session for inspection
+        ArgumentCaptor<Object> argument = ArgumentCaptor.forClass(Object.class);
+        Mockito.verify(session).setAttribute(Mockito.eq(Constants.SESSION_AUTHN_REQUEST), argument.capture());
 
-		// verify that we have an authnRequest on the session
-		Object storedAuthnRequest = argument.getValue();
-		Assertions.assertNotNull(storedAuthnRequest);
-		Assertions.assertTrue(storedAuthnRequest instanceof AuthnRequestWrapper);		
-		AuthnRequestWrapper authnRequest = (AuthnRequestWrapper) storedAuthnRequest;
+        // verify that we have an authnRequest on the session
+        Object storedAuthnRequest = argument.getValue();
+        Assertions.assertNotNull(storedAuthnRequest);
+        Assertions.assertTrue(storedAuthnRequest instanceof AuthnRequestWrapper);        
+        AuthnRequestWrapper authnRequest = (AuthnRequestWrapper) storedAuthnRequest;
 
-		// verify that the AuthnRequest is NOT requesting any NSIS level
-		Assertions.assertEquals(0, authnRequest.getAuthnContextClassRefValues().size());
-	}
-	
-	@DisplayName("Login with forceAuthn")
-	@Test
-	public void loginWithForceAuthn() throws Exception {
-		AuthenticatedFilter filter = new AuthenticatedFilter();
-		filter.init(getConfig(false, true, null));
+        // verify that the AuthnRequest is NOT requesting any NSIS level
+        Assertions.assertEquals(0, authnRequest.getAuthnContextClassRefValues().size());
+    }
+    
+    @DisplayName("Login with forceAuthn")
+    @Test
+    public void loginWithForceAuthn() throws Exception {
+        AuthenticatedFilter filter = new AuthenticatedFilter();
+        filter.init(getConfig(false, true, null));
 
-		// mock session with state: not logged in at any NSIS level
-		HttpSession session = Mockito.mock(HttpSession.class);
-		Mockito.when(session.getAttribute(Constants.SESSION_NSIS_LEVEL)).thenReturn(null);
-		Mockito.when(session.getAttribute(Constants.SESSION_AUTHENTICATED)).thenReturn(null);
+        // mock session with state: not logged in at any NSIS level
+        HttpSession session = Mockito.mock(HttpSession.class);
+        Mockito.when(session.getAttribute(Constants.SESSION_NSIS_LEVEL)).thenReturn(null);
+        Mockito.when(session.getAttribute(Constants.SESSION_AUTHENTICATED)).thenReturn(null);
 
-		// mock request
-		HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-		Mockito.when(request.getSession()).thenReturn(session);
+        // mock request
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getSession()).thenReturn(session);
 
-		// mock response objects to verify behavior later
-		HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
-		FilterChain chain = Mockito.mock(FilterChain.class);
+        // mock response objects to verify behavior later
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        FilterChain chain = Mockito.mock(FilterChain.class);
 
-		// invoke method to be tested
-		filter.doFilter(request, response, chain);
-		
-		// verify that the filterChain was not invoked
-		Mockito.verify(chain, Mockito.times(0)).doFilter(request, response);
-		
-		// capture AUTHN_REQUEST stored on session for inspection
-		ArgumentCaptor<Object> argument = ArgumentCaptor.forClass(Object.class);
-		Mockito.verify(session).setAttribute(Mockito.eq(Constants.SESSION_AUTHN_REQUEST), argument.capture());
+        // invoke method to be tested
+        filter.doFilter(request, response, chain);
+        
+        // verify that the filterChain was not invoked
+        Mockito.verify(chain, Mockito.times(0)).doFilter(request, response);
+        
+        // capture AUTHN_REQUEST stored on session for inspection
+        ArgumentCaptor<Object> argument = ArgumentCaptor.forClass(Object.class);
+        Mockito.verify(session).setAttribute(Mockito.eq(Constants.SESSION_AUTHN_REQUEST), argument.capture());
 
-		// verify that we have an authnRequest on the session
-		Object storedAuthnRequest = argument.getValue();
-		Assertions.assertNotNull(storedAuthnRequest);
-		Assertions.assertTrue(storedAuthnRequest instanceof AuthnRequestWrapper);
-		AuthnRequestWrapper authnRequest = (AuthnRequestWrapper) storedAuthnRequest;
+        // verify that we have an authnRequest on the session
+        Object storedAuthnRequest = argument.getValue();
+        Assertions.assertNotNull(storedAuthnRequest);
+        Assertions.assertTrue(storedAuthnRequest instanceof AuthnRequestWrapper);
+        AuthnRequestWrapper authnRequest = (AuthnRequestWrapper) storedAuthnRequest;
 
-		// verify that the AuthnRequest is forceAuthn
-		Assertions.assertTrue(authnRequest.isForceAuthn());
-		Assertions.assertFalse(authnRequest.isPassive());
-	}
-	
-	@DisplayName("Login with isPassive")
-	@Test
-	public void loginWithIsPassive() throws Exception {
-		AuthenticatedFilter filter = new AuthenticatedFilter();
-		filter.init(getConfig(true, false, null));
+        // verify that the AuthnRequest is forceAuthn
+        Assertions.assertTrue(authnRequest.isForceAuthn());
+        Assertions.assertFalse(authnRequest.isPassive());
+    }
+    
+    @DisplayName("Login with isPassive")
+    @Test
+    public void loginWithIsPassive() throws Exception {
+        AuthenticatedFilter filter = new AuthenticatedFilter();
+        filter.init(getConfig(true, false, null));
 
-		// mock session with state: not logged in at any NSIS level
-		HttpSession session = Mockito.mock(HttpSession.class);
-		Mockito.when(session.getAttribute(Constants.SESSION_NSIS_LEVEL)).thenReturn(null);
-		Mockito.when(session.getAttribute(Constants.SESSION_AUTHENTICATED)).thenReturn(null);
-		
-		// mock request
-		HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-		Mockito.when(request.getSession()).thenReturn(session);
+        // mock session with state: not logged in at any NSIS level
+        HttpSession session = Mockito.mock(HttpSession.class);
+        Mockito.when(session.getAttribute(Constants.SESSION_NSIS_LEVEL)).thenReturn(null);
+        Mockito.when(session.getAttribute(Constants.SESSION_AUTHENTICATED)).thenReturn(null);
+        
+        // mock request
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getSession()).thenReturn(session);
 
-		// mock response objects to verify behavior later
-		HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
-		FilterChain chain = Mockito.mock(FilterChain.class);
+        // mock response objects to verify behavior later
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        FilterChain chain = Mockito.mock(FilterChain.class);
 
-		// invoke method to be tested
-		filter.doFilter(request, response, chain);
-		
-		// verify that the filterChain was not invoked
-		Mockito.verify(chain, Mockito.times(0)).doFilter(request, response);
-		
-		// capture AUTHN_REQUEST stored on session for inspection
-		ArgumentCaptor<Object> argument = ArgumentCaptor.forClass(Object.class);
-		Mockito.verify(session).setAttribute(Mockito.eq(Constants.SESSION_AUTHN_REQUEST), argument.capture());
+        // invoke method to be tested
+        filter.doFilter(request, response, chain);
+        
+        // verify that the filterChain was not invoked
+        Mockito.verify(chain, Mockito.times(0)).doFilter(request, response);
+        
+        // capture AUTHN_REQUEST stored on session for inspection
+        ArgumentCaptor<Object> argument = ArgumentCaptor.forClass(Object.class);
+        Mockito.verify(session).setAttribute(Mockito.eq(Constants.SESSION_AUTHN_REQUEST), argument.capture());
 
-		// verify that we have an authnRequest on the session
-		Object storedAuthnRequest = argument.getValue();
-		Assertions.assertNotNull(storedAuthnRequest);
-		Assertions.assertTrue(storedAuthnRequest instanceof AuthnRequestWrapper);		
-		AuthnRequestWrapper authnRequest = (AuthnRequestWrapper) storedAuthnRequest;
+        // verify that we have an authnRequest on the session
+        Object storedAuthnRequest = argument.getValue();
+        Assertions.assertNotNull(storedAuthnRequest);
+        Assertions.assertTrue(storedAuthnRequest instanceof AuthnRequestWrapper);        
+        AuthnRequestWrapper authnRequest = (AuthnRequestWrapper) storedAuthnRequest;
 
-		// verify that the AuthnRequest is forceAuthn
-		Assertions.assertTrue(authnRequest.isPassive());
-		Assertions.assertFalse(authnRequest.isForceAuthn());
-	}
+        // verify that the AuthnRequest is forceAuthn
+        Assertions.assertTrue(authnRequest.isPassive());
+        Assertions.assertFalse(authnRequest.isForceAuthn());
+    }
 
-	@DisplayName("Setting SESSION_REQUESTED_PATH when authenticating")
-	@Test
-	public void settingRedirectUrlOnAuthentication() throws Exception {
-		AuthenticatedFilter filter = new AuthenticatedFilter();
-		filter.init(getConfig(false, false, "SUBSTANTIAL"));
+    @DisplayName("Setting SESSION_REQUESTED_PATH when authenticating")
+    @Test
+    public void settingRedirectUrlOnAuthentication() throws Exception {
+        AuthenticatedFilter filter = new AuthenticatedFilter();
+        filter.init(getConfig(false, false, "SUBSTANTIAL"));
 
-		// mock session with state: not logged in at any NSIS level
-		HttpSession session = Mockito.mock(HttpSession.class);
-		Mockito.when(session.getAttribute(Constants.SESSION_NSIS_LEVEL)).thenReturn(null);
-		Mockito.when(session.getAttribute(Constants.SESSION_AUTHENTICATED)).thenReturn(null);
+        // mock session with state: not logged in at any NSIS level
+        HttpSession session = Mockito.mock(HttpSession.class);
+        Mockito.when(session.getAttribute(Constants.SESSION_NSIS_LEVEL)).thenReturn(null);
+        Mockito.when(session.getAttribute(Constants.SESSION_AUTHENTICATED)).thenReturn(null);
 
-		// mock request
-		HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-		Mockito.when(request.getSession()).thenReturn(session);
-		Mockito.when(request.getRequestURI()).thenReturn("/some/url");
-		Mockito.when(request.getQueryString()).thenReturn("var1=1&var2=2");
+        // mock request
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getSession()).thenReturn(session);
+        Mockito.when(request.getRequestURI()).thenReturn("/some/url");
+        Mockito.when(request.getQueryString()).thenReturn("var1=1&var2=2");
 
-		// invoke method to be tested
-		filter.doFilter(request, Mockito.mock(HttpServletResponse.class), Mockito.mock(FilterChain.class));
+        // invoke method to be tested
+        filter.doFilter(request, Mockito.mock(HttpServletResponse.class), Mockito.mock(FilterChain.class));
 
-		// verify that URL is added to the session
-		Mockito.verify(session, Mockito.times(1)).setAttribute(Constants.SESSION_REQUESTED_PATH,"/some/url?var1=1&var2=2");
-	}
+        // verify that URL is added to the session
+        Mockito.verify(session, Mockito.times(1)).setAttribute(Constants.SESSION_REQUESTED_PATH,"/some/url?var1=1&var2=2");
+    }
 
-	@DisplayName("Not setting SESSION_REQUESTED_PATH on current session")
-	@Test
-	public void settingRedirectUrl() throws Exception {
-		AuthenticatedFilter filter = new AuthenticatedFilter();
-		filter.init(getConfig(false, false, "SUBSTANTIAL"));
+    @DisplayName("Not setting SESSION_REQUESTED_PATH on current session")
+    @Test
+    public void settingRedirectUrl() throws Exception {
+        AuthenticatedFilter filter = new AuthenticatedFilter();
+        filter.init(getConfig(false, false, "SUBSTANTIAL"));
 
-		// mock session with state: logged in at NSIS level SUBSTANTIAL
-		HttpSession session = Mockito.mock(HttpSession.class);
-		Mockito.when(session.getAttribute(Constants.SESSION_NSIS_LEVEL)).thenReturn(NSISLevel.SUBSTANTIAL);
-		Mockito.when(session.getAttribute(Constants.SESSION_AUTHENTICATED)).thenReturn("true");
+        // mock session with state: logged in at NSIS level SUBSTANTIAL
+        HttpSession session = Mockito.mock(HttpSession.class);
+        Mockito.when(session.getAttribute(Constants.SESSION_NSIS_LEVEL)).thenReturn(NSISLevel.SUBSTANTIAL);
+        Mockito.when(session.getAttribute(Constants.SESSION_AUTHENTICATED)).thenReturn("true");
 
-		// mock request
-		HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-		Mockito.when(request.getSession()).thenReturn(session);
-		Mockito.when(request.getRequestURI()).thenReturn("/some/url");
-		Mockito.when(request.getQueryString()).thenReturn("var1=1&var2=2");
+        // mock request
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getSession()).thenReturn(session);
+        Mockito.when(request.getRequestURI()).thenReturn("/some/url");
+        Mockito.when(request.getQueryString()).thenReturn("var1=1&var2=2");
 
-		// invoke method to be tested
-		filter.doFilter(request, Mockito.mock(HttpServletResponse.class), Mockito.mock(FilterChain.class));
+        // invoke method to be tested
+        filter.doFilter(request, Mockito.mock(HttpServletResponse.class), Mockito.mock(FilterChain.class));
 
-		// verify that URL is added to the session
-		Mockito.verify(session,Mockito.never()).setAttribute(Mockito.eq(Constants.SESSION_REQUESTED_PATH), Mockito.any());
-	}
+        // verify that URL is added to the session
+        Mockito.verify(session,Mockito.never()).setAttribute(Mockito.eq(Constants.SESSION_REQUESTED_PATH), Mockito.any());
+    }
 
-	private FilterConfig getConfig(boolean isPassive, boolean forceAuthn, String requiredLevel) {
-		FilterConfig config = new FilterConfig() {
+    private FilterConfig getConfig(boolean isPassive, boolean forceAuthn, String requiredLevel) {
+        FilterConfig config = new FilterConfig() {
 
-			@Override
-			public Enumeration<String> getInitParameterNames() {
-				List<String> keys = new ArrayList<>();
-				keys.add(Constants.FORCE_AUTHN);
-				keys.add(Constants.IS_PASSIVE);
-				if (requiredLevel != null) {
-					keys.add(Constants.REQUIRED_NSIS_LEVEL);
-				}
+            @Override
+            public Enumeration<String> getInitParameterNames() {
+                List<String> keys = new ArrayList<>();
+                keys.add(Constants.FORCE_AUTHN);
+                keys.add(Constants.IS_PASSIVE);
+                if (requiredLevel != null) {
+                    keys.add(Constants.REQUIRED_NSIS_LEVEL);
+                }
 
-				return Collections.enumeration(keys);
-			}
+                return Collections.enumeration(keys);
+            }
 
-			@Override
-			public String getInitParameter(String name) {
-				switch (name) {
-					case Constants.IS_PASSIVE:
-						return Boolean.toString(isPassive);
-					case Constants.FORCE_AUTHN:
-						return Boolean.toString(forceAuthn);
-					case Constants.REQUIRED_NSIS_LEVEL:
-						return requiredLevel;
-				}
+            @Override
+            public String getInitParameter(String name) {
+                switch (name) {
+                    case Constants.IS_PASSIVE:
+                        return Boolean.toString(isPassive);
+                    case Constants.FORCE_AUTHN:
+                        return Boolean.toString(forceAuthn);
+                    case Constants.REQUIRED_NSIS_LEVEL:
+                        return requiredLevel;
+                }
 
-				return null;
-			}
+                return null;
+            }
 
-			@Override
-			public String getFilterName() {
-				return "TestConfig";
-			}
+            @Override
+            public String getFilterName() {
+                return "TestConfig";
+            }
 
-			@Override
-			public ServletContext getServletContext() {
-				return null;
-			}
-		};
+            @Override
+            public ServletContext getServletContext() {
+                return null;
+            }
+        };
 
-		return config;
-	}
+        return config;
+    }
 }
