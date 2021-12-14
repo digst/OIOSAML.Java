@@ -119,14 +119,13 @@ public abstract class SAMLHandler {
     void sendSOAP(HttpServletResponse httpServletResponse, MessageContext<SAMLObject> message) throws ComponentInitializationException, MessageEncodingException {
         log.debug("Encoding and sending message (SOAP)");
 
-        // TODO: This seems to needs to send a SOAP Envelope, to conform to HTTPSOAP11Encoder
-
         HTTPSOAP11Encoder encoder = new HTTPSOAP11Encoder();
 
         encoder.setHttpServletResponse(httpServletResponse);
         encoder.setMessageContext(message);
 
         encoder.initialize();
+        encoder.prepareContext();
         encoder.encode();
     }
 

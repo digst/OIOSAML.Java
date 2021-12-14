@@ -171,12 +171,12 @@ public class LogoutRequestHandlerTest {
         Mockito.when(request.getSession()).thenReturn(session); // Mocked Session
         Mockito.when(request.getMethod()).thenReturn("POST"); // Method: GET
         Mockito.when(request.getContentType()).thenReturn("text/xml");
+        Mockito.when(request.getHeader("SOAPAction")).thenReturn("SOAPAction");
         Mockito.when(request.getInputStream()).thenReturn(new ServletInputStream(){
             public int read() throws IOException {
                 return inputStream.read();
             }
         });
-        //SOAPAction
 
         // Mock DummyOutputStream
         ServletOutputStream outputStreamMock = Mockito.mock(ServletOutputStream.class);
@@ -236,6 +236,72 @@ public class LogoutRequestHandlerTest {
 
         Mockito.verify(session).invalidate();
         Mockito.verify(response).sendRedirect(StringUtil.getUrl(request, OIOSAML3Service.getConfig().getLogoutPage()));
+    }
+
+    @DisplayName("Test that a user that is not logged in can safely attempt a SOAP logout")
+    @Test
+    public void testSOAPLogoutRequestWhenNotLoggedIn() throws Exception {
+        // Create LogoutRequest
+        String nameID = "https://data.gov.dk/model/core/eid/person/uuid/37a5a1aa-67ce-4f70-b7c0-b8e678d585f7";
+        MessageContext<SAMLObject> messageContext = IdpUtil.createMessageWithLogoutRequest(nameID, NameID.PERSISTENT, TestConstants.SP_LOGOUT_REQUEST_URL);
+
+        // Marshall and serialize
+        Element marshalledMessage = XMLObjectSupport.marshall(messageContext.getMessage());
+        final String soapXml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"><soapenv:Body>" +
+                StringUtil.elementToString(marshalledMessage) + "</soapenv:Body></soapenv:Envelope>";
+
+        InputStream inputStream = new ByteArrayInputStream(soapXml.getBytes("UTF-8"));
+
+        // Mock session with state: not logged in at any NSIS level
+        HttpSession session = Mockito.mock(HttpSession.class);
+        Mockito.when(session.getAttribute(Constants.SESSION_NSIS_LEVEL)).thenReturn(NSISLevel.SUBSTANTIAL);
+        Mockito.when(session.getAttribute(Constants.SESSION_AUTHENTICATED)).thenReturn("false");
+        Mockito.when(session.getAttribute(Constants.SESSION_AUTHN_REQUEST)).thenReturn(null);
+        Mockito.when(session.getAttribute(Constants.SESSION_NAME_ID)).thenReturn(null);
+        Mockito.when(session.getAttribute(Constants.SESSION_NAME_ID_FORMAT)).thenReturn(null);
+
+        // Mock HttpServletRequest
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getRequestURL()).thenReturn(new StringBuffer(TestConstants.SP_ASSERTION_CONSUMER_URL)); // URL
+        Mockito.when(request.getSession()).thenReturn(session); // Mocked Session
+        Mockito.when(request.getMethod()).thenReturn("POST"); // Method: GET
+        Mockito.when(request.getContentType()).thenReturn("text/xml");
+        Mockito.when(request.getHeader("SOAPAction")).thenReturn("SOAPAction");
+        Mockito.when(request.getInputStream()).thenReturn(new ServletInputStream(){
+            public int read() throws IOException {
+                return inputStream.read();
+            }
+        });
+
+        // Mock DummyOutputStream
+        ServletOutputStream outputStreamMock = Mockito.mock(ServletOutputStream.class);
+
+        // Mock HttpServletResponse
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        Mockito.when(response.getOutputStream()).thenReturn(outputStreamMock);
+
+        // Capture request and parameters
+        ArgumentCaptor<MessageContext<SAMLObject>> contextArgumentCaptor = ArgumentCaptor.forClass(MessageContext.class);
+
+        // Spy test class to capture output
+        LogoutRequestHandler logoutRequestHandler = Mockito.spy(new LogoutRequestHandler());
+
+        // Action
+        logoutRequestHandler.handleSOAP(request, response);
+
+        // Verification
+        Mockito.verify(session).invalidate();
+        Mockito.verify(outputStreamMock).flush(); //Verify that something is sent to the IdP
+        Mockito.verify(logoutRequestHandler).sendSOAP(Mockito.eq(response), contextArgumentCaptor.capture());
+
+        // Verify that response is for IDP and from SP
+        LogoutResponse logoutResponse = logoutRequestHandler.getSamlObject(contextArgumentCaptor.getAllValues().get(0), LogoutResponse.class);
+
+        Assertions.assertTrue(logoutResponse.isSigned());
+
+        Assertions.assertEquals(StatusCode.SUCCESS, logoutResponse.getStatus().getStatusCode().getValue());
+        Assertions.assertEquals(TestConstants.SP_ENTITY_ID, logoutResponse.getIssuer().getValue());
+        Assertions.assertEquals(TestConstants.IDP_LOGOUT_RESPONSE_URL, logoutResponse.getDestination());
     }
 
     @DisplayName("Test that an IdP can safely request a logout of a user thas is not logged in")

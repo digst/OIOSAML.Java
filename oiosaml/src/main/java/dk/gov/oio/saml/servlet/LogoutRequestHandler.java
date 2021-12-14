@@ -83,9 +83,11 @@ public class LogoutRequestHandler extends SAMLHandler {
                 .withAuthnAttribute("ASSERTION_ID", (null != assertion)? assertion.getID():"")
                 .withAuthnAttribute("REQUEST", isAuthenticated(httpServletRequest) ? "VALID":"INVALID"));
 
-        // TODO: This should invalidate the actual OIOSAML session
+        // Invalidate users session
 
-        // Invalidate SP users session
+        // TODO: This should invalidate the OIOSAML session (missing in current implementation)
+
+        // Invalidate current http session - remove all data
         httpServletRequest.getSession().invalidate();
 
         return authenticated;
@@ -209,7 +211,7 @@ public class LogoutRequestHandler extends SAMLHandler {
 
     private boolean isAuthenticated(HttpServletRequest httpServletRequest) {
 
-        // TODO: This should return true if there is an actual OIOSAML session
+        // TODO: This should return true if there is an actual OIOSAML session (missing in current implementation)
 
         return "true".equals(httpServletRequest.getSession().getAttribute(Constants.SESSION_AUTHENTICATED));
     }
@@ -221,7 +223,7 @@ public class LogoutRequestHandler extends SAMLHandler {
 
     private String getUserSessionId(HttpServletRequest httpServletRequest) {
 
-        // TODO: This should return an actual OIOSAML session id
+        // TODO: This should return an actual OIOSAML session id (missing in current implementation)
 
         HttpSession session = httpServletRequest.getSession();
         return session.getId();
