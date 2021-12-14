@@ -213,13 +213,13 @@ public class DispatcherServlet extends HttpServlet {
             } else {
                 samlHandler.handlePost(req, res);
             }
-		}
-		catch (ExternalException | InternalException e) {
-        	log.error("Unexpected error during SAML processing", e);
-        	
-        	ErrorHandler.handle(req, res, ERROR_TYPE.EXCEPTION, e.getMessage());
-        	return;
-		}
+        }
+        catch (ExternalException | InternalException e) {
+            log.error("Unexpected error during SAML processing", e);
+            
+            ErrorHandler.handle(req, res, ERROR_TYPE.EXCEPTION, e.getMessage());
+            return;
+        }
     }
 
     @Override
