@@ -2,6 +2,10 @@
 <web-app id="WebApp_ID" version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" >
     <display-name>OIOSAML3-Demo</display-name>
 
+    <listener>
+        <listener-class>dk.gov.oio.saml.session.SessionDestroyListener</listener-class>
+    </listener>
+
     <servlet>
         <servlet-name>DispatcherServlet</servlet-name>
         <servlet-class>

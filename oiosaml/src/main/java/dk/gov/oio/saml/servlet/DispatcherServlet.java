@@ -293,6 +293,8 @@ public class DispatcherServlet extends HttpServlet {
                         .setAuditRequestAttributePort(config.get(Constants.SP_AUDIT_ATTRIBUTE_PORT))
                         .setAuditRequestAttributeServiceProviderUserId(config.get(Constants.SP_AUDIT_ATTRIBUTE_USER_ID))
                         .setAuditRequestAttributeSessionId(config.get(Constants.SP_AUDIT_ATTRIBUTE_SESSION_ID))
+                        .setSessionHandlerFactoryClassName(config.get(Constants.SP_SESSION_HANDLER_FACTORY_CLASSNAME))
+                        .setSessionHandlerJndiName(config.get(Constants.SP_SESSION_HANDLER_JNDI_NAME))
                         .build();
 
                 handleOptionalValues(config, configuration);

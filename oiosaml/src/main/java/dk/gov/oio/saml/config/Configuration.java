@@ -21,6 +21,8 @@ public class Configuration {
     private String auditRequestAttributePort; // Replace IP in audit request with value from attribute [protocol:name]
     private String auditRequestAttributeSessionId; // Replace SessionId in audit request with value from attribute [protocol:name]
     private String auditRequestAttributeServiceProviderUserId; // Replace ServiceProviderUserId in audit request with value from attribute [protocol:name]
+    private String sessionHandlerFactoryClassName; // Class name of the session handler factory implementation
+    private String sessionHandlerJndiName; // JNDI name for the JNDI session handler factory
     private boolean validationEnabled = true;
     private boolean isAssuranceLevelAllowed = false;
     private int minimumAssuranceLevel = 3;
@@ -356,6 +358,22 @@ public class Configuration {
         this.auditRequestAttributeServiceProviderUserId = auditRequestAttributeServiceProviderUserId;
     }
 
+    public String getSessionHandlerFactoryClassName() {
+        return sessionHandlerFactoryClassName;
+    }
+
+    public void setSessionHandlerFactoryClassName(String sessionHandlerFactoryClassName) {
+        this.sessionHandlerFactoryClassName = sessionHandlerFactoryClassName;
+    }
+
+    public String getSessionHandlerJndiName() {
+        return sessionHandlerJndiName;
+    }
+
+    public void setSessionHandlerJndiName(String sessionHandlerJndiName) {
+        this.sessionHandlerJndiName = sessionHandlerJndiName;
+    }
+
     // Configuration builder for mandatory fields
     public static class Builder {
         private String spEntityID;
@@ -377,6 +395,8 @@ public class Configuration {
         private String auditRequestAttributePort;
         private String auditRequestAttributeSessionId;
         private String auditRequestAttributeServiceProviderUserId;
+        private String sessionHandlerFactoryClassName;
+        private String sessionHandlerJndiName;
 
         public Configuration build() throws InternalException {
             if (StringUtil.isEmpty(spEntityID)) {
@@ -428,6 +448,8 @@ public class Configuration {
             configuration.auditRequestAttributePort = StringUtil.defaultIfEmpty(this.auditRequestAttributePort, "request:remotePort");
             configuration.auditRequestAttributeSessionId = StringUtil.defaultIfEmpty(this.auditRequestAttributeSessionId, "request:remoteUser");
             configuration.auditRequestAttributeServiceProviderUserId = StringUtil.defaultIfEmpty(this.auditRequestAttributeServiceProviderUserId, "request:sessionId");
+            configuration.sessionHandlerFactoryClassName = StringUtil.defaultIfEmpty(this.sessionHandlerFactoryClassName, "dk.gov.oio.saml.session.inmemory.InMemorySessionHandlerFactory");
+            configuration.sessionHandlerJndiName = StringUtil.defaultIfEmpty(this.sessionHandlerJndiName, null);
 
             return configuration;
         }
@@ -526,6 +548,17 @@ public class Configuration {
             this.auditRequestAttributeServiceProviderUserId=auditRequestAttributeServiceProviderUserId;
             return this;
         }
+
+        public Builder setSessionHandlerFactoryClassName(String sessionHandlerFactoryClassName) {
+            this.sessionHandlerFactoryClassName=sessionHandlerFactoryClassName;
+            return this;
+        }
+
+        public Builder setSessionHandlerJndiName(String sessionHandlerJndiName) {
+            this.sessionHandlerJndiName=sessionHandlerJndiName;
+            return this;
+        }
+
     }
 
     public boolean isAssuranceLevelSufficient(String value) {

@@ -49,12 +49,7 @@ public class AuditService {
         }
 
         public String toJSON() {
-            return auditMap
-                    .entrySet()
-                    .stream()
-                    .map(entry -> String.format("\"%s\":\"%s\"", entry.getKey(), StringUtil.jsonEscape(entry.getValue())))
-                    .collect(Collectors
-                            .joining(",", "{", "}"));
+            return StringUtil.map2json(auditMap);
         }
     }
 

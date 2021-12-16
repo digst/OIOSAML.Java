@@ -35,13 +35,10 @@ import dk.gov.oio.saml.util.SamlHelper;
 public class AssertionWrapper implements Serializable {
     private static final Logger log = LoggerFactory.getLogger(AssertionWrapper.class);
     private static final long serialVersionUID = -338227958970338958L;
-    private String assertion;
+    private Assertion assertion;
+    private String assertionString;
     private String id;
-    private String issuer;
     private String sessionIndex;
-    private NSISLevel nsisLevel;
-    private String assuranceLevel;
-    private String subjectNameId;
     private List<String> audiences;
     private String authnContextClassRef;
     private PrivilegeList privilegeList;
@@ -50,14 +47,17 @@ public class AssertionWrapper implements Serializable {
     private DateTime confirmationTime;
     private DateTime conditionTimeNotBefore;
     private DateTime conditionTimeNotOnOrAfter;
-    private String signingCredentialEntityId;
 
     public AssertionWrapper(Assertion assertion) throws InternalException {
+
         // getAssertion()
+        this.assertion = assertion;
+
+        // getAssertionAsString()
         AssertionMarshaller marshaller = new AssertionMarshaller();
         try {
             Element element = marshaller.marshall(assertion);
-            this.assertion = StringUtil.elementToString(element);
+            this.assertionString = StringUtil.elementToString(element);
         }
         catch (MarshallingException e) {
             throw new InternalException(e);
@@ -68,25 +68,6 @@ public class AssertionWrapper implements Serializable {
         if (attributeStatements != null && attributeStatements.size() == 1) {
             AttributeStatement attributeStatement = attributeStatements.get(0);
             this.attributeValues = SamlHelper.extractAttributeValues(attributeStatement);
-        }
-
-        // getNSISLevel()
-        NSISLevel level = NSISLevel.NONE;
-        if (attributeValues != null) {
-            String value = attributeValues.get(Constants.LOA);
-            level = NSISLevel.getNSISLevelFromAttributeValue(value, NSISLevel.NONE);
-            this.assuranceLevel = attributeValues.get(Constants.ASSURANCE_LEVEL); // NULL is acceptable
-        }
-        this.nsisLevel = level;
-
-        // getIssuer()
-        Issuer issuerObj = assertion.getIssuer();
-        this.issuer = issuerObj != null ? issuerObj.getValue() : null;
-
-        // getSubjectNameID()
-        Subject subject = assertion.getSubject();
-        if (subject != null && subject.getNameID() != null) {
-            subjectNameId = subject.getNameID().getValue();
         }
 
         Conditions conditions = assertion.getConditions();
@@ -155,22 +136,18 @@ public class AssertionWrapper implements Serializable {
                 this.privilegeList = OIOBPPUtil.parse(attributeValue);
             }
         }
-
-        // getSigningCredentialEntityId()
-        if (null != assertion.getSignature() && null != assertion.getSignature().getSigningCredential()) {
-            this.signingCredentialEntityId = assertion.getSignature().getSigningCredential().getEntityId();
-        }
-
-        // getID()
-        this.id = assertion.getID();
     }
 
-    public String getAssertion() {
-        return assertion;
+    public String getAssertionAsString() {
+        return assertionString;
     }
     
     public String getAssertionAsHtml() {
-        return htmlEscape(assertion);
+        return htmlEscape(assertionString);
+    }
+
+    public Assertion getAssertion() {
+        return this.assertion;
     }
     
     private static String htmlEscape(String input) {
@@ -204,19 +181,27 @@ public class AssertionWrapper implements Serializable {
     }
     
     public NSISLevel getNsisLevel() {
-        return nsisLevel;
+        if (attributeValues != null) {
+            String value = attributeValues.get(Constants.LOA);
+            return NSISLevel.getNSISLevelFromAttributeValue(value, NSISLevel.NONE);
+        }
+        return NSISLevel.NONE;
     }
 
     public String getAssuranceLevel() {
-        return assuranceLevel;
+        if (attributeValues != null) {
+            return attributeValues.get(Constants.ASSURANCE_LEVEL); // NULL is acceptable
+        }
+        return null;
     }
 
     public String getID() {
-        return id;
+        return this.assertion.getID();
     }
 
     public String getIssuer() {
-        return issuer;
+        Issuer issuerObj = assertion.getIssuer();
+        return issuerObj != null ? issuerObj.getValue() : null;
     }
 
     public String getSessionIndex() {
@@ -224,7 +209,11 @@ public class AssertionWrapper implements Serializable {
     }
 
     public String getSubjectNameId() {
-        return subjectNameId;
+        Subject subject = assertion.getSubject();
+        if (subject != null && subject.getNameID() != null) {
+            return subject.getNameID().getValue();
+        }
+        return null;
     }
 
     public List<String> getAudiences() {
@@ -260,11 +249,14 @@ public class AssertionWrapper implements Serializable {
     }
 
     public String getSigningCredentialEntityId() {
-        return signingCredentialEntityId;
+        if (null != assertion.getSignature() && null != assertion.getSignature().getSigningCredential()) {
+            return assertion.getSignature().getSigningCredential().getEntityId();
+        }
+        return null;
     }
 
     @Override
     public String toString() {
-        return String.format("AssertionWrapper{assertion='%s'}", assertion);
+        return String.format("AssertionWrapper{assertion='%s'}", assertionString);
     }
 }

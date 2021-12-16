@@ -109,6 +109,7 @@ public class AuditRequestUtil {
                 .withAuthnAttribute("IP", getAttributeFromRequest(request, OIOSAML3Service.getConfig().getAuditRequestAttributeIP(), request.getRemoteAddr()))
                 .withAuthnAttribute("PORT", getAttributeFromRequest(request, OIOSAML3Service.getConfig().getAuditRequestAttributePort(), String.valueOf(request.getRemotePort())))
                 .withAuthnAttribute("SESSION_ID", getAttributeFromRequest(request, OIOSAML3Service.getConfig().getAuditRequestAttributeSessionId(), request.getSession().getId()))
+                .withAuthnAttribute("HTTP_SESSION_ID", request.getSession().getId())
                 .withAuthnAttribute("REQUESTED_SESSION_ID", request.getRequestedSessionId())
                 .withAuthnAttribute("USER", getAttributeFromRequest(request, OIOSAML3Service.getConfig().getAuditRequestAttributeServiceProviderUserId(), request.getRemoteUser()))
                 .withAuthnAttribute("USER-AGENT", getAttributeFromRequest(request, "header:User-Agent",

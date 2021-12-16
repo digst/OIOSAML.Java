@@ -1,12 +1,20 @@
 package dk.gov.oio.saml.util;
 
+import dk.gov.oio.saml.oiobpp.OIOBPPUtil;
+import dk.gov.oio.saml.oiobpp.ObjectFactory;
+import dk.gov.oio.saml.oiobpp.PrivilegeList;
 import org.w3c.dom.Element;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.xml.bind.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Utility class related to string operations in the OIOSAML library.
@@ -110,7 +118,7 @@ public class StringUtil {
         return sb.toString();
     }
 
-    /**
+   /**
      * Check if input string is empty
      * @param input any string
      * @return true if input string is null, empty or only contain whitespaces
@@ -142,5 +150,87 @@ public class StringUtil {
             return defaultString;
         }
         return input;
+    }
+
+    /**
+     * Convert an input map into a JSON string
+     * @param map input map
+     * @return string representation of the input map
+     */
+    public static String map2json(Map<String, String> map) {
+        return map.entrySet()
+                .stream()
+                .map(entry -> String.format("\"%s\":\"%s\"", entry.getKey(), StringUtil.jsonEscape(entry.getValue())))
+                .collect(Collectors
+                        .joining(",", "{", "}"));
+    }
+
+    /**
+     * Convert an input map into a property formatted string
+     * @param map input map
+     * @return string representation of the input map
+     */
+    public static String map2properties(Map<String, String> map) {
+        return map.entrySet()
+                .stream()
+                .map(entry -> String.format("%s=%s", entry.getKey(), entry.getValue()))
+                .collect(Collectors
+                        .joining("\n"));
+    }
+
+    /**
+     * Convert a property formatted string into a map
+     * @param properties input string
+     * @return map representation of the input string
+     */
+    public static Map<String, String> properties2map(String properties) {
+        return Arrays.stream(properties.split("\n"))
+                .collect(Collectors.toMap(
+                        s -> s.substring(0,s.indexOf("=")-1),
+                        s -> s.substring(s.indexOf("="))));
+    }
+
+    /**
+     * Convert a list of strings into a newline separated string
+     * @param list input list
+     * @return newline separated string
+     */
+    public static String list2string(List<String> list) {
+        return list.stream().collect(Collectors.joining("\n"));
+    }
+
+    public static List<String> string2list(String input) {
+        if (input == null) {
+            return Arrays.asList();
+        }
+        return Arrays.asList(input.split("\n"));
+    }
+
+    /**
+     * Convert input string to PrivilegeList instance
+     * @param privilegeListString String matching Constants.PRIVILEGE_ATTRIBUTE from the opensaml assertion
+     * @return PrivilegeList instance
+     */
+    public static PrivilegeList string2PrivilegeList(String privilegeListString ) {
+        return OIOBPPUtil.parse(privilegeListString);
+    }
+
+    /**
+     * Convert PrivilegeList instance into output string
+     * @param privilegeList PrivilegeList instance
+     * @return String matching Constants.PRIVILEGE_ATTRIBUTE from the opensaml assertion
+     */
+    public static String privilegeList2String(PrivilegeList privilegeList) {
+        try {
+            StringWriter stringWriter = new StringWriter();
+            JAXBContext context = JAXBContext.newInstance(ObjectFactory.class);
+            Marshaller marsheller = context.createMarshaller();
+            marsheller.marshal(privilegeList, stringWriter);
+
+            return new String(Base64.getEncoder().encode(stringWriter.toString().getBytes(Charset.forName("UTF-8"))));
+        }
+        catch (Exception ex) {
+            return null;
+        }
     }
 }

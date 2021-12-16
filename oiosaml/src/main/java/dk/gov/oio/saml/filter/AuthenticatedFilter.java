@@ -15,6 +15,7 @@ import javax.servlet.http.HttpSession;
 
 import dk.gov.oio.saml.config.Configuration;
 import dk.gov.oio.saml.service.OIOSAML3Service;
+import dk.gov.oio.saml.session.SessionHandler;
 import dk.gov.oio.saml.util.*;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.slf4j.Logger;
@@ -75,9 +76,10 @@ public class AuthenticatedFilter implements Filter {
         
         log.debug("AuthenticatedFilter invoked by endpoint: '{}{}'", req.getContextPath(), req.getServletPath());
 
-        HttpSession session = req.getSession();
-
         try {
+            HttpSession session = req.getSession();
+            SessionHandler sessionHandler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
+
             // default: not logged in, and no authenticated NSIS level
             boolean authenticated = false;
             NSISLevel authenticatedNsisLevel = tryExtractNSISLevel(session, NSISLevel.NONE);
@@ -176,7 +178,7 @@ public class AuthenticatedFilter implements Filter {
 
     @Override
     public void destroy() {
-        ;
+        OIOSAML3Service.getSessionHandlerFactory().close();
     }
 
     private void removeAssertionFromThreadLocal() {

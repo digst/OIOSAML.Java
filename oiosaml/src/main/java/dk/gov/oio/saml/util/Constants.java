@@ -53,6 +53,9 @@ public class Constants {
     public static final String SP_AUDIT_ATTRIBUTE_PORT = "oiosaml.servlet.audit.logger.attribute.port";
     public static final String SP_AUDIT_ATTRIBUTE_USER_ID = "oiosaml.servlet.audit.logger.attribute.userid";
     public static final String SP_AUDIT_ATTRIBUTE_SESSION_ID = "oiosaml.servlet.audit.logger.attribute.sessionId";
+    public static final String SP_SESSION_HANDLER_FACTORY_CLASSNAME ="oiosaml.servlet.session.handler.factory";
+    public static final String SP_SESSION_HANDLER_JNDI_NAME ="oiosaml.servlet.session.handler.jdni.name";
+
 
     // Configuration constants for revocation check settings
     public static final String CRL_CHECK_ENABLED = "oiosaml.servlet.revocation.crl.check.enabled";
