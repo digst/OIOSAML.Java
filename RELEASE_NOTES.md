@@ -1,6 +1,6 @@
 # OIO SAML 3 (Artifact ID: oiosaml3.java)
 
-## 3.2.0 (planned
+## 3.2.0 (planned)
 - CVE-2021-45105: Update log4j-core to version 2.17.0
 
 ## 3.1.0
