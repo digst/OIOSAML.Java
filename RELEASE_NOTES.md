@@ -3,9 +3,9 @@
 ## 3.2.0 (planned)
 - NLRFIM-120: Support SOAP bindings in Java OIO SAML 3
 - NLRFIM-121: Session handling and storage in Java OIO SAML 3
+- CVE-2021-45105, CVE-2021-44832: Update log4j-core to version 2.17.1
 
-## 3.1.0 (planned)
-- CVE-2021-45105: Update log4j-core to version 2.17.0
+## 3.1.0
 - CVE-2021-44228: Update log4j-core to version 2.16.0
 - NLRFIM-109: Logging for Java OIO SAML 3
 
