@@ -37,6 +37,7 @@ public interface SessionHandlerFactory {
     /**
      * Get a new session handler.
      * @return session handler instance
+     * @throws InternalException on failure to get session handler
      */
     SessionHandler getHandler() throws InternalException;
 
@@ -50,6 +51,7 @@ public interface SessionHandlerFactory {
     /**
      * Configure the factory. This will be called before any calls are made to {@link #getHandler()}.
      * @param config OIOSAML configuration
+     * @throws InitializationException on failure to initialize factory
      */
     void configure(Configuration config) throws InitializationException;
 }

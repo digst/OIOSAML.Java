@@ -29,6 +29,7 @@ public class AuditService {
 
     /**
      * Audit log a message, e.g. AuthnRequest or Assertion from SAML
+     * @param auditBuilder audit log statement
      */
     public void auditLog(Builder auditBuilder) {
         if (null != auditBuilder) {

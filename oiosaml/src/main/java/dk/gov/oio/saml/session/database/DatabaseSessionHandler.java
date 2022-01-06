@@ -28,6 +28,7 @@ import dk.gov.oio.saml.oiobpp.ObjectFactory;
 import dk.gov.oio.saml.oiobpp.PrivilegeList;
 import dk.gov.oio.saml.session.AssertionWrapper;
 import dk.gov.oio.saml.session.AuthnRequestWrapper;
+import dk.gov.oio.saml.session.LogoutRequestWrapper;
 import dk.gov.oio.saml.session.SessionHandler;
 import dk.gov.oio.saml.util.InternalException;
 import dk.gov.oio.saml.util.StringUtil;
@@ -128,7 +129,7 @@ public class DatabaseSessionHandler implements SessionHandler {
      * @param request {@link LogoutRequest}
      */
     @Override
-    public void storeLogoutRequest(HttpSession session, LogoutRequest request) {
+    public void storeLogoutRequest(HttpSession session, LogoutRequestWrapper request) {
 
     }
 
@@ -238,7 +239,7 @@ public class DatabaseSessionHandler implements SessionHandler {
      * @return LogoutRequest from current session
      */
     @Override
-    public LogoutRequest getLogoutRequest(HttpSession session) {
+    public LogoutRequestWrapper getLogoutRequest(HttpSession session) {
         return null;
     }
 
@@ -251,6 +252,28 @@ public class DatabaseSessionHandler implements SessionHandler {
     @Override
     public boolean isAuthenticated(HttpSession session) {
         return false;
+    }
+
+    /**
+     * Get OIOSAML session ID for current session
+     *
+     * @param session HTTP session
+     * @return OIOSAML session ID (for audit logging)
+     */
+    @Override
+    public String getSessionId(HttpSession session) {
+        return null;
+    }
+
+    /**
+     * Get OIOSAML session ID for session with session index
+     *
+     * @param sessionIndex Session index to lookup session ID for
+     * @return OIOSAML session ID (for audit logging)
+     */
+    @Override
+    public String getSessionId(String sessionIndex) {
+        return null;
     }
 
     /**

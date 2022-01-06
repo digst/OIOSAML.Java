@@ -3,13 +3,24 @@ package dk.gov.oio.saml.util;
 import dk.gov.oio.saml.oiobpp.OIOBPPUtil;
 import dk.gov.oio.saml.oiobpp.ObjectFactory;
 import dk.gov.oio.saml.oiobpp.PrivilegeList;
+import net.shibboleth.utilities.java.support.codec.Base64Support;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.core.xml.io.UnmarshallingException;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -29,7 +40,7 @@ public class StringUtil {
      * @return Context path + page (URL)
      */
     public static String getUrl(HttpServletRequest request, String page) {
-        String url = (request.getContextPath() != null) ? request.getContextPath() : "/";
+        String url = StringUtil.isNotEmpty(request.getContextPath()) ? request.getContextPath() : "/";
 
         int slashCount = (url.endsWith("/")) ? 1 : 0;
         slashCount += (page != null && page.startsWith("/")) ? 1 : 0;
@@ -73,6 +84,43 @@ public class StringUtil {
         }
         catch (Exception ex) {
             return null;
+        }
+    }
+
+    /**
+     * Convert OPENSAML object to base64 encoded XML string
+     * @param xmlObject OPENSAML object
+     * @return Base64 encoded XML string
+     * @throws InternalException on serialization failure
+     */
+    public static String XMLObjectToBase64(XMLObject xmlObject) throws InternalException {
+        try {
+            Element element = SamlHelper.marshallObject(xmlObject);
+            return Base64.getEncoder().encodeToString(elementToString(element).getBytes(StandardCharsets.UTF_8));
+        } catch (MarshallingException e) {
+            throw new InternalException("Unable to parse XML object to string",e);
+        }
+    }
+
+    /**
+     * Convert base64 encoded XML string to OPENSAML object
+     * @param base64  Base64 encoded XML string representation of an OPENSAML object
+     * @return OPENSAML object
+     * @throws InternalException on serialization failure
+     */
+    public static XMLObject base64ToXMLObject(String base64) throws InternalException {
+        try {
+            byte[] decodedInput = Base64.getDecoder().decode(base64.getBytes(StandardCharsets.UTF_8));
+
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setNamespaceAware(true);
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document doc = db.parse(new ByteArrayInputStream(decodedInput));
+
+            Element element = (Element) doc.getElementsByTagNameNS("http://www.w3.org/2001/04/xmlenc#", "EncryptedData").item(0);
+            return SamlHelper.unmarshallObject(element);
+        } catch (UnmarshallingException|ParserConfigurationException|IOException|SAXException e) {
+            throw new InternalException("Unable to parse input to XML object",e);
         }
     }
 

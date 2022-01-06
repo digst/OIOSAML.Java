@@ -2,9 +2,13 @@ package dk.gov.oio.saml.servlet;
 
 import dk.gov.oio.saml.model.NSISLevel;
 import dk.gov.oio.saml.service.AuthnRequestService;
+import dk.gov.oio.saml.service.OIOSAML3Service;
+import dk.gov.oio.saml.session.AssertionWrapper;
 import dk.gov.oio.saml.session.AuthnRequestWrapper;
+import dk.gov.oio.saml.session.SessionHandler;
 import dk.gov.oio.saml.util.Constants;
 import dk.gov.oio.saml.util.IdpUtil;
+import dk.gov.oio.saml.util.InternalException;
 import dk.gov.oio.saml.util.TestConstants;
 import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
@@ -13,8 +17,10 @@ import javax.servlet.http.HttpSession;
 import net.shibboleth.utilities.java.support.codec.Base64Support;
 import net.shibboleth.utilities.java.support.xml.SerializeSupport;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.opensaml.core.xml.util.XMLObjectSupport;
 import org.opensaml.messaging.context.MessageContext;
@@ -23,6 +29,14 @@ import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.w3c.dom.Element;
 
 public class AssertionHandlerTest {
+
+    private HttpSession session;
+
+    @BeforeEach
+    public void beforeEach() throws InternalException {
+        session = Mockito.mock(HttpSession.class);
+        Mockito.when(session.getId()).thenReturn("TEST_SESSION_ID");
+    }
 
     @DisplayName("Test that handler will accept a valid assertion")
     @Test
@@ -45,10 +59,9 @@ public class AssertionHandlerTest {
         AuthnRequestWrapper wrapper = new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL);
 
         // mock session with state: not logged in at any NSIS level
-        HttpSession session = Mockito.mock(HttpSession.class);
-        Mockito.when(session.getAttribute(Constants.SESSION_NSIS_LEVEL)).thenReturn(null);
-        Mockito.when(session.getAttribute(Constants.SESSION_AUTHENTICATED)).thenReturn(null);
-        Mockito.when(session.getAttribute(Constants.SESSION_AUTHN_REQUEST)).thenReturn(wrapper);
+        SessionHandler sessionHandler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
+        Mockito.when(sessionHandler.getAuthnRequest(session)).thenReturn(wrapper);
+
 
         // Mock HttpServletRequest
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
@@ -61,11 +74,16 @@ public class AssertionHandlerTest {
         // Mock HttpServletResponse
         HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
 
+        // Capture the assertion
+        ArgumentCaptor<AssertionWrapper> assertionWrapperArgumentCaptor = ArgumentCaptor.forClass(AssertionWrapper.class);
+
         AssertionHandler assertionHandler = new AssertionHandler();
         assertionHandler.handlePost(request, response);
 
         Mockito.verify(response).sendRedirect("/"); // Verify that handler redirected
-        Mockito.verify(session).setAttribute(Constants.SESSION_NSIS_LEVEL, NSISLevel.SUBSTANTIAL); // Verify that NSISLevel was set on session
+        Mockito.verify(sessionHandler).storeAssertion(Mockito.eq(session), assertionWrapperArgumentCaptor.capture());
+
+        Assertions.assertEquals(assertionWrapperArgumentCaptor.getValue().getNsisLevel(), NSISLevel.SUBSTANTIAL);
     }
     
     @DisplayName("Test that handler will reject am invalid assertion")
@@ -89,10 +107,8 @@ public class AssertionHandlerTest {
         AuthnRequestWrapper wrapper = new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL);
 
         // mock session with state: not logged in at any NSIS level
-        HttpSession session = Mockito.mock(HttpSession.class);
-        Mockito.when(session.getAttribute(Constants.SESSION_NSIS_LEVEL)).thenReturn(null);
-        Mockito.when(session.getAttribute(Constants.SESSION_AUTHENTICATED)).thenReturn(null);
-        Mockito.when(session.getAttribute(Constants.SESSION_AUTHN_REQUEST)).thenReturn(wrapper);
+        SessionHandler sessionHandler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
+        Mockito.when(sessionHandler.getAuthnRequest(session)).thenReturn(wrapper);
 
         // Mock HttpServletRequest
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
@@ -112,7 +128,7 @@ public class AssertionHandlerTest {
             assertionHandler.handlePost(request, response);
         });
 
-        // Verify that NSISLevel was NOT set on session
-        Mockito.verify(session, Mockito.times(0)).setAttribute(Mockito.eq(Constants.SESSION_NSIS_LEVEL), Mockito.any());
+        Mockito.verify(sessionHandler, Mockito.never()).storeAssertion(Mockito.eq(session), Mockito.any(AssertionWrapper.class));
+        Assertions.assertFalse(sessionHandler.isAuthenticated(session));
     }    
 }

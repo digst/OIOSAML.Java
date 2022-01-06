@@ -144,6 +144,14 @@ public class DispatcherServlet extends HttpServlet {
         if (StringUtil.isNotEmpty(value)) {
             configuration.setSignatureAlgorithm(value);
         }
+
+        value = config.get(Constants.SP_SESSION_HANDLER_NUM_TRACKED_ASSERTIONIDS);
+        try {
+            configuration.setSessionHandlerNumTrackedSessionIds(Integer.parseInt(StringUtil.defaultIfEmpty(value,"10000")));
+        }
+        catch (Exception ex) {
+            log.error("Invalid value {} = {}", Constants.SP_SESSION_HANDLER_NUM_TRACKED_ASSERTIONIDS, value, ex);
+        }
     }
 
     @Override

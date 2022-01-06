@@ -3,17 +3,9 @@ package dk.gov.oio.saml.util;
 public class Constants {
 
     // Session constants
-    public static final String SESSION_NAME_ID = "oiosaml.nameid.value";
-    public static final String SESSION_NAME_ID_FORMAT = "oiosaml.nameid.format";
-    public static final String SESSION_NSIS_LEVEL = "oiosaml.nsis.level";
-    public static final String SESSION_ASSURANCE_LEVEL = "oiosaml.assurance.level";
     public static final String SESSION_REQUESTED_PATH = "oiosaml.request.path";
-    public static final String SESSION_AUTHN_REQUEST = "oiosaml.authn.request";
-    public static final String SESSION_AUTHENTICATED = "oiosaml.authenticated";
-    public static final String SESSION_ASSERTION = "oiosaml.assertion";
     public static final String SESSION_ERROR_TYPE = "oiosaml.error.type";
     public static final String SESSION_ERROR_MESSAGE = "oiosaml.error.message";
-    public static final String SESSION_SESSION_INDEX = "oiosaml.session.index";
 
     // Configuration constants for DispatcherServlet (required)
     public static final String SP_ENTITY_ID = "oiosaml.servlet.entityid";
@@ -55,7 +47,7 @@ public class Constants {
     public static final String SP_AUDIT_ATTRIBUTE_SESSION_ID = "oiosaml.servlet.audit.logger.attribute.sessionId";
     public static final String SP_SESSION_HANDLER_FACTORY_CLASSNAME ="oiosaml.servlet.session.handler.factory";
     public static final String SP_SESSION_HANDLER_JNDI_NAME ="oiosaml.servlet.session.handler.jdni.name";
-
+    public static final String SP_SESSION_HANDLER_NUM_TRACKED_ASSERTIONIDS ="oiosaml.servlet.session.handler.inmemory.numusedassertionids";
 
     // Configuration constants for revocation check settings
     public static final String CRL_CHECK_ENABLED = "oiosaml.servlet.revocation.crl.check.enabled";

@@ -37,7 +37,6 @@ public class AssertionWrapper implements Serializable {
     private static final long serialVersionUID = -338227958970338958L;
     private Assertion assertion;
     private String assertionString;
-    private String id;
     private String sessionIndex;
     private List<String> audiences;
     private String authnContextClassRef;
@@ -102,19 +101,20 @@ public class AssertionWrapper implements Serializable {
 
         if (assertion.getAuthnStatements() != null) {
             if (assertion.getAuthnStatements().size() > 0) {
+                // getSessionIndex()
+                for (AuthnStatement authnStatement : assertion.getAuthnStatements()) {
+                    if (StringUtil.isNotEmpty(authnStatement.getSessionIndex())) {
+                        this.sessionIndex = authnStatement.getSessionIndex();
+                    }
+                }
+
                 // We only look into the first AuthnStatement
                 AuthnStatement authnStatement = assertion.getAuthnStatements().get(0);
-
-                // getSessionIndex()
-                this.sessionIndex = authnStatement.getSessionIndex();
 
                 // isSessionExpired()
                 boolean sessionExpired = false;
                 if (authnStatement.getSessionNotOnOrAfter() != null) {
                     sessionExpired = authnStatement.getSessionNotOnOrAfter().isBeforeNow();
-                }
-                else {
-                    sessionExpired = false;
                 }
                 this.sessionExpired = sessionExpired;
 
@@ -179,7 +179,7 @@ public class AssertionWrapper implements Serializable {
 
         return escaped.toString();
     }
-    
+
     public NSISLevel getNsisLevel() {
         if (attributeValues != null) {
             String value = attributeValues.get(Constants.LOA);
@@ -212,6 +212,14 @@ public class AssertionWrapper implements Serializable {
         Subject subject = assertion.getSubject();
         if (subject != null && subject.getNameID() != null) {
             return subject.getNameID().getValue();
+        }
+        return null;
+    }
+
+    public String getSubjectNameIdFormat() {
+        Subject subject = assertion.getSubject();
+        if (subject != null && subject.getNameID() != null) {
+            return subject.getNameID().getFormat();
         }
         return null;
     }
@@ -254,6 +262,32 @@ public class AssertionWrapper implements Serializable {
         }
         return null;
     }
+
+    /*
+    // Set NSISLevel to what was provided by the Assertion
+        Map<String, String> attributeMap = SamlHelper.extractAttributeValues(assertion.getAttributeStatements().get(0));
+        String loa = attributeMap.get(Constants.LOA);
+        String assuranceLevel = attributeMap.get(Constants.ASSURANCE_LEVEL);
+        NSISLevel nsisLevel = NSISLevel.getNSISLevelFromAttributeValue(loa, NSISLevel.NONE);
+
+        session.setAttribute(Constants.SESSION_NSIS_LEVEL, nsisLevel);
+        if(assuranceLevel != null) {
+            session.setAttribute(Constants.SESSION_ASSURANCE_LEVEL, assuranceLevel);
+        }
+
+        session.setAttribute(Constants.SESSION_AUTHENTICATED, "true");
+        session.setAttribute(Constants.SESSION_SESSION_INDEX, getSessionIndex(assertion));
+
+
+        session.setAttribute(Constants.SESSION_ASSERTION, new AssertionWrapper(assertion));
+
+        NameID nameID = assertion.getSubject().getNameID();
+        session.setAttribute(Constants.SESSION_NAME_ID, nameID.getValue());
+        session.setAttribute(Constants.SESSION_NAME_ID_FORMAT, nameID.getFormat());
+     */
+
+
+
 
     @Override
     public String toString() {

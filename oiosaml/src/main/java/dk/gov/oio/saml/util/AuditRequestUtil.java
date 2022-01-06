@@ -2,6 +2,7 @@ package dk.gov.oio.saml.util;
 
 import dk.gov.oio.saml.audit.AuditService;
 import dk.gov.oio.saml.service.OIOSAML3Service;
+import dk.gov.oio.saml.session.SessionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,7 +102,8 @@ public class AuditRequestUtil {
      * @param description Descriptive name for the event which is audited
      * @return Builder for audit record
      */
-    public static AuditService.Builder createBasicAuditBuilder(HttpServletRequest request, String action, String description) {
+    public static AuditService.Builder createBasicAuditBuilder(HttpServletRequest request, String action, String description) throws InternalException {
+        SessionHandler handler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
         return new AuditService
                 .Builder()
                 .withAuthnAttribute("ACTION", action)
@@ -109,7 +111,7 @@ public class AuditRequestUtil {
                 .withAuthnAttribute("IP", getAttributeFromRequest(request, OIOSAML3Service.getConfig().getAuditRequestAttributeIP(), request.getRemoteAddr()))
                 .withAuthnAttribute("PORT", getAttributeFromRequest(request, OIOSAML3Service.getConfig().getAuditRequestAttributePort(), String.valueOf(request.getRemotePort())))
                 .withAuthnAttribute("SESSION_ID", getAttributeFromRequest(request, OIOSAML3Service.getConfig().getAuditRequestAttributeSessionId(), request.getSession().getId()))
-                .withAuthnAttribute("HTTP_SESSION_ID", request.getSession().getId())
+                .withAuthnAttribute("SP_SESSION_ID", handler.getSessionId(request.getSession()))
                 .withAuthnAttribute("REQUESTED_SESSION_ID", request.getRequestedSessionId())
                 .withAuthnAttribute("USER", getAttributeFromRequest(request, OIOSAML3Service.getConfig().getAuditRequestAttributeServiceProviderUserId(), request.getRemoteUser()))
                 .withAuthnAttribute("USER-AGENT", getAttributeFromRequest(request, "header:User-Agent",

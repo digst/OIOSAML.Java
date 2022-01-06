@@ -66,7 +66,7 @@ public class SessionDestroyListener implements HttpSessionListener {
                                 .Builder()
                                 .withAuthnAttribute("ACTION", "TIMEOUT")
                                 .withAuthnAttribute("DESCRIPTION", "SessionDestroyed")
-                                .withAuthnAttribute("HTTP_SESSION_ID", httpSessionEvent.getSession().getId())
+                                .withAuthnAttribute("SP_SESSION_ID", handler.getSessionId(httpSessionEvent.getSession()))
                                 .withAuthnAttribute("ASSERTION_ID", assertion.getID())
                                 .withAuthnAttribute("SUBJECT_NAME_ID", assertion.getSubjectNameId()));
 

@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import dk.gov.oio.saml.audit.AuditService;
+import dk.gov.oio.saml.session.SessionHandler;
 import dk.gov.oio.saml.util.*;
 import org.joda.time.DateTime;
 import org.opensaml.core.xml.io.MarshallingException;
@@ -86,7 +87,8 @@ public class AssertionHandler extends SAMLHandler {
         log.info("Incoming Response - ID:'{}' InResponseTo:'{}' Issuer:'{}' Status:'{}' IssueInstant:'{}' Destination:'{}'", response.getID(), response.getInResponseTo(), issuer, responseStatus, instant, response.getDestination());
 
         // Get AuthnRequest with matching ID (inResponseTo)
-        AuthnRequestWrapper authnRequest = (AuthnRequestWrapper) session.getAttribute(Constants.SESSION_AUTHN_REQUEST);
+        SessionHandler sessionHandler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
+        AuthnRequestWrapper authnRequest = sessionHandler.getAuthnRequest(httpServletRequest.getSession());
 
         if (authnRequest == null) {
             throw new InternalException("No AuthnRequest found on session");
@@ -104,7 +106,6 @@ public class AssertionHandler extends SAMLHandler {
                 .withAuthnAttribute("ASSERTION_ID", assertion.getID())
                 .withAuthnAttribute("IN_RESPONSE_TO", response.getInResponseTo())
                 .withAuthnAttribute("RESPONSE_STATUS", responseStatus)
-                .withAuthnAttribute("SESSION_INDEX", getSessionIndex(assertion))
                 .withAuthnAttribute("ISSUER", issuer)
                 .withAuthnAttribute("ISSUE_INSTANT", instant)
                 .withAuthnAttribute("DESTINATION", response.getDestination());
@@ -126,6 +127,7 @@ public class AssertionHandler extends SAMLHandler {
 
             auditBuilder
                     .withAuthnAttribute("RESULT", "VALID")
+                    .withAuthnAttribute("SESSION_INDEX", wrapper.getSessionIndex())
                     .withAuthnAttribute("SIGNATURE_REFERENCE", assertion.getSignatureReferenceID())
                     .withAuthnAttribute("SIGNATURE_ENTITY", wrapper.getSigningCredentialEntityId())
                     .withAuthnAttribute("ASSURANCE_LEVEL", wrapper.getAssuranceLevel())
@@ -141,31 +143,14 @@ public class AssertionHandler extends SAMLHandler {
             OIOSAML3Service.getAuditService().auditLog(auditBuilder);
         }
 
+        AssertionWrapper assertionWrapper = new AssertionWrapper(assertion);
+
+        sessionHandler.storeAssertion(session, assertionWrapper);
+
         OIOSAML3Service.getAuditService().auditLog(AuditRequestUtil
                 .createBasicAuditBuilder(httpServletRequest, "BSA7", "CreateSession")
-                .withAuthnAttribute("SP_SESSION_ID", session.getId())
+                .withAuthnAttribute("SP_SESSION_ID", sessionHandler.getSessionId(session))
                 .withAuthnAttribute("SP_SESSION_TIMEOUT", String.valueOf(session.getMaxInactiveInterval())));
-
-        // Set NSISLevel to what was provided by the Assertion
-        Map<String, String> attributeMap = SamlHelper.extractAttributeValues(assertion.getAttributeStatements().get(0));
-        String loa = attributeMap.get(Constants.LOA);
-        String assuranceLevel = attributeMap.get(Constants.ASSURANCE_LEVEL);
-        NSISLevel nsisLevel = NSISLevel.getNSISLevelFromAttributeValue(loa, NSISLevel.NONE);
-
-        session.setAttribute(Constants.SESSION_NSIS_LEVEL, nsisLevel);
-        if(assuranceLevel != null) {
-            session.setAttribute(Constants.SESSION_ASSURANCE_LEVEL, assuranceLevel);
-        }
-
-        session.setAttribute(Constants.SESSION_AUTHENTICATED, "true");
-        session.setAttribute(Constants.SESSION_SESSION_INDEX, getSessionIndex(assertion));
-
-
-        session.setAttribute(Constants.SESSION_ASSERTION, new AssertionWrapper(assertion));
-
-        NameID nameID = assertion.getSubject().getNameID();
-        session.setAttribute(Constants.SESSION_NAME_ID, nameID.getValue());
-        session.setAttribute(Constants.SESSION_NAME_ID_FORMAT, nameID.getFormat());
 
         // Redirect
         String attribute = Objects.toString(session.getAttribute(Constants.SESSION_REQUESTED_PATH),"");
@@ -179,17 +164,5 @@ public class AssertionHandler extends SAMLHandler {
                 .withAuthnAttribute("URL_REDIRECT",url));
 
         httpServletResponse.sendRedirect(url);
-    }
-
-    private String getSessionIndex(Assertion assertion) {
-        if (assertion.getAuthnStatements() != null && assertion.getAuthnStatements().size() > 0) {
-            for (AuthnStatement authnStatement : assertion.getAuthnStatements()) {
-                if (StringUtil.isNotEmpty(authnStatement.getSessionIndex())) {
-                    return authnStatement.getSessionIndex();
-                }
-            }
-        }
-
-        return null;
     }
 }

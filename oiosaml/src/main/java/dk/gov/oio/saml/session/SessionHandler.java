@@ -23,6 +23,11 @@
  */
 package dk.gov.oio.saml.session;
 
+import dk.gov.oio.saml.config.Configuration;
+import dk.gov.oio.saml.util.InternalException;
+import org.opensaml.core.config.InitializationException;
+import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.AuthnStatement;
 import org.opensaml.saml.saml2.core.LogoutRequest;
 
 import javax.servlet.http.HttpSession;
@@ -31,7 +36,7 @@ import javax.servlet.http.HttpSession;
  * Handle session state across requests and instances.
  *
  * <p>Due to SOAP Logout, it is not possible to store all state in the HTTP session. Instead, implementations of this interface handle session state,
- * primarily based on the HTTP session.<p>
+ * primarily based on the HTTP session.</p>
  *
  * <p>Implementations are expected to be thread-safe, and should not store any instance state, as a new instance will be created for
  * every request.</p>
@@ -43,22 +48,25 @@ public interface SessionHandler {
      * Set AuthnRequest on the current session
      * @param session HTTP session
      * @param request {@link AuthnRequestWrapper}
+     * @throws InternalException on failure to persist request
      */
-    void storeAuthnRequest(HttpSession session, AuthnRequestWrapper request);
+    void storeAuthnRequest(HttpSession session, AuthnRequestWrapper request) throws InternalException;
 
     /**
      * Set Assertion on the current session
      * @param session HTTP session
      * @param assertion {@link AssertionWrapper}
+     * @throws InternalException on failure to persist assertion
      */
-    void storeAssertion(HttpSession session, AssertionWrapper assertion);
+    void storeAssertion(HttpSession session, AssertionWrapper assertion) throws InternalException;
 
     /**
      * Set LogoutRequest on the current session
      * @param session HTTP session
-     * @param request {@link LogoutRequest}
+     * @param request {@link LogoutRequestWrapper}
+     * @throws InternalException on failure to persist request
      */
-    void storeLogoutRequest(HttpSession session, LogoutRequest request);
+    void storeLogoutRequest(HttpSession session, LogoutRequestWrapper request) throws InternalException;
 
     /**
      * Get AuthnRequest from the current session
@@ -86,14 +94,38 @@ public interface SessionHandler {
      * @param session HTTP session
      * @return LogoutRequest from current session
      */
-    LogoutRequest getLogoutRequest(HttpSession session);
+    LogoutRequestWrapper getLogoutRequest(HttpSession session);
 
     /**
      * Is current session authenticated
      * @param session HTTP session
      * @return true if current session is authenticated
      */
-    boolean isAuthenticated(HttpSession session);
+    default boolean isAuthenticated(HttpSession session) {
+        AuthnRequestWrapper authnRequestWrapper = getAuthnRequest(session);
+        if (null == authnRequestWrapper) {
+            return false;
+        }
+        AssertionWrapper assertionWrapper = getAssertion(session);
+        if (null == assertionWrapper) {
+            return false;
+        }
+        return !assertionWrapper.isSessionExpired();
+    };
+
+    /**
+     * Get OIOSAML session ID for current session
+     * @param session HTTP session
+     * @return OIOSAML session ID (for audit logging)
+     */
+    String getSessionId(HttpSession session);
+
+    /**
+     * Get OIOSAML session ID for session with session index
+     * @param sessionIndex Session index to lookup session ID for
+     * @return OIOSAML session ID (for audit logging)
+     */
+    String getSessionId(String sessionIndex);
 
     /**
      * Invalidate current session and assertion

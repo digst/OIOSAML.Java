@@ -69,6 +69,18 @@ public class AuthenticatedFilter implements Filter {
         }
     }
 
+    private boolean userNeedsAuthentication(HttpServletRequest req, SessionHandler sessionHandler, AssertionWrapper assertionWrapper) {
+        if (null == assertionWrapper || !sessionHandler.isAuthenticated(req.getSession())) {
+            log.debug("Unauthenticated session, Required NSIS Level: {}", requiredNsisLevel);
+            return true;
+        } else if (!isAssuranceSufficient(requiredNsisLevel, assertionWrapper.getNsisLevel(), assertionWrapper.getAssuranceLevel())) {
+            log.debug("Current NSIS Level on session: {}, Required NSIS Level: {}", assertionWrapper.getNsisLevel(), requiredNsisLevel);
+            return true;
+        }
+        log.debug("Authenticated session, NSIS Level: {}", requiredNsisLevel);
+        return false;
+    }
+
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
@@ -77,24 +89,11 @@ public class AuthenticatedFilter implements Filter {
         log.debug("AuthenticatedFilter invoked by endpoint: '{}{}'", req.getContextPath(), req.getServletPath());
 
         try {
-            HttpSession session = req.getSession();
             SessionHandler sessionHandler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
-
-            // default: not logged in, and no authenticated NSIS level
-            boolean authenticated = false;
-            NSISLevel authenticatedNsisLevel = tryExtractNSISLevel(session, NSISLevel.NONE);
-            String authenticatedAssuranceLevel = tryExtractAssuranceLevel(session);
-
-            // Get current authenticated and NSIS level states from session
-            Object attribute = session.getAttribute(Constants.SESSION_AUTHENTICATED);
-            if (attribute != null && "true".equals(attribute)) {
-                authenticated = true;
-            }
-
-            log.debug("Current NSIS Level on session: {}, Required NSIS Level: {}", authenticatedNsisLevel, requiredNsisLevel);
+            AssertionWrapper assertionWrapper = sessionHandler.getAssertion(req.getSession());
 
             // Is the user authenticated, and at the required level?
-            if (!authenticated || !isAssuranceSufficient(requiredNsisLevel, authenticatedNsisLevel, authenticatedAssuranceLevel)) {
+            if (userNeedsAuthentication(req, sessionHandler, assertionWrapper)) {
                 log.debug("Filter config: isPassive: {}, forceAuthn: {}", isPassive, forceAuthn);
 
                 AuthnRequestService authnRequestService = AuthnRequestService.getInstance();
@@ -117,7 +116,7 @@ public class AuthenticatedFilter implements Filter {
             }
             else {
                 try {
-                    putAssertionOnThreadLocal(session);
+                    putAssertionOnThreadLocal(req.getSession());
 
                     // User already authenticated to the correct level
                     chain.doFilter(req, res);
@@ -132,31 +131,6 @@ public class AuthenticatedFilter implements Filter {
 
             throw new ServletException(e);
         }
-    }
-
-    private NSISLevel tryExtractNSISLevel(HttpSession session, NSISLevel defaultValue) {
-        NSISLevel authenticatedNsisLevel = defaultValue;
-
-        Object attribute = session.getAttribute(Constants.SESSION_NSIS_LEVEL);
-        if (attribute != null) {
-            try {
-                authenticatedNsisLevel = (NSISLevel) attribute;
-            }
-            catch (Exception ex) {
-                log.warn("Unknown NSIS level on session: " + attribute);
-            }
-        }
-
-        return authenticatedNsisLevel;
-    }
-
-    private String tryExtractAssuranceLevel(HttpSession session) {
-        Object attribute = session.getAttribute(Constants.SESSION_ASSURANCE_LEVEL);
-        if(!(attribute instanceof String)) {
-            return null;
-        }
-
-        return (String) attribute;
     }
 
     private boolean isAssuranceSufficient(NSISLevel requiredNsisLevel, NSISLevel authenticatedNsisLevel, String authenticatedAssuranceLevel) {
@@ -185,10 +159,11 @@ public class AuthenticatedFilter implements Filter {
         AssertionWrapperHolder.clear();
     }
 
-    private void putAssertionOnThreadLocal(HttpSession session) {
-        Object assertionObject = session.getAttribute(Constants.SESSION_ASSERTION);
-        if (assertionObject != null && assertionObject instanceof AssertionWrapper) {
-            AssertionWrapperHolder.set((AssertionWrapper) assertionObject);
+    private void putAssertionOnThreadLocal(HttpSession session) throws InternalException {
+        SessionHandler sessionHandler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
+        AssertionWrapper assertion = sessionHandler.getAssertion(session);
+        if (assertion != null) {
+            AssertionWrapperHolder.set(assertion);
 
             if (log.isDebugEnabled()) {
                 log.debug("Saved Wrapped Assertion to ThreadLocal");
@@ -208,9 +183,10 @@ public class AuthenticatedFilter implements Filter {
         }
 
         // Save authnRequest on session
-        HttpSession session = req.getSession();
+        SessionHandler sessionHandler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
         AuthnRequestWrapper wrapper = new AuthnRequestWrapper((AuthnRequest) authnRequest.getMessage(), requiredNsisLevel);
-        session.setAttribute(Constants.SESSION_AUTHN_REQUEST, wrapper);
+
+        sessionHandler.storeAuthnRequest(req.getSession(), wrapper);
 
         log.info("Outgoing AuthnRequest - ID:'{}' Issuer:'{}' IssueInstant:'{}' Destination:'{}'", wrapper.getId(), wrapper.getIssuer(), wrapper.getIssueInstant(), wrapper.getDestination());
 

@@ -1,5 +1,6 @@
 package dk.gov.oio.saml.service;
 
+import dk.gov.oio.saml.session.LogoutRequestWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
@@ -37,7 +38,7 @@ public class LogoutResponseService {
         return;
     }
 
-    public static MessageContext<SAMLObject> createMessageWithLogoutResponse(LogoutRequest logoutRequest, String destination) throws InitializationException, InternalException {
+    public static MessageContext<SAMLObject> createMessageWithLogoutResponse(LogoutRequestWrapper logoutRequest, String destination) throws InitializationException, InternalException {
         log.debug("Create and sign logout response message for  request id '{}'", logoutRequest.getID());
 
         // Create message context
@@ -66,7 +67,7 @@ public class LogoutResponseService {
         return messageContext;
     }
 
-    private static LogoutResponse createLogoutResponse(String destination, LogoutRequest logoutRequest) throws InitializationException {
+    private static LogoutResponse createLogoutResponse(String destination, LogoutRequestWrapper logoutRequest) throws InitializationException {
         log.debug("Create logout response message for  request id '{}'", logoutRequest.getID());
 
         LogoutResponse logoutResponse = SamlHelper.build(LogoutResponse.class);

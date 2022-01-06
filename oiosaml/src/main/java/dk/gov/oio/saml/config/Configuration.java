@@ -23,6 +23,7 @@ public class Configuration {
     private String auditRequestAttributeServiceProviderUserId; // Replace ServiceProviderUserId in audit request with value from attribute [protocol:name]
     private String sessionHandlerFactoryClassName; // Class name of the session handler factory implementation
     private String sessionHandlerJndiName; // JNDI name for the JNDI session handler factory
+    private int sessionHandlerNumTrackedSessionIds; // InMemory limit to list of stored assertions
     private boolean validationEnabled = true;
     private boolean isAssuranceLevelAllowed = false;
     private int minimumAssuranceLevel = 3;
@@ -372,6 +373,14 @@ public class Configuration {
 
     public void setSessionHandlerJndiName(String sessionHandlerJndiName) {
         this.sessionHandlerJndiName = sessionHandlerJndiName;
+    }
+
+    public void setSessionHandlerNumTrackedSessionIds(Integer sessionHandlerNumTrackedSessionIds) {
+        this.sessionHandlerNumTrackedSessionIds = sessionHandlerNumTrackedSessionIds;
+    }
+
+    public int getSessionHandlerNumTrackedSessionIds() {
+        return sessionHandlerNumTrackedSessionIds;
     }
 
     // Configuration builder for mandatory fields

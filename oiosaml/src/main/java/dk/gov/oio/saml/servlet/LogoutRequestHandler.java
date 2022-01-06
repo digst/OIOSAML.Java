@@ -8,8 +8,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import dk.gov.oio.saml.session.AssertionWrapper;
+import dk.gov.oio.saml.session.LogoutRequestWrapper;
+import dk.gov.oio.saml.session.SessionHandler;
 import dk.gov.oio.saml.util.*;
 import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.saml.saml2.core.SessionIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.opensaml.core.config.InitializationException;
@@ -41,7 +44,7 @@ public class LogoutRequestHandler extends SAMLHandler {
         MessageContext<SAMLObject> context = decodeGet(httpServletRequest);
         LogoutRequest logoutRequest = getSamlObject(context, LogoutRequest.class);
 
-        MessageContext<SAMLObject> outgoingMessage = handleRequest(httpServletRequest, logoutRequest);
+        MessageContext<SAMLObject> outgoingMessage = handleRequest(httpServletRequest, new LogoutRequestWrapper(logoutRequest));
         try {
             sendPost(httpServletResponse, outgoingMessage);
         } catch (ComponentInitializationException | MessageEncodingException e) {
@@ -61,7 +64,7 @@ public class LogoutRequestHandler extends SAMLHandler {
         MessageContext<SAMLObject> context = decodeSOAP(httpServletRequest);
         LogoutRequest logoutRequest = getSamlObject(context, LogoutRequest.class);
 
-        MessageContext<SAMLObject> outgoingMessage = handleRequest(httpServletRequest, logoutRequest);
+        MessageContext<SAMLObject> outgoingMessage = handleRequest(httpServletRequest, new LogoutRequestWrapper(logoutRequest));
         try {
             sendSOAP(httpServletResponse, outgoingMessage);
         } catch (ComponentInitializationException | MessageEncodingException e) {
@@ -69,76 +72,70 @@ public class LogoutRequestHandler extends SAMLHandler {
         }
     }
 
-    private boolean invalidateUserSession(HttpServletRequest httpServletRequest) {
-        log.debug("Invalidate user session");
-
-        AssertionWrapper assertion = (AssertionWrapper) httpServletRequest.getSession().getAttribute(Constants.SESSION_ASSERTION);
-        boolean authenticated = isAuthenticated(httpServletRequest);
-
-        log.info("Authenticated: {}", authenticated);
-
-        OIOSAML3Service.getAuditService().auditLog(AuditRequestUtil
-                .createBasicAuditBuilder(httpServletRequest, "SLO1", "ServiceProviderLogout")
-                .withAuthnAttribute("SP_SESSION_ID", getUserSessionId(httpServletRequest))
-                .withAuthnAttribute("ASSERTION_ID", (null != assertion)? assertion.getID():"")
-                .withAuthnAttribute("REQUEST", isAuthenticated(httpServletRequest) ? "VALID":"INVALID"));
-
-        // Invalidate users session
-
-        // TODO: This should invalidate the OIOSAML session (missing in current implementation)
-
-        // Invalidate current http session - remove all data
-        httpServletRequest.getSession().invalidate();
-
-        return authenticated;
-    }
-
     private void handleServiceProviderRequest(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ExternalException, InternalException {
         log.debug("Handling ServiceProvider LogoutRequest");
+        SessionHandler sessionHandler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
 
         // SP initiated, generate logoutRequest and send to IdP
-        if (!invalidateUserSession(httpServletRequest)) {
 
+        boolean authenticated = sessionHandler.isAuthenticated(httpServletRequest.getSession());
+
+        log.debug("Authenticated: {}", authenticated);
+
+        if (!authenticated) {
             // if not logged in, just forward to front-page
             Configuration config = OIOSAML3Service.getConfig();
             String url = StringUtil.getUrl(httpServletRequest, config.getLogoutPage());
+
+            // Invalidate current http session - remove all data
+            httpServletRequest.getSession().invalidate();
 
             log.warn("User not logged in, redirecting to " + url);
             httpServletResponse.sendRedirect(url);
             return;
         }
 
-        // Send LogoutRequest to IdP only if the session actually has an authenticated user on it
+        AssertionWrapper assertion = sessionHandler.getAssertion(httpServletRequest.getSession());
+        String sessionId = sessionHandler.getSessionId(httpServletRequest.getSession());
 
+        OIOSAML3Service.getAuditService().auditLog(AuditRequestUtil
+                .createBasicAuditBuilder(httpServletRequest, "SLO1", "ServiceProviderLogout")
+                .withAuthnAttribute("SP_SESSION_ID", sessionId)
+                .withAuthnAttribute("ASSERTION_ID", (null != assertion)? assertion.getID():"")
+                .withAuthnAttribute("REQUEST", "VALID"));
+
+        // Invalidate users session
+        sessionHandler.logout(httpServletRequest.getSession(), assertion);
+
+        // Invalidate current http session - remove all data
+        httpServletRequest.getSession().invalidate();
+
+        // Send LogoutRequest to IdP only if the session actually has an authenticated user on it
         log.debug("Send LogoutRequest to IdP");
         try {
-            HttpSession session = httpServletRequest.getSession();
-            String nameId = (String) session.getAttribute(Constants.SESSION_NAME_ID);
-            String nameIdFormat = (String) session.getAttribute(Constants.SESSION_NAME_ID_FORMAT);
-            String index = (String) session.getAttribute(Constants.SESSION_SESSION_INDEX);
             String location = IdPMetadataService.getInstance().getLogoutEndpoint().getLocation();
 
-            MessageContext<SAMLObject> messageContext = LogoutRequestService.createMessageWithLogoutRequest(nameId, nameIdFormat, location, index);
-            LogoutRequest logoutRequest = getSamlObject(messageContext, LogoutRequest.class);
+            MessageContext<SAMLObject> messageContext = LogoutRequestService.createMessageWithLogoutRequest(assertion.getSubjectNameId(), assertion.getSubjectNameIdFormat(), location, assertion.getSessionIndex());
+            LogoutRequestWrapper logoutRequest = new LogoutRequestWrapper(getSamlObject(messageContext, LogoutRequest.class));
 
             OIOSAML3Service.getAuditService().auditLog(AuditRequestUtil
                     .createBasicAuditBuilder(httpServletRequest, "SLO2", "OutgoingLogoutRequest")
-                    .withAuthnAttribute("SP_SESSION_ID", getUserSessionId(httpServletRequest))
+                    .withAuthnAttribute("SP_SESSION_ID", sessionId)
                     .withAuthnAttribute("LOGOUT_REQUEST_ID", logoutRequest.getID())
                     .withAuthnAttribute("LOGOUT_REQUEST_DESTINATION", logoutRequest.getDestination()));
 
             // Log LogoutRequest
             try {
-                Element element = SamlHelper.marshallObject(logoutRequest);
+                Element element = SamlHelper.marshallObject(logoutRequest.getLogoutRequest());
                 log.debug("LogoutRequest: {}", StringUtil.elementToString(element));
             } catch (MarshallingException e) {
                 log.error("Could not marshall LogoutRequest for logging purposes");
             }
             log.info("Outgoing LogoutRequest - ID:'{}' Issuer:'{}' IssueInstant:'{}' SessionIndexes:'{}' Destination:'{}'",
                     logoutRequest.getID(),
-                    getIssuer(logoutRequest),
-                    getIssueInstant(logoutRequest),
-                    getSessionIndexes(logoutRequest),
+                    logoutRequest.getIssuerAsString(),
+                    logoutRequest.getIssueInstantAsString(),
+                    logoutRequest.getSessionIndexesAsString(),
                     logoutRequest.getDestination());
 
             sendGet(httpServletResponse, messageContext);
@@ -148,39 +145,64 @@ public class LogoutRequestHandler extends SAMLHandler {
         }
     }
 
-    private MessageContext<SAMLObject> handleRequest(HttpServletRequest httpServletRequest, LogoutRequest logoutRequest) throws ExternalException, InternalException {
+    private MessageContext<SAMLObject> handleRequest(HttpServletRequest httpServletRequest, LogoutRequestWrapper logoutRequest) throws ExternalException, InternalException {
         log.debug("Handling LogoutRequest");
-        AssertionWrapper assertion = (AssertionWrapper) httpServletRequest.getSession().getAttribute(Constants.SESSION_ASSERTION);
+        SessionHandler sessionHandler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
 
         // Log LogoutRequest
         try {
-            Element element = SamlHelper.marshallObject(logoutRequest);
+            Element element = SamlHelper.marshallObject(logoutRequest.getLogoutRequest());
             log.debug("LogoutRequest: {}", StringUtil.elementToString(element));
         } catch (MarshallingException e) {
             log.error("Could not marshall LogoutRequest for logging purposes");
         }
         log.info("Incoming LogoutRequest - ID:'{}' Issuer:'{}' IssueInstant:'{}' SessionIndexes:'{}' Destination:'{}'",
                 logoutRequest.getID(),
-                getIssuer(logoutRequest),
-                getIssueInstant(logoutRequest),
-                getSessionIndexes(logoutRequest),
+                logoutRequest.getIssuerAsString(),
+                logoutRequest.getIssueInstantAsString(),
+                logoutRequest.getSessionIndexesAsString(),
                 logoutRequest.getDestination());
+
+        sessionHandler.storeLogoutRequest(httpServletRequest.getSession(), logoutRequest);
 
         OIOSAML3Service.getAuditService().auditLog(AuditRequestUtil
                 .createBasicAuditBuilder(httpServletRequest, "SLO4", "IncomingLogoutRequest")
-                .withAuthnAttribute("SP_SESSION_ID", getUserSessionId(httpServletRequest))
-                .withAuthnAttribute("ASSERTION_ID", (null != assertion) ? assertion.getID():"")
-                .withAuthnAttribute("SUBJECT_NAME_ID", (null != assertion) ? assertion.getSubjectNameId():"")
                 .withAuthnAttribute("LOGOUT_REQUEST_ID", logoutRequest.getID())
                 .withAuthnAttribute("SIGNATURE_REFERENCE", logoutRequest.getSignatureReferenceID())
-                .withAuthnAttribute("LOGOUT_REQUEST_DESTINATION", logoutRequest.getDestination())
-                .withAuthnAttribute("REQUEST", (isAuthenticated(httpServletRequest)) ? "VALID":"INVALID"));
+                .withAuthnAttribute("LOGOUT_REQUEST_DESTINATION", logoutRequest.getDestination()));
 
-        if (invalidateUserSession(httpServletRequest)) {
+        if (null == logoutRequest.getSessionIndexes() || logoutRequest.getSessionIndexes().isEmpty()) {
             OIOSAML3Service.getAuditService().auditLog(AuditRequestUtil
                     .createBasicAuditBuilder(httpServletRequest, "SLO4", "InvalidatedSession")
-                    .withAuthnAttribute("SP_SESSION_ID", getUserSessionId(httpServletRequest)));
+                    .withAuthnAttribute("LOGOUT_REQUEST_ID", logoutRequest.getID())
+                    .withAuthnAttribute("SP_SESSION_INDEX", "INVALID")
+                    .withAuthnAttribute("REQUEST", "INVALID"));
+        } else {
+            for (SessionIndex sessionIndex : logoutRequest.getSessionIndexes()) {
+                AssertionWrapper assertion = sessionHandler.getAssertion(sessionIndex.getSessionIndex());
+                if (null == assertion) {
+                    OIOSAML3Service.getAuditService().auditLog(AuditRequestUtil
+                            .createBasicAuditBuilder(httpServletRequest, "SLO4", "InvalidatedSession")
+                            .withAuthnAttribute("LOGOUT_REQUEST_ID", logoutRequest.getID())
+                            .withAuthnAttribute("SP_SESSION_INDEX", sessionIndex.getSessionIndex())
+                            .withAuthnAttribute("REQUEST", "INVALID"));
+                    continue;
+                }
+                sessionHandler.logout(httpServletRequest.getSession(), assertion);
+
+                OIOSAML3Service.getAuditService().auditLog(AuditRequestUtil
+                        .createBasicAuditBuilder(httpServletRequest, "SLO4", "InvalidatedSession")
+                        .withAuthnAttribute("LOGOUT_REQUEST_ID", logoutRequest.getID())
+                        .withAuthnAttribute("SP_SESSION_INDEX", sessionIndex.getSessionIndex())
+                        .withAuthnAttribute("SP_SESSION_ID", sessionHandler.getSessionId(sessionIndex.getSessionIndex()))
+                        .withAuthnAttribute("ASSERTION_ID", assertion.getID())
+                        .withAuthnAttribute("SUBJECT_NAME_ID", assertion.getSubjectNameId())
+                        .withAuthnAttribute("REQUEST", "VALID"));
+            }
         }
+
+        // Invalidate current http session - remove all data
+        httpServletRequest.getSession().invalidate();
 
         // Create LogoutResponse
         try {
@@ -190,16 +212,16 @@ public class LogoutRequestHandler extends SAMLHandler {
 
             // Log LogoutRequest
             try {
-                Element element = SamlHelper.marshallObject(logoutRequest);
+                Element element = SamlHelper.marshallObject(logoutRequest.getLogoutRequest());
                 log.debug("LogoutRequest: {}", StringUtil.elementToString(element));
             } catch (MarshallingException e) {
                 log.error("Could not marshall LogoutRequest for logging purposes");
             }
             log.info("Outgoing LogoutRequest - ID:'{}' Issuer:'{}' IssueInstant:'{}' SessionIndexes:'{}' Destination:'{}'",
                     logoutRequest.getID(),
-                    getIssuer(logoutRequest),
-                    getIssueInstant(logoutRequest),
-                    getSessionIndexes(logoutRequest),
+                    logoutRequest.getIssuerAsString(),
+                    logoutRequest.getIssueInstantAsString(),
+                    logoutRequest.getSessionIndexesAsString(),
                     logoutRequest.getDestination());
 
             return messageContext;
@@ -209,41 +231,10 @@ public class LogoutRequestHandler extends SAMLHandler {
         }
     }
 
-    private boolean isAuthenticated(HttpServletRequest httpServletRequest) {
-
-        // TODO: This should return true if there is an actual OIOSAML session (missing in current implementation)
-
-        return "true".equals(httpServletRequest.getSession().getAttribute(Constants.SESSION_AUTHENTICATED));
-    }
-
     private boolean isServiceProviderRequest(HttpServletRequest httpServletRequest) {
         String samlRequest = httpServletRequest.getParameter("SAMLRequest");
         return  samlRequest == null || samlRequest.isEmpty();
     }
 
-    private String getUserSessionId(HttpServletRequest httpServletRequest) {
 
-        // TODO: This should return an actual OIOSAML session id (missing in current implementation)
-
-        HttpSession session = httpServletRequest.getSession();
-        return session.getId();
-    }
-
-    private String getIssuer(LogoutRequest logoutRequest) {
-        return logoutRequest.getIssuer() != null ?
-                logoutRequest.getIssuer().getValue() : "";
-    }
-
-    private String getIssueInstant(LogoutRequest logoutRequest) {
-        return logoutRequest.getIssueInstant() != null ?
-                logoutRequest.getIssueInstant().toString() : "";
-    }
-
-    private String getSessionIndexes(LogoutRequest logoutRequest) {
-        return logoutRequest.getSessionIndexes()
-                .stream()
-                .map(sessionIndex -> sessionIndex.getSessionIndex())
-                .collect(Collectors
-                        .joining(", ", "[", "]"));
-    }
 }
