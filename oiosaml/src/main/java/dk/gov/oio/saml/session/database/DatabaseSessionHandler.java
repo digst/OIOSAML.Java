@@ -24,8 +24,6 @@
 package dk.gov.oio.saml.session.database;
 
 import dk.gov.oio.saml.model.NSISLevel;
-import dk.gov.oio.saml.oiobpp.ObjectFactory;
-import dk.gov.oio.saml.oiobpp.PrivilegeList;
 import dk.gov.oio.saml.session.AssertionWrapper;
 import dk.gov.oio.saml.session.AuthnRequestWrapper;
 import dk.gov.oio.saml.session.LogoutRequestWrapper;
@@ -35,35 +33,23 @@ import dk.gov.oio.saml.util.StringUtil;
 import net.shibboleth.utilities.java.support.xml.SerializeSupport;
 import net.shibboleth.utilities.java.support.xml.XMLParserException;
 import org.apache.commons.codec.binary.Base64;
-import org.joda.time.DateTime;
-import org.opensaml.core.xml.XMLObject;
 import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.core.xml.io.UnmarshallingException;
 import org.opensaml.core.xml.util.XMLObjectSupport;
 import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.LogoutRequest;
-import org.opensaml.saml.saml2.core.impl.AssertionMarshaller;
-import org.opensaml.saml.saml2.core.impl.AssertionUnmarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Element;
 
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.Unmarshaller;
 import java.io.ByteArrayInputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class DatabaseSessionHandler implements SessionHandler {
     private static final Logger log = LoggerFactory.getLogger(DatabaseSessionHandler.class);
@@ -75,25 +61,30 @@ public class DatabaseSessionHandler implements SessionHandler {
     public DatabaseSessionHandler(DataSource ds) {
         log.debug("Created database session handler");
         this.ds = ds;
-
-        // TODO: database scheme + index
-        // TODO: wrapper for logout request
-        // TODO: logout request wrapper usage i other code?
-        // TODO: store requests
-        // TODO: get requests (authn + logout)
-        // TODO: unit test for everything
-        // TODO: documentation
-        // TODO:
     }
     /**
      * Set AuthnRequest on the current session
      *
      * @param session HTTP session
      * @param request {@link AuthnRequestWrapper}
+     * @throws InternalException on failure to persist request
      */
     @Override
-    public void storeAuthnRequest(HttpSession session, AuthnRequestWrapper request) {
-
+    public void storeAuthnRequest(HttpSession session, AuthnRequestWrapper request) throws InternalException {
+        try (Connection connection=ds.getConnection()){
+            connection.setAutoCommit(true);
+            // Create assertion
+            try(PreparedStatement ps = connection.prepareStatement("INSERT INTO authn_requests_tbl (session_id, access_time, nsis_level, xml_object) VALUES (?,?,?,?)")) {
+                ps.setString(1, session.getId());
+                ps.setLong(2, System.currentTimeMillis());
+                ps.setString(3, request.getRequestedNsisLevel().name());
+                ps.setBytes(4,  request.getAuthnRequestAsBase64().getBytes(StandardCharsets.UTF_8));
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            log.error("Failure to persist authn request", e);
+            throw new InternalException("Failure to persist authn request", e);
+        }
     }
 
     /**
@@ -101,24 +92,23 @@ public class DatabaseSessionHandler implements SessionHandler {
      *
      * @param session   HTTP session
      * @param assertion {@link AssertionWrapper}
+     * @throws InternalException on failure to persist request
      */
     @Override
-    public void storeAssertion(HttpSession session, AssertionWrapper assertion) {
+    public void storeAssertion(HttpSession session, AssertionWrapper assertion) throws InternalException {
         try (Connection connection=ds.getConnection()){
             connection.setAutoCommit(true);
-
             // Create assertion
-            try(PreparedStatement ps = connection.prepareStatement("INSERT INTO assertions (sessionId, sessionIndex, subjectNameId,  timestamp, assertion) VALUES (?,?,?,?,?)")) {
+            try(PreparedStatement ps = connection.prepareStatement("INSERT INTO assertions_tbl (session_id, session_index, access_time, xml_object) VALUES (?,?,?,?)")) {
                 ps.setString(1, session.getId());
                 ps.setString(2, assertion.getSessionIndex());
-                ps.setString(3, assertion.getSubjectNameId());
-                ps.setTimestamp(4, new Timestamp(new Date().getTime()));
-                ps.setBytes(5,  assertion2bytes(assertion.getAssertion()));
+                ps.setLong(3, System.currentTimeMillis());
+                ps.setBytes(4,  assertion.getAssertionAsBase64().getBytes(StandardCharsets.UTF_8));
                 ps.executeUpdate();
             }
         } catch (SQLException e) {
-            log.error("Failed retrieving assertion matching sessionIndex", e);
-            throw new RuntimeException("Failed retrieving assertion matching sessionIndex", e);
+            log.error("Failure to persist assertion", e);
+            throw new InternalException("Failure to persist assertion", e);
         }
     }
 
@@ -127,10 +117,23 @@ public class DatabaseSessionHandler implements SessionHandler {
      *
      * @param session HTTP session
      * @param request {@link LogoutRequest}
+     * @throws InternalException on failure to persist request
      */
     @Override
-    public void storeLogoutRequest(HttpSession session, LogoutRequestWrapper request) {
-
+    public void storeLogoutRequest(HttpSession session, LogoutRequestWrapper request) throws InternalException {
+        try (Connection connection=ds.getConnection()){
+            connection.setAutoCommit(true);
+            // Create assertion
+            try(PreparedStatement ps = connection.prepareStatement("INSERT INTO logout_requests_tbl (session_id, access_time, xml_object) VALUES (?,?,?)")) {
+                ps.setString(1, session.getId());
+                ps.setLong(2, System.currentTimeMillis());
+                ps.setBytes(3,  request.getLogoutRequestAsBase64().getBytes(StandardCharsets.UTF_8));
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            log.error("Failure to persist logout request", e);
+            throw new InternalException("Failure to persist logout request", e);
+        }
     }
 
     /**
@@ -145,18 +148,17 @@ public class DatabaseSessionHandler implements SessionHandler {
             connection.setAutoCommit(true);
 
             // Update assertions timestamp
-            try(PreparedStatement ps = connection.prepareStatement("UPDATE assertions SET timestamp = ? WHERE sessionId = ?")) {
+            try(PreparedStatement ps = connection.prepareStatement("UPDATE assertions_tbl SET timestamp = ? WHERE session_id = ?")) {
                 ps.setTimestamp(1, new Timestamp(new Date().getTime()));
                 ps.setString(2, session.getId());
                 ps.executeUpdate();
             }
 
             // Retrieve assertion
-            try(PreparedStatement ps = connection.prepareStatement("SELECT assertion FROM assertions WHERE sessionId = ?")) {
+            try(PreparedStatement ps = connection.prepareStatement("SELECT xml_object FROM assertions_tbl WHERE session_id = ?")) {
                 ps.setString(1, session.getId());
-
                 try(ResultSet rs = ps.executeQuery()) {
-                    return new AssertionWrapper(rs2assertion(rs));
+                    return new AssertionWrapper((Assertion) StringUtil.base64ToXMLObject(new String(rs.getBytes(1), StandardCharsets.UTF_8)));
                 }
             }
         } catch (SQLException | InternalException e) {
@@ -173,52 +175,7 @@ public class DatabaseSessionHandler implements SessionHandler {
      */
     @Override
     public AssertionWrapper getAssertion(String sessionIndex) {
-        try (Connection connection=ds.getConnection()){
-            connection.setAutoCommit(true);
-
-            // Update assertions timestamp
-            try(PreparedStatement ps = connection.prepareStatement("UPDATE assertions SET timestamp = ? WHERE sessionIndex = ?")) {
-                ps.setTimestamp(1, new Timestamp(new Date().getTime()));
-                ps.setString(2, sessionIndex);
-                ps.executeUpdate();
-            }
-
-            // Retrieve assertion
-            try(PreparedStatement ps = connection.prepareStatement("SELECT assertion FROM assertions WHERE sessionIndex = ?")) {
-                ps.setString(1, sessionIndex);
-
-                try(ResultSet rs = ps.executeQuery()) {
-                    return new AssertionWrapper(rs2assertion(rs));
-                }
-            }
-        } catch (SQLException | InternalException e) {
-            log.error("Failed retrieving assertion matching sessionIndex", e);
-            throw new RuntimeException("Failed retrieving assertion matching sessionIndex", e);
-        }
-    }
-
-    private byte[] assertion2bytes(Assertion assertion) throws SQLException {
-            try {
-                return Base64.encodeBase64(SerializeSupport
-                        .nodeToString(XMLObjectSupport.marshall(assertion))
-                        .getBytes(Charset.forName("UTF-8")));
-            } catch (MarshallingException e) {
-                log.error("Failed retrieving assertion matching sessionIndex", e);
-                throw new RuntimeException("Failed retrieving assertion matching sessionIndex", e);
-            }
-    }
-
-    private Assertion rs2assertion(ResultSet rs) throws SQLException {
-        if (rs.first()) {
-            try {
-                return (Assertion) XMLObjectSupport.unmarshallFromInputStream(XMLObjectProviderRegistrySupport.getParserPool(), new ByteArrayInputStream(
-                        Base64.decodeBase64(rs.getBytes("assertion"))));
-            } catch (UnmarshallingException | XMLParserException e) {
-                log.error("Failed retrieving assertion matching sessionIndex", e);
-                throw new RuntimeException("Failed retrieving assertion matching sessionIndex", e);
-            }
-        }
-        return null;
+        return getAssertion(getSessionId(sessionIndex));
     }
 
     /**
@@ -229,7 +186,27 @@ public class DatabaseSessionHandler implements SessionHandler {
      */
     @Override
     public AuthnRequestWrapper getAuthnRequest(HttpSession session) {
-        return null;
+        try (Connection connection=ds.getConnection()){
+            connection.setAutoCommit(true);
+
+            // Update authn request timestamp
+            try(PreparedStatement ps = connection.prepareStatement("UPDATE authn_requests_tbl SET timestamp = ? WHERE session_id = ?")) {
+                ps.setTimestamp(1, new Timestamp(new Date().getTime()));
+                ps.setString(2, session.getId());
+                ps.executeUpdate();
+            }
+
+            // Retrieve assertion
+            try(PreparedStatement ps = connection.prepareStatement("SELECT xml_object, nsis_level FROM authn_requests_tbl WHERE session_id = ?")) {
+                ps.setString(1, session.getId());
+                try(ResultSet rs = ps.executeQuery()) {
+                    return new AuthnRequestWrapper((AuthnRequest) StringUtil.base64ToXMLObject(new String(rs.getBytes(1), StandardCharsets.UTF_8)), NSISLevel.valueOf(rs.getString(2)));
+                }
+            }
+        } catch (SQLException | InternalException e) {
+            log.error("Failed retrieving authn request matching sessionId", e);
+            throw new RuntimeException("Failed retrieving authn request matching sessionId", e);
+        }
     }
 
     /**
@@ -240,18 +217,27 @@ public class DatabaseSessionHandler implements SessionHandler {
      */
     @Override
     public LogoutRequestWrapper getLogoutRequest(HttpSession session) {
-        return null;
-    }
+        try (Connection connection=ds.getConnection()){
+            connection.setAutoCommit(true);
 
-    /**
-     * Is current session authenticated
-     *
-     * @param session HTTP session
-     * @return true if current session is authenticated
-     */
-    @Override
-    public boolean isAuthenticated(HttpSession session) {
-        return false;
+            // Update authn request timestamp
+            try(PreparedStatement ps = connection.prepareStatement("UPDATE logout_requests_tbl SET timestamp = ? WHERE session_id = ?")) {
+                ps.setTimestamp(1, new Timestamp(new Date().getTime()));
+                ps.setString(2, session.getId());
+                ps.executeUpdate();
+            }
+
+            // Retrieve assertion
+            try(PreparedStatement ps = connection.prepareStatement("SELECT xml_object FROM logout_requests_tbl WHERE session_id = ?")) {
+                ps.setString(1, session.getId());
+                try(ResultSet rs = ps.executeQuery()) {
+                    return new LogoutRequestWrapper((LogoutRequest) StringUtil.base64ToXMLObject(new String(rs.getBytes(1), StandardCharsets.UTF_8)));
+                }
+            }
+        } catch (SQLException | InternalException e) {
+            log.error("Failed retrieving authn request matching sessionId", e);
+            throw new RuntimeException("Failed retrieving authn request matching sessionId", e);
+        }
     }
 
     /**
@@ -262,7 +248,7 @@ public class DatabaseSessionHandler implements SessionHandler {
      */
     @Override
     public String getSessionId(HttpSession session) {
-        return null;
+        return session.getId();
     }
 
     /**
@@ -273,7 +259,20 @@ public class DatabaseSessionHandler implements SessionHandler {
      */
     @Override
     public String getSessionId(String sessionIndex) {
-        return null;
+        try (Connection connection=ds.getConnection()){
+            connection.setAutoCommit(true);
+
+            // Retrieve assertion
+            try(PreparedStatement ps = connection.prepareStatement("SELECT session_id FROM assertions_tbl WHERE session_index = ?")) {
+                ps.setString(1, sessionIndex);
+                try(ResultSet rs = ps.executeQuery()) {
+                    return rs.getString(1);
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Failed retrieving authn request matching sessionId", e);
+            throw new RuntimeException("Failed retrieving authn request matching sessionId", e);
+        }
     }
 
     /**
@@ -284,7 +283,27 @@ public class DatabaseSessionHandler implements SessionHandler {
      */
     @Override
     public void logout(HttpSession session, AssertionWrapper assertion) {
+        log.debug("Logout from session '{}' and assertion '{}'",
+                null != session ? getSessionId(session) : "",
+                null != assertion ? assertion.getID() : "");
 
+        if (null != assertion
+                && StringUtil.isNotEmpty(assertion.getSessionIndex())) {
+            logout(getSessionId(assertion.getSessionIndex()));
+        }
+        logout(getSessionId(session));
+    }
+
+    private void logout(String sessionId) {
+        log.debug("Invalidate OIOSAML session '{}'", sessionId);
+
+        if (StringUtil.isEmpty(sessionId)) {
+            return;
+        }
+
+        //TODO : invalidate session and assertion
+
+        // delete assertion
     }
 
     /**
@@ -296,6 +315,14 @@ public class DatabaseSessionHandler implements SessionHandler {
     public void cleanup(long maxInactiveIntervalSeconds) {
         try (Connection connection=ds.getConnection()){
             connection.setAutoCommit(true);
+
+            // TODO: refactor
+
+            // TODO: unit test
+            // TODO: documentation
+
+            // TODO: configuration + debug
+
 
             String[] tables = new String[] { "assertions", "requests", "requestdata" };
             final long sessionCleanupDelay = (long)maxInactiveIntervalSeconds * 1000;

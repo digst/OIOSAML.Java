@@ -1,19 +1,14 @@
 package dk.gov.oio.saml.session;
 
-import dk.gov.oio.saml.model.NSISLevel;
 import dk.gov.oio.saml.util.InternalException;
 import dk.gov.oio.saml.util.StringUtil;
 import org.joda.time.DateTime;
 import org.opensaml.saml.saml2.core.*;
 
-import javax.annotation.Nullable;
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class LogoutRequestWrapper implements Serializable {
-    private static final long serialVersionUID = -6155927753076931485L;
+public class LogoutRequestWrapper {
 
     private LogoutRequest delegator;
 
@@ -23,6 +18,10 @@ public class LogoutRequestWrapper implements Serializable {
 
     public LogoutRequest getLogoutRequest() {
         return delegator;
+    }
+
+    public String getLogoutRequestAsBase64() throws InternalException {
+        return StringUtil.xmlObjectToBase64(delegator);
     }
 
     public String getIssuerAsString() {

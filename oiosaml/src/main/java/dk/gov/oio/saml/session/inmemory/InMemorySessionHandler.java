@@ -234,18 +234,6 @@ public class InMemorySessionHandler implements SessionHandler {
         return sessionIndexMap.get(sessionIndex).getObject();
     }
 
-    private void logout(String sessionId) {
-        log.debug("Invalidate OIOSAML session '{}'", sessionId);
-
-        if (StringUtil.isEmpty(sessionId) || !assertions.containsKey(sessionId)) {
-            return;
-        }
-
-        TimeOutWrapper<AssertionWrapper> wrapperTimeOutWrapper = assertions.get(sessionId);
-        sessionIndexMap.remove(wrapperTimeOutWrapper.getObject().getSessionIndex());
-        assertions.remove(sessionId);
-    }
-
     /**
      * Invalidate current OIOSAML session
      *
@@ -263,6 +251,18 @@ public class InMemorySessionHandler implements SessionHandler {
             logout(getSessionId(assertion.getSessionIndex()));
         }
         logout(getSessionId(session));
+    }
+
+    private void logout(String sessionId) {
+        log.debug("Invalidate OIOSAML session '{}'", sessionId);
+
+        if (StringUtil.isEmpty(sessionId) || !assertions.containsKey(sessionId)) {
+            return;
+        }
+
+        TimeOutWrapper<AssertionWrapper> wrapperTimeOutWrapper = assertions.get(sessionId);
+        sessionIndexMap.remove(wrapperTimeOutWrapper.getObject().getSessionIndex());
+        assertions.remove(sessionId);
     }
 
     /**

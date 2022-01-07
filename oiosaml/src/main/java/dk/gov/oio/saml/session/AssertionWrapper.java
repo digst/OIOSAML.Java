@@ -35,9 +35,15 @@ import dk.gov.oio.saml.util.SamlHelper;
 public class AssertionWrapper implements Serializable {
     private static final Logger log = LoggerFactory.getLogger(AssertionWrapper.class);
     private static final long serialVersionUID = -338227958970338958L;
-    private Assertion assertion;
+
+    private String id;
     private String assertionString;
+    private String assertionBase64;
     private String sessionIndex;
+    private String issuer;
+    private String subjectNameId;
+    private String subjectNameIdFormat;
+    private String signingCredentialEntityId;
     private List<String> audiences;
     private String authnContextClassRef;
     private PrivilegeList privilegeList;
@@ -48,9 +54,7 @@ public class AssertionWrapper implements Serializable {
     private DateTime conditionTimeNotOnOrAfter;
 
     public AssertionWrapper(Assertion assertion) throws InternalException {
-
-        // getAssertion()
-        this.assertion = assertion;
+        this.assertionBase64 = StringUtil.xmlObjectToBase64(assertion);
 
         // getAssertionAsString()
         AssertionMarshaller marshaller = new AssertionMarshaller();
@@ -60,6 +64,17 @@ public class AssertionWrapper implements Serializable {
         }
         catch (MarshallingException e) {
             throw new InternalException(e);
+        }
+
+        // getIssuer()
+        Issuer issuerObj = assertion.getIssuer();
+        this.issuer = issuerObj != null ? issuerObj.getValue() : null;
+
+        // getSubjectNameID()
+        Subject subject = assertion.getSubject();
+        if (subject != null && subject.getNameID() != null) {
+            subjectNameId = subject.getNameID().getValue();
+            subjectNameIdFormat = subject.getNameID().getFormat();
         }
 
         // getAttributeValues()
@@ -136,20 +151,28 @@ public class AssertionWrapper implements Serializable {
                 this.privilegeList = OIOBPPUtil.parse(attributeValue);
             }
         }
+
+        // getSigningCredentialEntityId()
+        if (null != assertion.getSignature() && null != assertion.getSignature().getSigningCredential()) {
+            this.signingCredentialEntityId = assertion.getSignature().getSigningCredential().getEntityId();
+        }
+
+        // getID()
+        this.id = assertion.getID();
     }
 
     public String getAssertionAsString() {
         return assertionString;
+    }
+
+    public String getAssertionAsBase64() {
+        return assertionBase64;
     }
     
     public String getAssertionAsHtml() {
         return htmlEscape(assertionString);
     }
 
-    public Assertion getAssertion() {
-        return this.assertion;
-    }
-    
     private static String htmlEscape(String input) {
         StringBuilder escaped = new StringBuilder();
         for (int i = 0; i < input.length(); i++) {
@@ -196,12 +219,11 @@ public class AssertionWrapper implements Serializable {
     }
 
     public String getID() {
-        return this.assertion.getID();
+        return this.id;
     }
 
     public String getIssuer() {
-        Issuer issuerObj = assertion.getIssuer();
-        return issuerObj != null ? issuerObj.getValue() : null;
+        return this.issuer;
     }
 
     public String getSessionIndex() {
@@ -209,19 +231,11 @@ public class AssertionWrapper implements Serializable {
     }
 
     public String getSubjectNameId() {
-        Subject subject = assertion.getSubject();
-        if (subject != null && subject.getNameID() != null) {
-            return subject.getNameID().getValue();
-        }
-        return null;
+        return subjectNameId;
     }
 
     public String getSubjectNameIdFormat() {
-        Subject subject = assertion.getSubject();
-        if (subject != null && subject.getNameID() != null) {
-            return subject.getNameID().getFormat();
-        }
-        return null;
+        return subjectNameIdFormat;
     }
 
     public List<String> getAudiences() {
@@ -257,37 +271,8 @@ public class AssertionWrapper implements Serializable {
     }
 
     public String getSigningCredentialEntityId() {
-        if (null != assertion.getSignature() && null != assertion.getSignature().getSigningCredential()) {
-            return assertion.getSignature().getSigningCredential().getEntityId();
-        }
-        return null;
+        return signingCredentialEntityId;
     }
-
-    /*
-    // Set NSISLevel to what was provided by the Assertion
-        Map<String, String> attributeMap = SamlHelper.extractAttributeValues(assertion.getAttributeStatements().get(0));
-        String loa = attributeMap.get(Constants.LOA);
-        String assuranceLevel = attributeMap.get(Constants.ASSURANCE_LEVEL);
-        NSISLevel nsisLevel = NSISLevel.getNSISLevelFromAttributeValue(loa, NSISLevel.NONE);
-
-        session.setAttribute(Constants.SESSION_NSIS_LEVEL, nsisLevel);
-        if(assuranceLevel != null) {
-            session.setAttribute(Constants.SESSION_ASSURANCE_LEVEL, assuranceLevel);
-        }
-
-        session.setAttribute(Constants.SESSION_AUTHENTICATED, "true");
-        session.setAttribute(Constants.SESSION_SESSION_INDEX, getSessionIndex(assertion));
-
-
-        session.setAttribute(Constants.SESSION_ASSERTION, new AssertionWrapper(assertion));
-
-        NameID nameID = assertion.getSubject().getNameID();
-        session.setAttribute(Constants.SESSION_NAME_ID, nameID.getValue());
-        session.setAttribute(Constants.SESSION_NAME_ID_FORMAT, nameID.getFormat());
-     */
-
-
-
 
     @Override
     public String toString() {

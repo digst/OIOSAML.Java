@@ -93,7 +93,7 @@ public class StringUtil {
      * @return Base64 encoded XML string
      * @throws InternalException on serialization failure
      */
-    public static String XMLObjectToBase64(XMLObject xmlObject) throws InternalException {
+    public static String xmlObjectToBase64(XMLObject xmlObject) throws InternalException {
         try {
             Element element = SamlHelper.marshallObject(xmlObject);
             return Base64.getEncoder().encodeToString(elementToString(element).getBytes(StandardCharsets.UTF_8));

@@ -23,8 +23,11 @@ public class AuthnRequestWrapper implements Serializable {
     private String issuer;
     private String issueInstant;
     private String destination;
+    private String authnRequestAsBase64;
 
     public AuthnRequestWrapper(AuthnRequest authnRequest, NSISLevel requestedNsisLevel) throws InternalException {
+        this.authnRequestAsBase64 = StringUtil.xmlObjectToBase64(authnRequest);
+
         // get ContextClassRefs
         authnContextClassRefValues = new ArrayList<String>();
         if (authnRequest.getRequestedAuthnContext() != null) {
@@ -84,5 +87,9 @@ public class AuthnRequestWrapper implements Serializable {
 
     public String getDestination() {
         return destination;
+    }
+
+    public String getAuthnRequestAsBase64() {
+        return authnRequestAsBase64;
     }
 }

@@ -98,7 +98,7 @@ class StringUtilTest {
         MessageContext<SAMLObject> messageContext = IdpUtil.createMessageWithAssertion(true, false, true,  nameID, TestConstants.SP_ENTITY_ID, TestConstants.SP_ASSERTION_CONSUMER_URL, inResponseToId);
         Assertion assertionInput = (Assertion) messageContext.getMessage();
 
-        String base64Input = StringUtil.XMLObjectToBase64(assertionInput);
+        String base64Input = StringUtil.xmlObjectToBase64(assertionInput);
 
         Assertion assertionOutput = (Assertion) StringUtil.base64ToXMLObject(base64Input);
         Assertions.assertEquals(assertionOutput, assertionInput);
@@ -109,7 +109,7 @@ class StringUtilTest {
         Assertions.assertEquals(assertionOutput.getVersion(), assertionInput.getVersion());
         Assertions.assertEquals(assertionOutput.getClass().getName(), assertionInput.getClass().getName());
 
-        String base64Output = StringUtil.XMLObjectToBase64(assertionOutput);
+        String base64Output = StringUtil.xmlObjectToBase64(assertionOutput);
         Assertions.assertEquals(base64Output, base64Input);
     }
 }
