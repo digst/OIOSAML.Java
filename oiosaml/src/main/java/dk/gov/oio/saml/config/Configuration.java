@@ -23,6 +23,10 @@ public class Configuration {
     private String auditRequestAttributeServiceProviderUserId; // Replace ServiceProviderUserId in audit request with value from attribute [protocol:name]
     private String sessionHandlerFactoryClassName; // Class name of the session handler factory implementation
     private String sessionHandlerJndiName; // JNDI name for the JNDI session handler factory
+    private String sessionHandlerJdbcUrl; // JDBC URL for the JDBC session handler factory
+    private String sessionHandlerJdbcUsername; // JDBC username for the JDBC session handler factory
+    private String sessionHandlerJdbcPassword; // JDBC password for the JDBC session handler factory
+    private String sessionHandlerJdbcDriverClassName; // JDBC driver class name for the JDBC session handler factory
     private int sessionHandlerNumTrackedSessionIds; // InMemory limit to list of stored assertions
     private boolean validationEnabled = true;
     private boolean isAssuranceLevelAllowed = false;
@@ -375,6 +379,38 @@ public class Configuration {
         this.sessionHandlerJndiName = sessionHandlerJndiName;
     }
 
+    public String getSessionHandlerJdbcUrl() {
+        return sessionHandlerJdbcUrl;
+    }
+
+    public void setSessionHandlerJdbcUrl(String sessionHandlerJdbcUrl) {
+        this.sessionHandlerJdbcUrl = sessionHandlerJdbcUrl;
+    }
+
+    public String getSessionHandlerJdbcUsername() {
+        return sessionHandlerJdbcUsername;
+    }
+
+    public void setSessionHandlerJdbcUsername(String sessionHandlerJdbcUsername) {
+        this.sessionHandlerJdbcUsername = sessionHandlerJdbcUsername;
+    }
+
+    public String getSessionHandlerJdbcPassword() {
+        return sessionHandlerJdbcPassword;
+    }
+
+    public void setSessionHandlerJdbcPassword(String sessionHandlerJdbcPassword) {
+        this.sessionHandlerJdbcPassword = sessionHandlerJdbcPassword;
+    }
+
+    public String getSessionHandlerJdbcDriverClassName() {
+        return sessionHandlerJdbcDriverClassName;
+    }
+
+    public void setSessionHandlerJdbcDriverClassName(String sessionHandlerJdbcDriverClassName) {
+        this.sessionHandlerJdbcDriverClassName = sessionHandlerJdbcDriverClassName;
+    }
+
     public void setSessionHandlerNumTrackedSessionIds(Integer sessionHandlerNumTrackedSessionIds) {
         this.sessionHandlerNumTrackedSessionIds = sessionHandlerNumTrackedSessionIds;
     }
@@ -406,6 +442,10 @@ public class Configuration {
         private String auditRequestAttributeServiceProviderUserId;
         private String sessionHandlerFactoryClassName;
         private String sessionHandlerJndiName;
+        private String sessionHandlerJdbcUrl;
+        private String sessionHandlerJdbcUsername;
+        private String sessionHandlerJdbcPassword;
+        private String sessionHandlerJdbcDriverClassName;
 
         public Configuration build() throws InternalException {
             if (StringUtil.isEmpty(spEntityID)) {
@@ -459,6 +499,10 @@ public class Configuration {
             configuration.auditRequestAttributeServiceProviderUserId = StringUtil.defaultIfEmpty(this.auditRequestAttributeServiceProviderUserId, "request:sessionId");
             configuration.sessionHandlerFactoryClassName = StringUtil.defaultIfEmpty(this.sessionHandlerFactoryClassName, "dk.gov.oio.saml.session.inmemory.InMemorySessionHandlerFactory");
             configuration.sessionHandlerJndiName = StringUtil.defaultIfEmpty(this.sessionHandlerJndiName, null);
+            configuration.sessionHandlerJdbcUrl = StringUtil.defaultIfEmpty(this.sessionHandlerJdbcUrl, null);
+            configuration.sessionHandlerJdbcUsername = StringUtil.defaultIfEmpty(this.sessionHandlerJdbcUsername, null);
+            configuration.sessionHandlerJdbcPassword = StringUtil.defaultIfEmpty(this.sessionHandlerJdbcPassword, null);
+            configuration.sessionHandlerJdbcDriverClassName = StringUtil.defaultIfEmpty(this.sessionHandlerJdbcDriverClassName, null);
 
             return configuration;
         }
@@ -568,6 +612,25 @@ public class Configuration {
             return this;
         }
 
+        public Builder setSessionHandlerJdbcUrl(String sessionHandlerJdbcUrl) {
+            this.sessionHandlerJdbcUrl = sessionHandlerJdbcUrl;
+            return this;
+        }
+
+        public Builder setSessionHandlerJdbcUsername(String sessionHandlerJdbcUsername) {
+            this.sessionHandlerJdbcUsername = sessionHandlerJdbcUsername;
+            return this;
+        }
+
+        public Builder setSessionHandlerJdbcPassword(String sessionHandlerJdbcPassword) {
+            this.sessionHandlerJdbcPassword = sessionHandlerJdbcPassword;
+            return this;
+        }
+
+        public Builder setSessionHandlerJdbcDriverClassName(String sessionHandlerJdbcDriverClassName) {
+            this.sessionHandlerJdbcDriverClassName = sessionHandlerJdbcDriverClassName;
+            return this;
+        }
     }
 
     public boolean isAssuranceLevelSufficient(String value) {

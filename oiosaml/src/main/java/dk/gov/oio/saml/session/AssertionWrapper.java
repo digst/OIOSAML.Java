@@ -274,6 +274,18 @@ public class AssertionWrapper implements Serializable {
         return signingCredentialEntityId;
     }
 
+    public boolean isReplayOf(AssertionWrapper assertionWrapper) {
+        if (null == assertionWrapper) {
+            return false;
+        }
+        if (StringUtil.isEmpty(assertionWrapper.getID()) || StringUtil.isEmpty(assertionWrapper.getSessionIndex())) {
+            return false;
+        }
+        return assertionWrapper.getSessionIndex().equals(this.getSessionIndex())
+                && assertionWrapper.getID().equals(this.getID());
+    }
+
+
     @Override
     public String toString() {
         return String.format("AssertionWrapper{assertion='%s'}", assertionString);

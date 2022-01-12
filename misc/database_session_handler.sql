@@ -2,9 +2,17 @@ CREATE DATABASE IF NOT EXISTS oiosaml;
 
 use oiosaml;
 
+DROP TABLE if EXISTS replay_tbl;
 DROP TABLE if EXISTS assertions_tbl;
 DROP TABLE if EXISTS authn_requests_tbl;
 DROP TABLE if EXISTS logout_requests_tbl;
+
+CREATE TABLE replay_tbl
+(
+    assertion_id VARCHAR(255) NOT NULL,
+    access_time LONG NOT NULL,
+    CONSTRAINT replay_assertion_id_pk PRIMARY KEY (assertion_id)
+);
 
 CREATE TABLE assertions_tbl
 (

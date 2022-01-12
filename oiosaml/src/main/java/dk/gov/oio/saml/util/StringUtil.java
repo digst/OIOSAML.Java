@@ -117,7 +117,7 @@ public class StringUtil {
             DocumentBuilder db = dbf.newDocumentBuilder();
             Document doc = db.parse(new ByteArrayInputStream(decodedInput));
 
-            Element element = (Element) doc.getElementsByTagNameNS("http://www.w3.org/2001/04/xmlenc#", "EncryptedData").item(0);
+            Element element = (Element) doc.getDocumentElement();
             return SamlHelper.unmarshallObject(element);
         } catch (UnmarshallingException|ParserConfigurationException|IOException|SAXException e) {
             throw new InternalException("Unable to parse input to XML object",e);

@@ -88,8 +88,7 @@ public class InMemorySessionHandler implements SessionHandler {
             return;
         }
         if (StringUtil.isEmpty(assertion.getSessionIndex())) {
-            log.error("Assertion '{}' with missing session index", assertion.getID());
-            throw new IllegalArgumentException(String.format("Ignore Assertion '%s' with missing session index", assertion.getID()));
+            log.info("Assertion '{}' with passive session and missing index", assertion.getID());
         }
 
         // Replay validation
@@ -102,13 +101,18 @@ public class InMemorySessionHandler implements SessionHandler {
         // Save assertion
         AssertionWrapper existingAssertion = getAssertion(session);
         if (null != existingAssertion) {
+            if (assertion.isReplayOf(existingAssertion)) {
+                log.debug("Assertion '{}' is being replayed", assertion.getID(), existingAssertion.getID());
+                throw new IllegalArgumentException(String.format("Assertion with id '%s' and session index '%s' is already registered", assertion.getID(), assertion.getSessionIndex()));
+            }
+
             log.debug("Assertion '{}' will replace '{}'", assertion.getID(), existingAssertion.getID());
-            sessionIndexMap.remove(existingAssertion.getSessionIndex());
+            sessionIndexMap.remove(StringUtil.defaultIfEmpty(existingAssertion.getSessionIndex(), existingAssertion.getID()));
         }
 
         log.debug("Store Assertion '{}'", assertion.getID());
         assertions.put(session.getId(), new TimeOutWrapper<>(assertion));
-        sessionIndexMap.put(assertion.getSessionIndex(), new TimeOutWrapper<>(session.getId()));
+        sessionIndexMap.put(StringUtil.defaultIfEmpty(assertion.getSessionIndex(), assertion.getID()), new TimeOutWrapper<>(session.getId()));
     }
 
     /**

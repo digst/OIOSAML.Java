@@ -47,6 +47,10 @@ public class Constants {
     public static final String SP_AUDIT_ATTRIBUTE_SESSION_ID = "oiosaml.servlet.audit.logger.attribute.sessionId";
     public static final String SP_SESSION_HANDLER_FACTORY_CLASSNAME ="oiosaml.servlet.session.handler.factory";
     public static final String SP_SESSION_HANDLER_JNDI_NAME ="oiosaml.servlet.session.handler.jdni.name";
+    public static final String SP_SESSION_HANDLER_JDBC_URL = "oiosaml.servlet.session.handler.jdbc.url";
+    public static final String SP_SESSION_HANDLER_JDBC_USERNAME = "oiosaml.servlet.session.handler.jdbc.username";
+    public static final String SP_SESSION_HANDLER_JDBC_PASSWORD = "oiosaml.servlet.session.handler.jdbc.password";
+    public static final String SP_SESSION_HANDLER_JDBC_DRIVER_CLASSNAME = "oiosaml.servlet.session.handler.jdbc.driver.classname";
     public static final String SP_SESSION_HANDLER_NUM_TRACKED_ASSERTIONIDS ="oiosaml.servlet.session.handler.inmemory.numusedassertionids";
 
     // Configuration constants for revocation check settings

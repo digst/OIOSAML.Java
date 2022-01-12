@@ -40,7 +40,7 @@ public class InMemorySessionHandlerFactory implements SessionHandlerFactory {
     }
 
     /**
-     * Get a new session handler.
+     * Get a session handler.
      *
      * @return session handler instance
      */

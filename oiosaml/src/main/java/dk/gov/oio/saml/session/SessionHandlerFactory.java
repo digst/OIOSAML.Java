@@ -28,14 +28,14 @@ import dk.gov.oio.saml.util.InternalException;
 import org.opensaml.core.config.InitializationException;
 
 /**
- * Factory for creating new session handlers.
+ * Factory for creating session handlers.
  *
  * Normally, only one instance of a factory is created (using {@link InternalSessionHandlerFactory}), so implementations must be thread safe.
  */
 public interface SessionHandlerFactory {
 
     /**
-     * Get a new session handler.
+     * Get a session handler.
      * @return session handler instance
      * @throws InternalException on failure to get session handler
      */

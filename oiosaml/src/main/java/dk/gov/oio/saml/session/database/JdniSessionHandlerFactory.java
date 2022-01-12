@@ -5,33 +5,32 @@ import dk.gov.oio.saml.session.SessionHandler;
 import dk.gov.oio.saml.session.SessionHandlerFactory;
 import dk.gov.oio.saml.util.InternalException;
 import org.opensaml.core.config.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 public class JdniSessionHandlerFactory implements SessionHandlerFactory {
+    private static final Logger log = LoggerFactory.getLogger(JdniSessionHandlerFactory.class);
 
-    private String name;
+    private SessionHandler handler;
 
     public JdniSessionHandlerFactory() {
     }
 
     /**
-     * Get a new session handler.
+     * Get a session handler.
      *
      * @return session handler instance
      */
     @Override
     public SessionHandler getHandler() throws InternalException {
-        try {
-            InitialContext ctx = new InitialContext();
-            DataSource ds = (DataSource) ctx.lookup(name);
-
-            return new DatabaseSessionHandler(ds);
-        } catch (NamingException e) {
-            throw new InternalException("Unable to create JNDI database session handler", e);
+        if (null == handler) {
+            throw new InternalException("Please call configure before getHandler");
         }
+        return handler;
     }
 
     /**
@@ -41,6 +40,8 @@ public class JdniSessionHandlerFactory implements SessionHandlerFactory {
      */
     @Override
     public void close() {
+        log.debug("Closing factory with handler '{}'",handler);
+        handler = null;
     }
 
     /**
@@ -50,6 +51,13 @@ public class JdniSessionHandlerFactory implements SessionHandlerFactory {
      */
     @Override
     public void configure(Configuration config) throws InitializationException {
-        name = config.getSessionHandlerJndiName();
+        try {
+            InitialContext ctx = new InitialContext();
+            DataSource ds = (DataSource) ctx.lookup(config.getSessionHandlerJndiName());
+
+            this.handler = new DatabaseSessionHandler(ds);
+        } catch (NamingException e) {
+            throw new InitializationException("Unable to create JNDI database session handler", e);
+        }
     }
 }

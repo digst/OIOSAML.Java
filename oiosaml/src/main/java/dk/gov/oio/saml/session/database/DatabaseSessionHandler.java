@@ -28,6 +28,7 @@ import dk.gov.oio.saml.session.AssertionWrapper;
 import dk.gov.oio.saml.session.AuthnRequestWrapper;
 import dk.gov.oio.saml.session.LogoutRequestWrapper;
 import dk.gov.oio.saml.session.SessionHandler;
+import dk.gov.oio.saml.session.inmemory.TimeOutWrapper;
 import dk.gov.oio.saml.util.InternalException;
 import dk.gov.oio.saml.util.StringUtil;
 import net.shibboleth.utilities.java.support.xml.SerializeSupport;
@@ -53,8 +54,6 @@ import java.util.Date;
 
 public class DatabaseSessionHandler implements SessionHandler {
     private static final Logger log = LoggerFactory.getLogger(DatabaseSessionHandler.class);
-    private static int uniqueId = 0;
-    private static int counter = 0;
 
     private final DataSource ds;
 
@@ -71,9 +70,22 @@ public class DatabaseSessionHandler implements SessionHandler {
      */
     @Override
     public void storeAuthnRequest(HttpSession session, AuthnRequestWrapper request) throws InternalException {
+        if (null == request || null == request.getId()) {
+            log.warn("Ignore AuthRequest with null value or missing ID");
+            return;
+        }
         try (Connection connection=ds.getConnection()){
             connection.setAutoCommit(true);
-            // Create assertion
+
+            AuthnRequestWrapper authnRequest = getAuthnRequest(session);
+            if (null != authnRequest) {
+                log.debug("AuthRequest '{}' will replace '{}'", request.getId(), authnRequest.getId());
+                try (PreparedStatement ps = connection.prepareStatement("DELETE FROM authn_requests_tbl WHERE session_id = ?")) {
+                    ps.setString(1, getSessionId(session));
+                    ps.executeUpdate();
+                }
+            }
+            log.debug("Store AuthRequest '{}'", request.getId());
             try(PreparedStatement ps = connection.prepareStatement("INSERT INTO authn_requests_tbl (session_id, access_time, nsis_level, xml_object) VALUES (?,?,?,?)")) {
                 ps.setString(1, session.getId());
                 ps.setLong(2, System.currentTimeMillis());
@@ -81,6 +93,7 @@ public class DatabaseSessionHandler implements SessionHandler {
                 ps.setBytes(4,  request.getAuthnRequestAsBase64().getBytes(StandardCharsets.UTF_8));
                 ps.executeUpdate();
             }
+
         } catch (SQLException e) {
             log.error("Failure to persist authn request", e);
             throw new InternalException("Failure to persist authn request", e);
@@ -96,16 +109,56 @@ public class DatabaseSessionHandler implements SessionHandler {
      */
     @Override
     public void storeAssertion(HttpSession session, AssertionWrapper assertion) throws InternalException {
+        if (null == assertion || StringUtil.isEmpty(assertion.getID())) {
+            log.warn("Ignore Assertion with null value or missing ID");
+            return;
+        }
+        if (StringUtil.isEmpty(assertion.getSessionIndex())) {
+            log.info("Assertion '{}' with passive session and missing index", assertion.getID());
+        }
+
         try (Connection connection=ds.getConnection()){
             connection.setAutoCommit(true);
-            // Create assertion
+
+            try(PreparedStatement ps = connection.prepareStatement("SELECT '1' FROM replay_tbl WHERE assertion_id = ?")) {
+                ps.setString(1, assertion.getID());
+                try(ResultSet rs = ps.executeQuery()) {
+                    if (rs.first()) {
+                        throw new IllegalArgumentException(String.format("Assertion with id '%s' and session index '%s' is already registered", assertion.getID(), assertion.getSessionIndex()));
+                    }
+                }
+            }
+
+            AssertionWrapper existingAssertion = getAssertion(session);
+            if (null != existingAssertion) {
+                if (assertion.isReplayOf(existingAssertion)) {
+                    log.debug("Assertion '{}' is being replayed", assertion.getID(), existingAssertion.getID());
+                    throw new IllegalArgumentException(String.format("Assertion with id '%s' and session index '%s' is already registered", assertion.getID(), assertion.getSessionIndex()));
+                }
+
+                log.debug("Assertion '{}' will replace '{}'", assertion.getID(), existingAssertion.getID());
+                try (PreparedStatement ps = connection.prepareStatement("DELETE FROM assertions_tbl WHERE session_id = ?")) {
+                    ps.setString(1, getSessionId(session));
+                    ps.executeUpdate();
+                }
+            }
+
+            log.debug("Store Assertion '{}'", assertion.getID());
             try(PreparedStatement ps = connection.prepareStatement("INSERT INTO assertions_tbl (session_id, session_index, access_time, xml_object) VALUES (?,?,?,?)")) {
                 ps.setString(1, session.getId());
-                ps.setString(2, assertion.getSessionIndex());
+                ps.setString(2, StringUtil.defaultIfEmpty(assertion.getSessionIndex(),assertion.getID()));
                 ps.setLong(3, System.currentTimeMillis());
                 ps.setBytes(4,  assertion.getAssertionAsBase64().getBytes(StandardCharsets.UTF_8));
                 ps.executeUpdate();
             }
+
+            log.debug("Add replay entry for assertion '{}'", assertion.getID());
+            try(PreparedStatement ps = connection.prepareStatement("INSERT INTO replay_tbl (assertion_id, access_time) VALUES (?,?)")) {
+                ps.setString(1, assertion.getID());
+                ps.setLong(2, System.currentTimeMillis());
+                ps.executeUpdate();
+            }
+
         } catch (SQLException e) {
             log.error("Failure to persist assertion", e);
             throw new InternalException("Failure to persist assertion", e);
@@ -121,15 +174,29 @@ public class DatabaseSessionHandler implements SessionHandler {
      */
     @Override
     public void storeLogoutRequest(HttpSession session, LogoutRequestWrapper request) throws InternalException {
+        if (null == request || null == request.getID()) {
+            log.warn("Ignore LogoutRequest with null value or missing ID");
+            return;
+        }
         try (Connection connection=ds.getConnection()){
             connection.setAutoCommit(true);
-            // Create assertion
+
+            LogoutRequestWrapper logoutRequest = getLogoutRequest(session);
+            if (null != logoutRequest) {
+                log.debug("LogoutRequest '{}' will replace '{}'", request.getID(), logoutRequest.getID());
+                try (PreparedStatement ps = connection.prepareStatement("DELETE FROM logout_requests_tbl WHERE session_id = ?")) {
+                    ps.setString(1, getSessionId(session));
+                    ps.executeUpdate();
+                }
+            }
+            log.debug("Store LogoutRequest '{}'", request.getID());
             try(PreparedStatement ps = connection.prepareStatement("INSERT INTO logout_requests_tbl (session_id, access_time, xml_object) VALUES (?,?,?)")) {
                 ps.setString(1, session.getId());
                 ps.setLong(2, System.currentTimeMillis());
                 ps.setBytes(3,  request.getLogoutRequestAsBase64().getBytes(StandardCharsets.UTF_8));
                 ps.executeUpdate();
             }
+
         } catch (SQLException e) {
             log.error("Failure to persist logout request", e);
             throw new InternalException("Failure to persist logout request", e);
@@ -147,20 +214,27 @@ public class DatabaseSessionHandler implements SessionHandler {
         try (Connection connection=ds.getConnection()){
             connection.setAutoCommit(true);
 
-            // Update assertions timestamp
-            try(PreparedStatement ps = connection.prepareStatement("UPDATE assertions_tbl SET timestamp = ? WHERE session_id = ?")) {
-                ps.setTimestamp(1, new Timestamp(new Date().getTime()));
-                ps.setString(2, session.getId());
-                ps.executeUpdate();
-            }
+            AssertionWrapper assertionWrapper = null;
 
-            // Retrieve assertion
             try(PreparedStatement ps = connection.prepareStatement("SELECT xml_object FROM assertions_tbl WHERE session_id = ?")) {
                 ps.setString(1, session.getId());
                 try(ResultSet rs = ps.executeQuery()) {
-                    return new AssertionWrapper((Assertion) StringUtil.base64ToXMLObject(new String(rs.getBytes(1), StandardCharsets.UTF_8)));
+                    if (rs.first()) {
+                        assertionWrapper = new AssertionWrapper((Assertion) StringUtil.base64ToXMLObject(new String(rs.getBytes(1), StandardCharsets.UTF_8)));
+                    }
                 }
             }
+
+            if (null != assertionWrapper) {
+                try(PreparedStatement ps = connection.prepareStatement("UPDATE assertions_tbl SET access_time = ? WHERE session_id = ?")) {
+                    ps.setLong(1, System.currentTimeMillis());
+                    ps.setString(2, session.getId());
+                    ps.executeUpdate();
+                }
+            }
+
+            return assertionWrapper;
+
         } catch (SQLException | InternalException e) {
             log.error("Failed retrieving assertion matching sessionId", e);
             throw new RuntimeException("Failed retrieving assertion matching sessionId", e);
@@ -189,20 +263,27 @@ public class DatabaseSessionHandler implements SessionHandler {
         try (Connection connection=ds.getConnection()){
             connection.setAutoCommit(true);
 
-            // Update authn request timestamp
-            try(PreparedStatement ps = connection.prepareStatement("UPDATE authn_requests_tbl SET timestamp = ? WHERE session_id = ?")) {
-                ps.setTimestamp(1, new Timestamp(new Date().getTime()));
-                ps.setString(2, session.getId());
-                ps.executeUpdate();
-            }
+            AuthnRequestWrapper authnRequestWrapper = null;
 
-            // Retrieve assertion
             try(PreparedStatement ps = connection.prepareStatement("SELECT xml_object, nsis_level FROM authn_requests_tbl WHERE session_id = ?")) {
                 ps.setString(1, session.getId());
                 try(ResultSet rs = ps.executeQuery()) {
-                    return new AuthnRequestWrapper((AuthnRequest) StringUtil.base64ToXMLObject(new String(rs.getBytes(1), StandardCharsets.UTF_8)), NSISLevel.valueOf(rs.getString(2)));
+                    if (rs.first()) {
+                        authnRequestWrapper = new AuthnRequestWrapper((AuthnRequest) StringUtil.base64ToXMLObject(new String(rs.getBytes(1), StandardCharsets.UTF_8)), NSISLevel.valueOf(rs.getString(2)));
+                    }
                 }
             }
+
+            if (null != authnRequestWrapper) {
+                try(PreparedStatement ps = connection.prepareStatement("UPDATE authn_requests_tbl SET access_time = ? WHERE session_id = ?")) {
+                    ps.setLong(1, System.currentTimeMillis());
+                    ps.setString(2, session.getId());
+                    ps.executeUpdate();
+                }
+            }
+
+            return authnRequestWrapper;
+
         } catch (SQLException | InternalException e) {
             log.error("Failed retrieving authn request matching sessionId", e);
             throw new RuntimeException("Failed retrieving authn request matching sessionId", e);
@@ -220,20 +301,27 @@ public class DatabaseSessionHandler implements SessionHandler {
         try (Connection connection=ds.getConnection()){
             connection.setAutoCommit(true);
 
-            // Update authn request timestamp
-            try(PreparedStatement ps = connection.prepareStatement("UPDATE logout_requests_tbl SET timestamp = ? WHERE session_id = ?")) {
-                ps.setTimestamp(1, new Timestamp(new Date().getTime()));
-                ps.setString(2, session.getId());
-                ps.executeUpdate();
-            }
+            LogoutRequestWrapper logoutRequestWrapper = null;
 
-            // Retrieve assertion
             try(PreparedStatement ps = connection.prepareStatement("SELECT xml_object FROM logout_requests_tbl WHERE session_id = ?")) {
                 ps.setString(1, session.getId());
                 try(ResultSet rs = ps.executeQuery()) {
-                    return new LogoutRequestWrapper((LogoutRequest) StringUtil.base64ToXMLObject(new String(rs.getBytes(1), StandardCharsets.UTF_8)));
+                    if (rs.first()) {
+                        logoutRequestWrapper = new LogoutRequestWrapper((LogoutRequest) StringUtil.base64ToXMLObject(new String(rs.getBytes(1), StandardCharsets.UTF_8)));
+                    }
                 }
             }
+
+            if (null != logoutRequestWrapper) {
+                try (PreparedStatement ps = connection.prepareStatement("UPDATE logout_requests_tbl SET access_time = ? WHERE session_id = ?")) {
+                    ps.setLong(1, System.currentTimeMillis());
+                    ps.setString(2, session.getId());
+                    ps.executeUpdate();
+                }
+            }
+
+            return logoutRequestWrapper;
+
         } catch (SQLException | InternalException e) {
             log.error("Failed retrieving authn request matching sessionId", e);
             throw new RuntimeException("Failed retrieving authn request matching sessionId", e);
@@ -262,17 +350,20 @@ public class DatabaseSessionHandler implements SessionHandler {
         try (Connection connection=ds.getConnection()){
             connection.setAutoCommit(true);
 
-            // Retrieve assertion
             try(PreparedStatement ps = connection.prepareStatement("SELECT session_id FROM assertions_tbl WHERE session_index = ?")) {
                 ps.setString(1, sessionIndex);
                 try(ResultSet rs = ps.executeQuery()) {
-                    return rs.getString(1);
+                    if (rs.first()) {
+                        return rs.getString(1);
+                    }
                 }
             }
+
         } catch (SQLException e) {
-            log.error("Failed retrieving authn request matching sessionId", e);
-            throw new RuntimeException("Failed retrieving authn request matching sessionId", e);
+            log.error("Failed retrieving sessionId from session index '{}'", sessionIndex, e);
+            throw new RuntimeException("Failed retrieving sessionId from session index", e);
         }
+        return null;
     }
 
     /**
@@ -296,14 +387,22 @@ public class DatabaseSessionHandler implements SessionHandler {
 
     private void logout(String sessionId) {
         log.debug("Invalidate OIOSAML session '{}'", sessionId);
+        try (Connection connection=ds.getConnection()) {
+            connection.setAutoCommit(true);
 
-        if (StringUtil.isEmpty(sessionId)) {
-            return;
+            if (StringUtil.isEmpty(sessionId)) {
+                return;
+            }
+
+            try (PreparedStatement ps = connection.prepareStatement("DELETE FROM assertions_tbl WHERE session_id = ?")) {
+                ps.setString(1, sessionId);
+                ps.executeUpdate();
+            }
+
+        } catch (SQLException e) {
+            log.error("Failed logging out", e);
+            throw new RuntimeException("Failed logging out", e);
         }
-
-        //TODO : invalidate session and assertion
-
-        // delete assertion
     }
 
     /**
@@ -316,24 +415,23 @@ public class DatabaseSessionHandler implements SessionHandler {
         try (Connection connection=ds.getConnection()){
             connection.setAutoCommit(true);
 
-            // TODO: refactor
-
-            // TODO: unit test
-            // TODO: documentation
-
-            // TODO: configuration + debug
-
-
-            String[] tables = new String[] { "assertions", "requests", "requestdata" };
             final long sessionCleanupDelay = (long)maxInactiveIntervalSeconds * 1000;
 
-            for (String table : tables) {
-                try(PreparedStatement ps = connection.prepareStatement("DELETE FROM " + table + " WHERE timestamp < ?")) {
-                    ps.setTimestamp(1, new Timestamp(new Date().getTime() - sessionCleanupDelay));
-                    ps.executeUpdate();
-
-                }
+            try(PreparedStatement ps = connection.prepareStatement("DELETE FROM assertions_tbl WHERE access_time < ?")) {
+                ps.setLong(1, System.currentTimeMillis() - sessionCleanupDelay);
+                ps.executeUpdate();
             }
+
+            try(PreparedStatement ps = connection.prepareStatement("DELETE FROM authn_requests_tbl WHERE access_time < ?")) {
+                ps.setLong(1, System.currentTimeMillis() - sessionCleanupDelay);
+                ps.executeUpdate();
+            }
+
+            try(PreparedStatement ps = connection.prepareStatement("DELETE FROM logout_requests_tbl WHERE access_time < ?")) {
+                ps.setLong(1, System.currentTimeMillis() - sessionCleanupDelay);
+                ps.executeUpdate();
+            }
+
         } catch (SQLException e) {
             log.error("Failed running cleanup", e);
             throw new RuntimeException("Failed running cleanup", e);

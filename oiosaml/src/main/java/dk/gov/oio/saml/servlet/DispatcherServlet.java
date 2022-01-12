@@ -303,6 +303,10 @@ public class DispatcherServlet extends HttpServlet {
                         .setAuditRequestAttributeSessionId(config.get(Constants.SP_AUDIT_ATTRIBUTE_SESSION_ID))
                         .setSessionHandlerFactoryClassName(config.get(Constants.SP_SESSION_HANDLER_FACTORY_CLASSNAME))
                         .setSessionHandlerJndiName(config.get(Constants.SP_SESSION_HANDLER_JNDI_NAME))
+                        .setSessionHandlerJdbcUrl(config.get(Constants.SP_SESSION_HANDLER_JDBC_URL))
+                        .setSessionHandlerJdbcUsername(config.get(Constants.SP_SESSION_HANDLER_JDBC_USERNAME))
+                        .setSessionHandlerJdbcPassword(config.get(Constants.SP_SESSION_HANDLER_JDBC_PASSWORD))
+                        .setSessionHandlerJdbcDriverClassName(config.get(Constants.SP_SESSION_HANDLER_JDBC_DRIVER_CLASSNAME))
                         .build();
 
                 handleOptionalValues(config, configuration);
