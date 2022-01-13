@@ -101,6 +101,7 @@ public class AuditRequestUtil {
      * @param action Identifier for the event which is audited
      * @param description Descriptive name for the event which is audited
      * @return Builder for audit record
+     * @throws InternalException on failure to initialize builder with default parameters from configuration
      */
     public static AuditService.Builder createBasicAuditBuilder(HttpServletRequest request, String action, String description) throws InternalException {
         SessionHandler handler = OIOSAML3Service.getSessionHandlerFactory().getHandler();

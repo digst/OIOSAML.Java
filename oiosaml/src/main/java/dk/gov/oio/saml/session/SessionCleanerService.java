@@ -46,8 +46,10 @@ public class SessionCleanerService {
 
     public synchronized void updateCleaner(HttpSession session) {
         try {
-            if (!initialized && 0 > session.getMaxInactiveInterval()) {
-                startCleaner((long)session.getMaxInactiveInterval() * 1000L);
+            if (!initialized) {
+                startCleaner(0 != session.getMaxInactiveInterval() ?
+                        (long)session.getMaxInactiveInterval() * 1000L :
+                        30L * 60L * 1000L /* default */);
 
                 initialized = true;
             }
@@ -66,7 +68,7 @@ public class SessionCleanerService {
 
         cleanupTimer.schedule(new TimerTask() {
             public void run() {
-                log.debug("Cleaning session data older than {}", maxInactiveInterval);
+                log.debug("Cleaning session data, time: {}, timeout: {}", System.currentTimeMillis(), maxInactiveInterval);
                 try {
                     SessionHandler sessionHandler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
                     sessionHandler.cleanup(maxInactiveInterval);
@@ -74,7 +76,7 @@ public class SessionCleanerService {
                     log.error("Failed removing old session data", e);
                 }
             }
-        }, maxInactiveInterval, maxInactiveInterval);
+        }, 0, maxInactiveInterval);
     }
 
     public void stopCleaner() {
