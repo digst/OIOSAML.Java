@@ -204,21 +204,14 @@ public class DatabaseSessionHandler implements SessionHandler {
         }
     }
 
-    /**
-     * Get Assertion from the current session
-     *
-     * @param session HTTP session
-     * @return Assertion from current session
-     */
-    @Override
-    public AssertionWrapper getAssertion(HttpSession session) {
+    private AssertionWrapper getAssertionFromSessionId(String sessionId) {
         try (Connection connection=ds.getConnection()){
             connection.setAutoCommit(true);
 
             AssertionWrapper assertionWrapper = null;
 
             try(PreparedStatement ps = connection.prepareStatement("SELECT xml_object FROM assertions_tbl WHERE session_id = ?")) {
-                ps.setString(1, getSessionId(session));
+                ps.setString(1, sessionId);
                 try(ResultSet rs = ps.executeQuery()) {
                     if (rs.first()) {
                         assertionWrapper = new AssertionWrapper((Assertion) StringUtil.base64ToXMLObject(new String(rs.getBytes(1), StandardCharsets.UTF_8)));
@@ -229,7 +222,7 @@ public class DatabaseSessionHandler implements SessionHandler {
             if (null != assertionWrapper) {
                 try(PreparedStatement ps = connection.prepareStatement("UPDATE assertions_tbl SET access_time = ? WHERE session_id = ?")) {
                     ps.setLong(1, System.currentTimeMillis());
-                    ps.setString(2, getSessionId(session));
+                    ps.setString(2, sessionId);
                     ps.executeUpdate();
                 }
             }
@@ -243,6 +236,17 @@ public class DatabaseSessionHandler implements SessionHandler {
     }
 
     /**
+     * Get Assertion from the current session
+     *
+     * @param session HTTP session
+     * @return Assertion from current session
+     */
+    @Override
+    public AssertionWrapper getAssertion(HttpSession session) {
+        return getAssertionFromSessionId(getSessionId(session));
+    }
+
+    /**
      * Get Assertion matching sessionIndex
      *
      * @param sessionIndex OPENSAML sessionIndex
@@ -250,7 +254,7 @@ public class DatabaseSessionHandler implements SessionHandler {
      */
     @Override
     public AssertionWrapper getAssertion(String sessionIndex) {
-        return getAssertion(getSessionId(sessionIndex));
+        return getAssertionFromSessionId(getSessionId(sessionIndex));
     }
 
     /**
