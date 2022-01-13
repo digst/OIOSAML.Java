@@ -86,11 +86,12 @@ public class DatabaseSessionHandler implements SessionHandler {
                 }
             }
             log.debug("Store AuthRequest '{}'", request.getId());
-            try(PreparedStatement ps = connection.prepareStatement("INSERT INTO authn_requests_tbl (session_id, access_time, nsis_level, xml_object) VALUES (?,?,?,?)")) {
-                ps.setString(1, session.getId());
+            try(PreparedStatement ps = connection.prepareStatement("INSERT INTO authn_requests_tbl (session_id, access_time, nsis_level, request_path, xml_object) VALUES (?,?,?,?,?)")) {
+                ps.setString(1, getSessionId(session));
                 ps.setLong(2, System.currentTimeMillis());
                 ps.setString(3, request.getRequestedNsisLevel().name());
-                ps.setBytes(4,  request.getAuthnRequestAsBase64().getBytes(StandardCharsets.UTF_8));
+                ps.setString(4, request.getRequestPath());
+                ps.setBytes(5,  request.getAuthnRequestAsBase64().getBytes(StandardCharsets.UTF_8));
                 ps.executeUpdate();
             }
 
@@ -145,7 +146,7 @@ public class DatabaseSessionHandler implements SessionHandler {
 
             log.debug("Store Assertion '{}'", assertion.getID());
             try(PreparedStatement ps = connection.prepareStatement("INSERT INTO assertions_tbl (session_id, session_index, access_time, xml_object) VALUES (?,?,?,?)")) {
-                ps.setString(1, session.getId());
+                ps.setString(1, getSessionId(session));
                 ps.setString(2, StringUtil.defaultIfEmpty(assertion.getSessionIndex(),assertion.getID()));
                 ps.setLong(3, System.currentTimeMillis());
                 ps.setBytes(4,  assertion.getAssertionAsBase64().getBytes(StandardCharsets.UTF_8));
@@ -191,7 +192,7 @@ public class DatabaseSessionHandler implements SessionHandler {
             }
             log.debug("Store LogoutRequest '{}'", request.getID());
             try(PreparedStatement ps = connection.prepareStatement("INSERT INTO logout_requests_tbl (session_id, access_time, xml_object) VALUES (?,?,?)")) {
-                ps.setString(1, session.getId());
+                ps.setString(1, getSessionId(session));
                 ps.setLong(2, System.currentTimeMillis());
                 ps.setBytes(3,  request.getLogoutRequestAsBase64().getBytes(StandardCharsets.UTF_8));
                 ps.executeUpdate();
@@ -217,7 +218,7 @@ public class DatabaseSessionHandler implements SessionHandler {
             AssertionWrapper assertionWrapper = null;
 
             try(PreparedStatement ps = connection.prepareStatement("SELECT xml_object FROM assertions_tbl WHERE session_id = ?")) {
-                ps.setString(1, session.getId());
+                ps.setString(1, getSessionId(session));
                 try(ResultSet rs = ps.executeQuery()) {
                     if (rs.first()) {
                         assertionWrapper = new AssertionWrapper((Assertion) StringUtil.base64ToXMLObject(new String(rs.getBytes(1), StandardCharsets.UTF_8)));
@@ -228,7 +229,7 @@ public class DatabaseSessionHandler implements SessionHandler {
             if (null != assertionWrapper) {
                 try(PreparedStatement ps = connection.prepareStatement("UPDATE assertions_tbl SET access_time = ? WHERE session_id = ?")) {
                     ps.setLong(1, System.currentTimeMillis());
-                    ps.setString(2, session.getId());
+                    ps.setString(2, getSessionId(session));
                     ps.executeUpdate();
                 }
             }
@@ -265,11 +266,11 @@ public class DatabaseSessionHandler implements SessionHandler {
 
             AuthnRequestWrapper authnRequestWrapper = null;
 
-            try(PreparedStatement ps = connection.prepareStatement("SELECT xml_object, nsis_level FROM authn_requests_tbl WHERE session_id = ?")) {
-                ps.setString(1, session.getId());
+            try(PreparedStatement ps = connection.prepareStatement("SELECT xml_object, nsis_level, request_path FROM authn_requests_tbl WHERE session_id = ?")) {
+                ps.setString(1, getSessionId(session));
                 try(ResultSet rs = ps.executeQuery()) {
                     if (rs.first()) {
-                        authnRequestWrapper = new AuthnRequestWrapper((AuthnRequest) StringUtil.base64ToXMLObject(new String(rs.getBytes(1), StandardCharsets.UTF_8)), NSISLevel.valueOf(rs.getString(2)));
+                        authnRequestWrapper = new AuthnRequestWrapper((AuthnRequest) StringUtil.base64ToXMLObject(new String(rs.getBytes(1), StandardCharsets.UTF_8)), NSISLevel.valueOf(rs.getString(2)), rs.getString(3));
                     }
                 }
             }
@@ -277,7 +278,7 @@ public class DatabaseSessionHandler implements SessionHandler {
             if (null != authnRequestWrapper) {
                 try(PreparedStatement ps = connection.prepareStatement("UPDATE authn_requests_tbl SET access_time = ? WHERE session_id = ?")) {
                     ps.setLong(1, System.currentTimeMillis());
-                    ps.setString(2, session.getId());
+                    ps.setString(2, getSessionId(session));
                     ps.executeUpdate();
                 }
             }
@@ -304,7 +305,7 @@ public class DatabaseSessionHandler implements SessionHandler {
             LogoutRequestWrapper logoutRequestWrapper = null;
 
             try(PreparedStatement ps = connection.prepareStatement("SELECT xml_object FROM logout_requests_tbl WHERE session_id = ?")) {
-                ps.setString(1, session.getId());
+                ps.setString(1, getSessionId(session));
                 try(ResultSet rs = ps.executeQuery()) {
                     if (rs.first()) {
                         logoutRequestWrapper = new LogoutRequestWrapper((LogoutRequest) StringUtil.base64ToXMLObject(new String(rs.getBytes(1), StandardCharsets.UTF_8)));
@@ -315,7 +316,7 @@ public class DatabaseSessionHandler implements SessionHandler {
             if (null != logoutRequestWrapper) {
                 try (PreparedStatement ps = connection.prepareStatement("UPDATE logout_requests_tbl SET access_time = ? WHERE session_id = ?")) {
                     ps.setLong(1, System.currentTimeMillis());
-                    ps.setString(2, session.getId());
+                    ps.setString(2, getSessionId(session));
                     ps.executeUpdate();
                 }
             }

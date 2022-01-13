@@ -3,7 +3,6 @@ package dk.gov.oio.saml.util;
 public class Constants {
 
     // Session constants
-    public static final String SESSION_REQUESTED_PATH = "oiosaml.request.path";
     public static final String SESSION_ERROR_TYPE = "oiosaml.error.type";
     public static final String SESSION_ERROR_MESSAGE = "oiosaml.error.message";
 

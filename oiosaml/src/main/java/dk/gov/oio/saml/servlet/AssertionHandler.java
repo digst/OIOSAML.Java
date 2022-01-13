@@ -152,11 +152,8 @@ public class AssertionHandler extends SAMLHandler {
                 .withAuthnAttribute("SP_SESSION_ID", sessionHandler.getSessionId(session))
                 .withAuthnAttribute("SP_SESSION_TIMEOUT", String.valueOf(session.getMaxInactiveInterval())));
 
-        // Redirect
-        String attribute = Objects.toString(session.getAttribute(Constants.SESSION_REQUESTED_PATH),"");
-
         // redirect to SESSION_REQUESTED_PATH or to login page if not found
-        String url = StringUtil.defaultIfEmpty(attribute,
+        String url = StringUtil.defaultIfEmpty(authnRequest.getRequestPath(),
                 StringUtil.getUrl(httpServletRequest, OIOSAML3Service.getConfig().getLoginPage()));
 
         OIOSAML3Service.getAuditService().auditLog(AuditRequestUtil

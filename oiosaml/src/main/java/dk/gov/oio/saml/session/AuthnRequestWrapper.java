@@ -24,8 +24,9 @@ public class AuthnRequestWrapper implements Serializable {
     private String issueInstant;
     private String destination;
     private String authnRequestAsBase64;
+    private String requestPath;
 
-    public AuthnRequestWrapper(AuthnRequest authnRequest, NSISLevel requestedNsisLevel) throws InternalException {
+    public AuthnRequestWrapper(AuthnRequest authnRequest, NSISLevel requestedNsisLevel, String requestPath) throws InternalException {
         this.authnRequestAsBase64 = StringUtil.xmlObjectToBase64(authnRequest);
 
         // get ContextClassRefs
@@ -45,6 +46,7 @@ public class AuthnRequestWrapper implements Serializable {
         this.passive = authnRequest.isPassive();
         this.forceAuthn = authnRequest.isForceAuthn();
         this.requestedNsisLevel = requestedNsisLevel;
+        this.requestPath = requestPath;
         this.destination = authnRequest.getDestination();
 
         Issuer issuer = authnRequest.getIssuer();
@@ -87,6 +89,10 @@ public class AuthnRequestWrapper implements Serializable {
 
     public String getDestination() {
         return destination;
+    }
+
+    public String getRequestPath() {
+        return requestPath;
     }
 
     public String getAuthnRequestAsBase64() {

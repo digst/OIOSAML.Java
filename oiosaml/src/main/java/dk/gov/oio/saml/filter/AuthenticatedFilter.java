@@ -98,21 +98,20 @@ public class AuthenticatedFilter implements Filter {
 
                 AuthnRequestService authnRequestService = AuthnRequestService.getInstance();
 
-                String reqPath = req.getRequestURI();
+                String requestPath = req.getRequestURI();
                 if(req.getQueryString() != null) {
-                    reqPath += "?" + req.getQueryString();
+                    requestPath += "?" + req.getQueryString();
                 }
 
-                req.getSession().setAttribute(Constants.SESSION_REQUESTED_PATH, reqPath);
                 MessageContext<SAMLObject> authnRequest = authnRequestService.createMessageWithAuthnRequest(isPassive, forceAuthn, requiredNsisLevel, attributeProfile);
 
                 //Audit logging
                 OIOSAML3Service.getAuditService().auditLog(AuditRequestUtil
                         .createBasicAuditBuilder(req, "BSA1", "AuthnRequest")
                         .withAuthnAttribute("AUTHN_REQUEST_ID", ((AuthnRequest)authnRequest.getMessage()).getID())
-                        .withAuthnAttribute("URL", req.getContextPath()));
+                        .withAuthnAttribute("URL", requestPath));
 
-                sendAuthnRequest(req, res, authnRequest, requiredNsisLevel);
+                sendAuthnRequest(req, res, authnRequest, requiredNsisLevel, requestPath);
             }
             else {
                 try {
@@ -174,7 +173,7 @@ public class AuthenticatedFilter implements Filter {
         }
     }
 
-    private void sendAuthnRequest(HttpServletRequest req, HttpServletResponse res, MessageContext<SAMLObject> authnRequest, NSISLevel requestedNsisLevel) throws InternalException {
+    private void sendAuthnRequest(HttpServletRequest req, HttpServletResponse res, MessageContext<SAMLObject> authnRequest, NSISLevel requestedNsisLevel, String requestPath) throws InternalException {
         try {
             log.debug("AuthnRequest: {}", StringUtil.elementToString(SamlHelper.marshallObject(authnRequest.getMessage())));
         }
@@ -184,7 +183,7 @@ public class AuthenticatedFilter implements Filter {
 
         // Save authnRequest on session
         SessionHandler sessionHandler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
-        AuthnRequestWrapper wrapper = new AuthnRequestWrapper((AuthnRequest) authnRequest.getMessage(), requiredNsisLevel);
+        AuthnRequestWrapper wrapper = new AuthnRequestWrapper((AuthnRequest) authnRequest.getMessage(), requiredNsisLevel, requestPath);
 
         sessionHandler.storeAuthnRequest(req.getSession(), wrapper);
 

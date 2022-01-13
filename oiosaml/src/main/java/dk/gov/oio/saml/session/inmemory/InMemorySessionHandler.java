@@ -72,7 +72,7 @@ public class InMemorySessionHandler implements SessionHandler {
             log.debug("AuthRequest '{}' will replace '{}'", request.getId(), authnRequest.getId());
         }
         log.debug("Store AuthRequest '{}'", request.getId());
-        authnRequests.put(session.getId(),new TimeOutWrapper<>(request));
+        authnRequests.put(getSessionId(session),new TimeOutWrapper<>(request));
     }
 
     /**
@@ -111,8 +111,8 @@ public class InMemorySessionHandler implements SessionHandler {
         }
 
         log.debug("Store Assertion '{}'", assertion.getID());
-        assertions.put(session.getId(), new TimeOutWrapper<>(assertion));
-        sessionIndexMap.put(StringUtil.defaultIfEmpty(assertion.getSessionIndex(), assertion.getID()), new TimeOutWrapper<>(session.getId()));
+        assertions.put(getSessionId(session), new TimeOutWrapper<>(assertion));
+        sessionIndexMap.put(StringUtil.defaultIfEmpty(assertion.getSessionIndex(), assertion.getID()), new TimeOutWrapper<>(getSessionId(session)));
     }
 
     /**
@@ -132,7 +132,7 @@ public class InMemorySessionHandler implements SessionHandler {
             log.debug("LogoutRequest '{}' will replace '{}'", request.getID(), logoutRequest.getID());
         }
         log.debug("Store LogoutRequest '{}'", request.getID());
-        logoutRequests.put(session.getId(),new TimeOutWrapper<>(request));
+        logoutRequests.put(getSessionId(session),new TimeOutWrapper<>(request));
     }
 
     /**
@@ -143,11 +143,11 @@ public class InMemorySessionHandler implements SessionHandler {
      */
     @Override
     public AuthnRequestWrapper getAuthnRequest(HttpSession session) {
-        TimeOutWrapper<AuthnRequestWrapper> wrapperTimeOutWrapper = authnRequests.get(session.getId());
+        TimeOutWrapper<AuthnRequestWrapper> wrapperTimeOutWrapper = authnRequests.get(getSessionId(session));
         if (null == wrapperTimeOutWrapper || null == wrapperTimeOutWrapper.getObject()) {
             return null;
         }
-        log.debug("Get AuthnRequest from the current session '{}'", session.getId());
+        log.debug("Get AuthnRequest from the current session '{}'", getSessionId(session));
         wrapperTimeOutWrapper.setAccesstime();
 
         return wrapperTimeOutWrapper.getObject();
@@ -161,11 +161,11 @@ public class InMemorySessionHandler implements SessionHandler {
      */
     @Override
     public AssertionWrapper getAssertion(HttpSession session) {
-        TimeOutWrapper<AssertionWrapper> wrapperTimeOutWrapper = assertions.get(session.getId());
+        TimeOutWrapper<AssertionWrapper> wrapperTimeOutWrapper = assertions.get(getSessionId(session));
         if (null == wrapperTimeOutWrapper || null == wrapperTimeOutWrapper.getObject()) {
             return null;
         }
-        log.debug("Get AssertionWrapper from the current session '{}'", session.getId());
+        log.debug("Get AssertionWrapper from the current session '{}'", getSessionId(session));
         wrapperTimeOutWrapper.setAccesstime();
 
         return wrapperTimeOutWrapper.getObject();
@@ -203,11 +203,11 @@ public class InMemorySessionHandler implements SessionHandler {
      */
     @Override
     public LogoutRequestWrapper getLogoutRequest(HttpSession session) {
-        TimeOutWrapper<LogoutRequestWrapper> wrapperTimeOutWrapper = logoutRequests.get(session.getId());
+        TimeOutWrapper<LogoutRequestWrapper> wrapperTimeOutWrapper = logoutRequests.get(getSessionId(session));
         if (null == wrapperTimeOutWrapper || null == wrapperTimeOutWrapper.getObject()) {
             return null;
         }
-        log.debug("Get LogoutRequestWrapper from the current session '{}'", session.getId());
+        log.debug("Get LogoutRequestWrapper from the current session '{}'", getSessionId(session));
         wrapperTimeOutWrapper.setAccesstime();
 
         return wrapperTimeOutWrapper.getObject();

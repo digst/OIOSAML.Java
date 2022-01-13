@@ -29,6 +29,7 @@ CREATE TABLE authn_requests_tbl
     session_id VARCHAR(255) NOT NULL,
     access_time LONG NOT NULL,
     nsis_level VARCHAR(100) NOT NULL,
+    request_path VARCHAR(8000) NOT NULL,
     xml_object BLOB,
     CONSTRAINT authn_requests_session_id_pk PRIMARY KEY (session_id)
 );

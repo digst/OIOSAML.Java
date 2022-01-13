@@ -405,8 +405,12 @@ public class AuthenticatedFilterTest {
         // invoke method to be tested
         filter.doFilter(request, Mockito.mock(HttpServletResponse.class), Mockito.mock(FilterChain.class));
 
+        ArgumentCaptor<AuthnRequestWrapper> authnRequestWrapperArgumentCaptor = ArgumentCaptor.forClass(AuthnRequestWrapper.class);
+
         // verify that URL is added to the session
-        Mockito.verify(session, Mockito.times(1)).setAttribute(Constants.SESSION_REQUESTED_PATH,"/some/url?var1=1&var2=2");
+        Mockito.verify(sessionHandler, Mockito.times(1)).storeAuthnRequest(Mockito.eq(session), authnRequestWrapperArgumentCaptor.capture());
+
+        Assertions.assertEquals("/some/url?var1=1&var2=2", authnRequestWrapperArgumentCaptor.getValue().getRequestPath());
     }
 
     @DisplayName("Not setting SESSION_REQUESTED_PATH on current session")
@@ -434,8 +438,8 @@ public class AuthenticatedFilterTest {
         // invoke method to be tested
         filter.doFilter(request, Mockito.mock(HttpServletResponse.class), Mockito.mock(FilterChain.class));
 
-        // verify that URL is added to the session
-        Mockito.verify(session,Mockito.never()).setAttribute(Mockito.eq(Constants.SESSION_REQUESTED_PATH), Mockito.any());
+        // verify that authnrequest with URL is not added to the session
+        Mockito.verify(sessionHandler, Mockito.never()).storeAuthnRequest(Mockito.eq(session), Mockito.any(AuthnRequestWrapper.class));
     }
 
     private FilterConfig getConfig(boolean isPassive, boolean forceAuthn, String requiredLevel) {
