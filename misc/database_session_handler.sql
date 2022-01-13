@@ -18,6 +18,8 @@ CREATE TABLE assertions_tbl
 (
     session_id VARCHAR(255) NOT NULL,
     session_index VARCHAR(255) NOT NULL,
+    assertion_id VARCHAR(255) NOT NULL,
+    subject_name_id VARCHAR(255) NOT NULL,
     access_time LONG NOT NULL,
     xml_object BLOB,
     CONSTRAINT assertions_session_id_pk PRIMARY KEY (session_id),

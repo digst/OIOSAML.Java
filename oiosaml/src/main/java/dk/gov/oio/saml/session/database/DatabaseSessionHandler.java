@@ -23,7 +23,9 @@
  */
 package dk.gov.oio.saml.session.database;
 
+import dk.gov.oio.saml.audit.AuditService;
 import dk.gov.oio.saml.model.NSISLevel;
+import dk.gov.oio.saml.service.OIOSAML3Service;
 import dk.gov.oio.saml.session.AssertionWrapper;
 import dk.gov.oio.saml.session.AuthnRequestWrapper;
 import dk.gov.oio.saml.session.LogoutRequestWrapper;
@@ -145,11 +147,13 @@ public class DatabaseSessionHandler implements SessionHandler {
             }
 
             log.debug("Store Assertion '{}'", assertion.getID());
-            try(PreparedStatement ps = connection.prepareStatement("INSERT INTO assertions_tbl (session_id, session_index, access_time, xml_object) VALUES (?,?,?,?)")) {
+            try(PreparedStatement ps = connection.prepareStatement("INSERT INTO assertions_tbl (session_id, session_index, assertion_id, subject_name_id, access_time, xml_object) VALUES (?,?,?,?,?,?)")) {
                 ps.setString(1, getSessionId(session));
                 ps.setString(2, StringUtil.defaultIfEmpty(assertion.getSessionIndex(),assertion.getID()));
-                ps.setLong(3, System.currentTimeMillis());
-                ps.setBytes(4,  assertion.getAssertionAsBase64().getBytes(StandardCharsets.UTF_8));
+                ps.setString(3, assertion.getID());
+                ps.setString(4, assertion.getSubjectNameId());
+                ps.setLong(5, System.currentTimeMillis());
+                ps.setBytes(6,  assertion.getAssertionAsBase64().getBytes(StandardCharsets.UTF_8));
                 ps.executeUpdate();
             }
 
@@ -406,7 +410,6 @@ public class DatabaseSessionHandler implements SessionHandler {
 
         } catch (SQLException e) {
             log.error("Failed logging out", e);
-            throw new RuntimeException("Failed logging out", e);
         }
     }
 
@@ -421,6 +424,23 @@ public class DatabaseSessionHandler implements SessionHandler {
             connection.setAutoCommit(true);
 
             final long sessionCleanupDelay = (long)maxInactiveIntervalSeconds * 1000;
+            final long replayCleanupDelay = (long) 24 * 60 * 60 * 1000; /* Save replay for a day */
+
+            try(PreparedStatement ps = connection.prepareStatement("SELECT session_id, assertion_id, subject_name_id FROM assertions_tbl WHERE access_time < ?")) {
+                ps.setLong(1, System.currentTimeMillis() - sessionCleanupDelay);
+                try(ResultSet rs = ps.executeQuery()) {
+                    rs.beforeFirst();
+                    while(rs.next()) {
+                        OIOSAML3Service.getAuditService().auditLog(new AuditService
+                                .Builder()
+                                .withAuthnAttribute("ACTION", "TIMEOUT")
+                                .withAuthnAttribute("DESCRIPTION", "SessionDestroyed")
+                                .withAuthnAttribute("SP_SESSION_ID", rs.getString(1))
+                                .withAuthnAttribute("ASSERTION_ID", rs.getString(2))
+                                .withAuthnAttribute("SUBJECT_NAME_ID", rs.getString(3)));
+                    }
+                }
+            }
 
             try(PreparedStatement ps = connection.prepareStatement("DELETE FROM assertions_tbl WHERE access_time < ?")) {
                 ps.setLong(1, System.currentTimeMillis() - sessionCleanupDelay);
@@ -437,9 +457,13 @@ public class DatabaseSessionHandler implements SessionHandler {
                 ps.executeUpdate();
             }
 
+            try(PreparedStatement ps = connection.prepareStatement("DELETE FROM replay_tbl WHERE access_time < ?")) {
+                ps.setLong(1, System.currentTimeMillis() - replayCleanupDelay);
+                ps.executeUpdate();
+            }
+
         } catch (SQLException e) {
             log.error("Failed running cleanup", e);
-            throw new RuntimeException("Failed running cleanup", e);
         }
     }
 }

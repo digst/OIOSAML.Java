@@ -15,7 +15,7 @@ import javax.servlet.http.HttpSession;
 
 import dk.gov.oio.saml.config.Configuration;
 import dk.gov.oio.saml.service.OIOSAML3Service;
-import dk.gov.oio.saml.session.SessionHandler;
+import dk.gov.oio.saml.session.*;
 import dk.gov.oio.saml.util.*;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.slf4j.Logger;
@@ -28,9 +28,6 @@ import org.opensaml.saml.saml2.core.AuthnRequest;
 
 import dk.gov.oio.saml.model.NSISLevel;
 import dk.gov.oio.saml.service.AuthnRequestService;
-import dk.gov.oio.saml.session.AssertionWrapper;
-import dk.gov.oio.saml.session.AssertionWrapperHolder;
-import dk.gov.oio.saml.session.AuthnRequestWrapper;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 
 public class AuthenticatedFilter implements Filter {
@@ -89,6 +86,7 @@ public class AuthenticatedFilter implements Filter {
         log.debug("AuthenticatedFilter invoked by endpoint: '{}{}'", req.getContextPath(), req.getServletPath());
 
         try {
+            OIOSAML3Service.getSessionCleanerService().updateCleaner(req.getSession());
             SessionHandler sessionHandler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
             AssertionWrapper assertionWrapper = sessionHandler.getAssertion(req.getSession());
 
@@ -151,6 +149,7 @@ public class AuthenticatedFilter implements Filter {
 
     @Override
     public void destroy() {
+        OIOSAML3Service.getSessionCleanerService().stopCleaner();
         OIOSAML3Service.getSessionHandlerFactory().close();
     }
 

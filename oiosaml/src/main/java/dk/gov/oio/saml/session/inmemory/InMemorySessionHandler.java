@@ -297,7 +297,7 @@ public class InMemorySessionHandler implements SessionHandler {
                             .Builder()
                             .withAuthnAttribute("ACTION", "TIMEOUT")
                             .withAuthnAttribute("DESCRIPTION", "SessionDestroyed")
-                            .withAuthnAttribute("SESSION_ID", String.valueOf(key))
+                            .withAuthnAttribute("SP_SESSION_ID", String.valueOf(key))
                             .withAuthnAttribute("ASSERTION_ID", ((AssertionWrapper) tow.getObject()).getID())
                             .withAuthnAttribute("SUBJECT_NAME_ID", ((AssertionWrapper) tow.getObject()).getSubjectNameId()));
                 }
