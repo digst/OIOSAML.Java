@@ -419,15 +419,14 @@ public class DatabaseSessionHandler implements SessionHandler {
      * @param maxInactiveIntervalSeconds Milliseconds to store session, before it should be invalidated.
      */
     @Override
-    public void cleanup(long maxInactiveIntervalSeconds) {
+    public void cleanup(final long maxInactiveIntervalSeconds) {
         try (Connection connection=ds.getConnection()){
             connection.setAutoCommit(true);
 
-            final long sessionCleanupDelay = (long)maxInactiveIntervalSeconds * 1000;
             final long replayCleanupDelay = (long) 24 * 60 * 60 * 1000; /* Save replay for a day */
 
             try(PreparedStatement ps = connection.prepareStatement("SELECT session_id, assertion_id, subject_name_id FROM assertions_tbl WHERE access_time < ?")) {
-                ps.setLong(1, System.currentTimeMillis() - sessionCleanupDelay);
+                ps.setLong(1, System.currentTimeMillis() - maxInactiveIntervalSeconds);
                 try(ResultSet rs = ps.executeQuery()) {
                     rs.beforeFirst();
                     while(rs.next()) {
@@ -443,17 +442,17 @@ public class DatabaseSessionHandler implements SessionHandler {
             }
 
             try(PreparedStatement ps = connection.prepareStatement("DELETE FROM assertions_tbl WHERE access_time < ?")) {
-                ps.setLong(1, System.currentTimeMillis() - sessionCleanupDelay);
+                ps.setLong(1, System.currentTimeMillis() - maxInactiveIntervalSeconds);
                 ps.executeUpdate();
             }
 
             try(PreparedStatement ps = connection.prepareStatement("DELETE FROM authn_requests_tbl WHERE access_time < ?")) {
-                ps.setLong(1, System.currentTimeMillis() - sessionCleanupDelay);
+                ps.setLong(1, System.currentTimeMillis() - maxInactiveIntervalSeconds);
                 ps.executeUpdate();
             }
 
             try(PreparedStatement ps = connection.prepareStatement("DELETE FROM logout_requests_tbl WHERE access_time < ?")) {
-                ps.setLong(1, System.currentTimeMillis() - sessionCleanupDelay);
+                ps.setLong(1, System.currentTimeMillis() - maxInactiveIntervalSeconds);
                 ps.executeUpdate();
             }
 
