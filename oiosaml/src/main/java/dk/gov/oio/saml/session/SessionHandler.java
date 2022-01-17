@@ -131,7 +131,6 @@ public interface SessionHandler {
      * Invalidate current session and assertion
      * @param session session to invalidate
      * @param assertion assertion to invalidate
-     *
      */
     void logout(HttpSession session, AssertionWrapper assertion);
 

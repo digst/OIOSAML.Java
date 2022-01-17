@@ -53,6 +53,16 @@ class InMemorySessionHandlerTest extends BaseServiceTest /* Require metadata fro
         return IdpUtil.createLogoutRequest("NAMEID", NameID.PERSISTENT, TestConstants.IDP_LOGOUT_REQUEST_URL);
     }
 
+    @DisplayName("Test stored missing AuthnRequest will exit")
+    @Test
+    void testStoreAuthnRequestMissingAuthnRequest() throws Exception {
+
+        sessionHandler.storeAuthnRequest(session, null);
+
+        // Will never reach biz logic
+        Mockito.verify(session, Mockito.never()).getId();
+    }
+
     @DisplayName("Test that stored AuthnRequest can be retrieved")
     @Test
     void testStoreAuthnRequest() throws InternalException, InitializationException {
@@ -88,6 +98,16 @@ class InMemorySessionHandlerTest extends BaseServiceTest /* Require metadata fro
 
         AuthnRequestWrapper authnRequestWrapperOutput = sessionHandler.getAuthnRequest(session);
         Assertions.assertNull(authnRequestWrapperOutput);
+    }
+
+    @DisplayName("Test stored missing Assertion will exit")
+    @Test
+    void testStoreAssertionMissingAssertion() throws Exception {
+
+        sessionHandler.storeAssertion(session, null);
+
+        // Will never reach biz logic
+        Mockito.verify(session, Mockito.never()).getId();
     }
 
     @DisplayName("Test that stored Assertion can be retrieved")
@@ -171,6 +191,16 @@ class InMemorySessionHandlerTest extends BaseServiceTest /* Require metadata fro
             sessionHandler.storeAssertion(session, assertionWrapperInput);
         });
         Assertions.assertEquals(String.format("Assertion ID begin replayed: '%s'",assertionWrapperInput.getID()), exception.getMessage());
+    }
+
+    @DisplayName("Test stored missing LogoutRequest will exit")
+    @Test
+    void testStoreLogoutRequestMissingLogoutRequest() throws Exception {
+
+        sessionHandler.storeLogoutRequest(session, null);
+
+        // Will never reach biz logic
+        Mockito.verify(session, Mockito.never()).getId();
     }
 
     @DisplayName("Test that stored LogoutRequest can be retrieved")

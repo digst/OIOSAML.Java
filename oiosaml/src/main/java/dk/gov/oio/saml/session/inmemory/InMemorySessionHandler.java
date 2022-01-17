@@ -93,8 +93,8 @@ public class InMemorySessionHandler implements SessionHandler {
 
         // Replay validation
         if(usedAssertionIds.contains(assertion.getID())) {
-            log.error("Assertion '{}' is begin replayed", assertion.getID());
-            throw new IllegalArgumentException(String.format("Assertion ID begin replayed: '%s'", assertion.getID()));
+            log.error("Assertion '{}' is being replayed", assertion.getID());
+            throw new IllegalArgumentException(String.format("Assertion ID being replayed: '%s'", assertion.getID()));
         }
         usedAssertionIds.add(assertion.getID());
 

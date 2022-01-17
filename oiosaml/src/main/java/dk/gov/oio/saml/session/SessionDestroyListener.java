@@ -57,7 +57,8 @@ public class SessionDestroyListener implements HttpSessionListener {
         try {
             SessionHandler handler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
             boolean loggedIn = handler.isAuthenticated(httpSessionEvent.getSession());
-            log.debug("User logged in: {}", loggedIn);
+            String sessionId = handler.getSessionId(httpSessionEvent.getSession());
+            log.debug("User on session {} logged in: {}", sessionId, loggedIn);
 
             if (loggedIn) {
                 AssertionWrapper assertion = handler.getAssertion(httpSessionEvent.getSession());
@@ -66,7 +67,7 @@ public class SessionDestroyListener implements HttpSessionListener {
                                 .Builder()
                                 .withAuthnAttribute("ACTION", "TIMEOUT")
                                 .withAuthnAttribute("DESCRIPTION", "SessionDestroyed")
-                                .withAuthnAttribute("SP_SESSION_ID", handler.getSessionId(httpSessionEvent.getSession()))
+                                .withAuthnAttribute("SP_SESSION_ID", sessionId)
                                 .withAuthnAttribute("ASSERTION_ID", assertion.getID())
                                 .withAuthnAttribute("SUBJECT_NAME_ID", assertion.getSubjectNameId()));
 
@@ -75,7 +76,7 @@ public class SessionDestroyListener implements HttpSessionListener {
                 log.debug("Session destroyed without saml assertion");
             }
         } catch (InternalException ex) {
-            ex.printStackTrace();
+            log.error("Error trying to logout http session {}", httpSessionEvent.getSession().getId(), ex);
         }
     }
 }

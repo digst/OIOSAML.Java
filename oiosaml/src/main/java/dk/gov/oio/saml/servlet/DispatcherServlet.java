@@ -147,7 +147,7 @@ public class DispatcherServlet extends HttpServlet {
 
         value = config.get(Constants.SP_SESSION_HANDLER_NUM_TRACKED_ASSERTIONIDS);
         try {
-            configuration.setSessionHandlerNumTrackedSessionIds(Integer.parseInt(StringUtil.defaultIfEmpty(value,"10000")));
+            configuration.setSessionHandlerInMemoryMaxNumTrackedSessionIds(Integer.parseInt(StringUtil.defaultIfEmpty(value,"10000")));
         }
         catch (Exception ex) {
             log.error("Invalid value {} = {}", Constants.SP_SESSION_HANDLER_NUM_TRACKED_ASSERTIONIDS, value, ex);

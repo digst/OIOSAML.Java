@@ -52,6 +52,7 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
+import java.time.Clock;
 import java.util.Date;
 
 public class DatabaseSessionHandler implements SessionHandler {
@@ -90,7 +91,7 @@ public class DatabaseSessionHandler implements SessionHandler {
             log.debug("Store AuthRequest '{}'", request.getId());
             try(PreparedStatement ps = connection.prepareStatement("INSERT INTO authn_requests_tbl (session_id, access_time, nsis_level, request_path, xml_object) VALUES (?,?,?,?,?)")) {
                 ps.setString(1, getSessionId(session));
-                ps.setLong(2, System.currentTimeMillis());
+                ps.setTimestamp(2, Timestamp.valueOf(java.time.LocalDateTime.now(Clock.systemDefaultZone())));
                 ps.setString(3, request.getRequestedNsisLevel().name());
                 ps.setString(4, request.getRequestPath());
                 ps.setBytes(5,  request.getAuthnRequestAsBase64().getBytes(StandardCharsets.UTF_8));
@@ -152,7 +153,7 @@ public class DatabaseSessionHandler implements SessionHandler {
                 ps.setString(2, StringUtil.defaultIfEmpty(assertion.getSessionIndex(),assertion.getID()));
                 ps.setString(3, assertion.getID());
                 ps.setString(4, assertion.getSubjectNameId());
-                ps.setLong(5, System.currentTimeMillis());
+                ps.setTimestamp(5, Timestamp.valueOf(java.time.LocalDateTime.now(Clock.systemDefaultZone())));
                 ps.setBytes(6,  assertion.getAssertionAsBase64().getBytes(StandardCharsets.UTF_8));
                 ps.executeUpdate();
             }
@@ -160,7 +161,7 @@ public class DatabaseSessionHandler implements SessionHandler {
             log.debug("Add replay entry for assertion '{}'", assertion.getID());
             try(PreparedStatement ps = connection.prepareStatement("INSERT INTO replay_tbl (assertion_id, access_time) VALUES (?,?)")) {
                 ps.setString(1, assertion.getID());
-                ps.setLong(2, System.currentTimeMillis());
+                ps.setTimestamp(2, Timestamp.valueOf(java.time.LocalDateTime.now(Clock.systemDefaultZone())));
                 ps.executeUpdate();
             }
 
@@ -197,7 +198,7 @@ public class DatabaseSessionHandler implements SessionHandler {
             log.debug("Store LogoutRequest '{}'", request.getID());
             try(PreparedStatement ps = connection.prepareStatement("INSERT INTO logout_requests_tbl (session_id, access_time, xml_object) VALUES (?,?,?)")) {
                 ps.setString(1, getSessionId(session));
-                ps.setLong(2, System.currentTimeMillis());
+                ps.setTimestamp(2, Timestamp.valueOf(java.time.LocalDateTime.now(Clock.systemDefaultZone())));
                 ps.setBytes(3,  request.getLogoutRequestAsBase64().getBytes(StandardCharsets.UTF_8));
                 ps.executeUpdate();
             }
@@ -218,14 +219,15 @@ public class DatabaseSessionHandler implements SessionHandler {
                 ps.setString(1, sessionId);
                 try(ResultSet rs = ps.executeQuery()) {
                     if (rs.first()) {
-                        assertionWrapper = new AssertionWrapper((Assertion) StringUtil.base64ToXMLObject(new String(rs.getBytes(1), StandardCharsets.UTF_8)));
+                        assertionWrapper = new AssertionWrapper(
+                                (Assertion) StringUtil.base64ToXMLObject(new String(rs.getBytes(1), StandardCharsets.UTF_8)));
                     }
                 }
             }
 
             if (null != assertionWrapper) {
                 try(PreparedStatement ps = connection.prepareStatement("UPDATE assertions_tbl SET access_time = ? WHERE session_id = ?")) {
-                    ps.setLong(1, System.currentTimeMillis());
+                    ps.setTimestamp(1, Timestamp.valueOf(java.time.LocalDateTime.now(Clock.systemDefaultZone())));
                     ps.setString(2, sessionId);
                     ps.executeUpdate();
                 }
@@ -278,14 +280,17 @@ public class DatabaseSessionHandler implements SessionHandler {
                 ps.setString(1, getSessionId(session));
                 try(ResultSet rs = ps.executeQuery()) {
                     if (rs.first()) {
-                        authnRequestWrapper = new AuthnRequestWrapper((AuthnRequest) StringUtil.base64ToXMLObject(new String(rs.getBytes(1), StandardCharsets.UTF_8)), NSISLevel.valueOf(rs.getString(2)), rs.getString(3));
+                        authnRequestWrapper = new AuthnRequestWrapper(
+                                (AuthnRequest) StringUtil.base64ToXMLObject(new String(rs.getBytes(1), StandardCharsets.UTF_8)),
+                                NSISLevel.valueOf(rs.getString(2)),
+                                rs.getString(3));
                     }
                 }
             }
 
             if (null != authnRequestWrapper) {
                 try(PreparedStatement ps = connection.prepareStatement("UPDATE authn_requests_tbl SET access_time = ? WHERE session_id = ?")) {
-                    ps.setLong(1, System.currentTimeMillis());
+                    ps.setTimestamp(1, Timestamp.valueOf(java.time.LocalDateTime.now(Clock.systemDefaultZone())));
                     ps.setString(2, getSessionId(session));
                     ps.executeUpdate();
                 }
@@ -323,7 +328,7 @@ public class DatabaseSessionHandler implements SessionHandler {
 
             if (null != logoutRequestWrapper) {
                 try (PreparedStatement ps = connection.prepareStatement("UPDATE logout_requests_tbl SET access_time = ? WHERE session_id = ?")) {
-                    ps.setLong(1, System.currentTimeMillis());
+                    ps.setTimestamp(1, Timestamp.valueOf(java.time.LocalDateTime.now(Clock.systemDefaultZone())));
                     ps.setString(2, getSessionId(session));
                     ps.executeUpdate();
                 }
@@ -423,10 +428,12 @@ public class DatabaseSessionHandler implements SessionHandler {
         try (Connection connection=ds.getConnection()){
             connection.setAutoCommit(true);
 
-            final long replayCleanupDelay = (long) 24 * 60 * 60 * 1000; /* Save replay for a day */
+            final long replayCleanupDelay = (long) 24 * 60 * 60; /* Save replay for a day */
 
             try(PreparedStatement ps = connection.prepareStatement("SELECT session_id, assertion_id, subject_name_id FROM assertions_tbl WHERE access_time < ?")) {
-                ps.setLong(1, System.currentTimeMillis() - maxInactiveIntervalSeconds);
+                ps.setTimestamp(1, Timestamp.valueOf(java.time.LocalDateTime
+                        .now(Clock.systemDefaultZone())
+                        .minusSeconds(maxInactiveIntervalSeconds)));
                 try(ResultSet rs = ps.executeQuery()) {
                     rs.beforeFirst();
                     while(rs.next()) {
@@ -442,22 +449,30 @@ public class DatabaseSessionHandler implements SessionHandler {
             }
 
             try(PreparedStatement ps = connection.prepareStatement("DELETE FROM assertions_tbl WHERE access_time < ?")) {
-                ps.setLong(1, System.currentTimeMillis() - maxInactiveIntervalSeconds);
+                ps.setTimestamp(1, Timestamp.valueOf(java.time.LocalDateTime
+                        .now(Clock.systemDefaultZone())
+                        .minusSeconds(maxInactiveIntervalSeconds)));
                 ps.executeUpdate();
             }
 
             try(PreparedStatement ps = connection.prepareStatement("DELETE FROM authn_requests_tbl WHERE access_time < ?")) {
-                ps.setLong(1, System.currentTimeMillis() - maxInactiveIntervalSeconds);
+                ps.setTimestamp(1, Timestamp.valueOf(java.time.LocalDateTime
+                        .now(Clock.systemDefaultZone())
+                        .minusSeconds(maxInactiveIntervalSeconds)));
                 ps.executeUpdate();
             }
 
             try(PreparedStatement ps = connection.prepareStatement("DELETE FROM logout_requests_tbl WHERE access_time < ?")) {
-                ps.setLong(1, System.currentTimeMillis() - maxInactiveIntervalSeconds);
+                ps.setTimestamp(1, Timestamp.valueOf(java.time.LocalDateTime
+                        .now(Clock.systemDefaultZone())
+                        .minusSeconds(maxInactiveIntervalSeconds)));
                 ps.executeUpdate();
             }
 
             try(PreparedStatement ps = connection.prepareStatement("DELETE FROM replay_tbl WHERE access_time < ?")) {
-                ps.setLong(1, System.currentTimeMillis() - replayCleanupDelay);
+                ps.setTimestamp(1, Timestamp.valueOf(java.time.LocalDateTime
+                        .now(Clock.systemDefaultZone())
+                        .minusSeconds(replayCleanupDelay)));
                 ps.executeUpdate();
             }
 
