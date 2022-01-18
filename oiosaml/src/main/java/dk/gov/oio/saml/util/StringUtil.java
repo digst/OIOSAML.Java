@@ -4,9 +4,12 @@ import dk.gov.oio.saml.oiobpp.OIOBPPUtil;
 import dk.gov.oio.saml.oiobpp.ObjectFactory;
 import dk.gov.oio.saml.oiobpp.PrivilegeList;
 import net.shibboleth.utilities.java.support.codec.Base64Support;
+import net.shibboleth.utilities.java.support.xml.XMLParserException;
 import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.core.xml.io.UnmarshallingException;
+import org.opensaml.core.xml.util.XMLObjectSupport;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -61,7 +64,7 @@ public class StringUtil {
     }
 
     /**
-     * Create string representation of XML element.
+     * Create string representation of XML element (pretty printed).
      *
      * @param element Any XML element
      * @return XML is parsed to string, if this fails null is returned
@@ -96,8 +99,22 @@ public class StringUtil {
     public static String xmlObjectToBase64(XMLObject xmlObject) throws InternalException {
         try {
             Element element = SamlHelper.marshallObject(xmlObject);
-            return Base64.getEncoder().encodeToString(elementToString(element).getBytes(StandardCharsets.UTF_8));
-        } catch (MarshallingException e) {
+
+            Source source = new DOMSource(element);
+            TransformerFactory transFactory = TransformerFactory.newInstance();
+            Transformer transformer = transFactory.newTransformer();
+            StringWriter buffer = new StringWriter();
+
+            // Remove spacing to ensure that f'(f(input)) == input
+            transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+            transformer.setOutputProperty("{http://xml.apache.org/xslt}strip-spaces", "*");
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            transformer.setOutputProperty(OutputKeys.INDENT, "no");
+            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+            transformer.transform(source, new StreamResult(buffer));
+
+            return Base64.getEncoder().encodeToString(buffer.toString().getBytes(StandardCharsets.UTF_8));
+        } catch (TransformerException | MarshallingException e) {
             throw new InternalException("Unable to parse XML object to string",e);
         }
     }
@@ -111,15 +128,8 @@ public class StringUtil {
     public static XMLObject base64ToXMLObject(String base64) throws InternalException {
         try {
             byte[] decodedInput = Base64.getDecoder().decode(base64.getBytes(StandardCharsets.UTF_8));
-
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            dbf.setNamespaceAware(true);
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.parse(new ByteArrayInputStream(decodedInput));
-
-            Element element = (Element) doc.getDocumentElement();
-            return SamlHelper.unmarshallObject(element);
-        } catch (UnmarshallingException|ParserConfigurationException|IOException|SAXException e) {
+            return XMLObjectSupport.unmarshallFromInputStream(XMLObjectProviderRegistrySupport.getParserPool(), new ByteArrayInputStream(decodedInput));
+        } catch (UnmarshallingException | XMLParserException e) {
             throw new InternalException("Unable to parse input to XML object",e);
         }
     }

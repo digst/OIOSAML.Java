@@ -23,7 +23,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class InMemorySessionHandlerTest extends BaseServiceTest /* Require metadata from IDP */ {
+class InMemorySessionHandlerTest {
     private static int TRECKED_SESSION_IDS = 2;
     private static NSISLevel NSIS_LEVEL = NSISLevel.SUBSTANTIAL;
     private static String SESSION_ID = "SESSION_ID";
@@ -190,7 +190,7 @@ class InMemorySessionHandlerTest extends BaseServiceTest /* Require metadata fro
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             sessionHandler.storeAssertion(session, assertionWrapperInput);
         });
-        Assertions.assertEquals(String.format("Assertion ID begin replayed: '%s'",assertionWrapperInput.getID()), exception.getMessage());
+        Assertions.assertEquals(String.format("Assertion ID being replayed: '%s'",assertionWrapperInput.getID()), exception.getMessage());
     }
 
     @DisplayName("Test stored missing LogoutRequest will exit")
