@@ -71,7 +71,7 @@ public class InMemorySessionHandlerFactory implements SessionHandlerFactory {
     @Override
     public synchronized void configure(Configuration config) throws InitializationException {
         if (null == handler) {
-            handler = new InMemorySessionHandler(config.getSessionHandlerInMemoryMaxNumTrackedSessionIds());
+            handler = new InMemorySessionHandler(config.getSessionHandlerInMemoryMaxNumberOfTrackedAssertionIds());
         }
     }
 }

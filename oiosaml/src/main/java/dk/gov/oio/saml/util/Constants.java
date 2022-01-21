@@ -50,7 +50,7 @@ public class Constants {
     public static final String SP_SESSION_HANDLER_JDBC_USERNAME = "oiosaml.servlet.session.handler.jdbc.username";
     public static final String SP_SESSION_HANDLER_JDBC_PASSWORD = "oiosaml.servlet.session.handler.jdbc.password";
     public static final String SP_SESSION_HANDLER_JDBC_DRIVER_CLASSNAME = "oiosaml.servlet.session.handler.jdbc.driver.classname";
-    public static final String SP_SESSION_HANDLER_NUM_TRACKED_ASSERTIONIDS ="oiosaml.servlet.session.handler.inmemory.numusedassertionids";
+    public static final String SP_SESSION_HANDLER_MAX_NUM_TRACKED_ASSERTIONIDS ="oiosaml.servlet.session.handler.inmemory.max.tracked.assertionids";
 
     // Configuration constants for revocation check settings
     public static final String CRL_CHECK_ENABLED = "oiosaml.servlet.revocation.crl.check.enabled";

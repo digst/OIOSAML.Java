@@ -27,7 +27,7 @@ public class Configuration {
     private String sessionHandlerJdbcUsername; // JDBC username for the JDBC session handler factory
     private String sessionHandlerJdbcPassword; // JDBC password for the JDBC session handler factory
     private String sessionHandlerJdbcDriverClassName; // JDBC driver class name for the JDBC session handler factory
-    private int sessionHandlerInMemoryMaxNumTrackedSessionIds; // InMemory limit to list of stored assertions
+    private int sessionHandlerInMemoryMaxNumberOfTrackedAssertionIds; // InMemory limit to list of stored assertions
     private boolean validationEnabled = true;
     private boolean isAssuranceLevelAllowed = false;
     private int minimumAssuranceLevel = 3;
@@ -411,12 +411,12 @@ public class Configuration {
         this.sessionHandlerJdbcDriverClassName = sessionHandlerJdbcDriverClassName;
     }
 
-    public void setSessionHandlerInMemoryMaxNumTrackedSessionIds(Integer sessionHandlerInMemoryMaxNumTrackedSessionIds) {
-        this.sessionHandlerInMemoryMaxNumTrackedSessionIds = sessionHandlerInMemoryMaxNumTrackedSessionIds;
+    public void setSessionHandlerInMemoryMaxNumberOfTrackedAssertionIds(Integer sessionHandlerInMemoryMaxNumberOfTrackedAssertionIds) {
+        this.sessionHandlerInMemoryMaxNumberOfTrackedAssertionIds = sessionHandlerInMemoryMaxNumberOfTrackedAssertionIds;
     }
 
-    public int getSessionHandlerInMemoryMaxNumTrackedSessionIds() {
-        return sessionHandlerInMemoryMaxNumTrackedSessionIds;
+    public int getSessionHandlerInMemoryMaxNumberOfTrackedAssertionIds() {
+        return sessionHandlerInMemoryMaxNumberOfTrackedAssertionIds;
     }
 
     // Configuration builder for mandatory fields

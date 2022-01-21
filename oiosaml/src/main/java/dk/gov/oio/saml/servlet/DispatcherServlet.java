@@ -145,12 +145,13 @@ public class DispatcherServlet extends HttpServlet {
             configuration.setSignatureAlgorithm(value);
         }
 
-        value = config.get(Constants.SP_SESSION_HANDLER_NUM_TRACKED_ASSERTIONIDS);
+        value = config.get(Constants.SP_SESSION_HANDLER_MAX_NUM_TRACKED_ASSERTIONIDS);
         try {
-            configuration.setSessionHandlerInMemoryMaxNumTrackedSessionIds(Integer.parseInt(StringUtil.defaultIfEmpty(value,"10000")));
+            configuration.setSessionHandlerInMemoryMaxNumberOfTrackedAssertionIds(Integer.parseInt(StringUtil.defaultIfEmpty(value,"10000")));
         }
         catch (Exception ex) {
-            log.error("Invalid value {} = {}", Constants.SP_SESSION_HANDLER_NUM_TRACKED_ASSERTIONIDS, value, ex);
+            configuration.setSessionHandlerInMemoryMaxNumberOfTrackedAssertionIds(10000);
+            log.error("Invalid value {} = {}", Constants.SP_SESSION_HANDLER_MAX_NUM_TRACKED_ASSERTIONIDS, value, ex);
         }
     }
 
