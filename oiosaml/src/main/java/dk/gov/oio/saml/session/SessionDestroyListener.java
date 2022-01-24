@@ -25,7 +25,6 @@ package dk.gov.oio.saml.session;
 
 import dk.gov.oio.saml.audit.AuditService;
 import dk.gov.oio.saml.service.OIOSAML3Service;
-import dk.gov.oio.saml.util.AuditRequestUtil;
 import dk.gov.oio.saml.util.InternalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

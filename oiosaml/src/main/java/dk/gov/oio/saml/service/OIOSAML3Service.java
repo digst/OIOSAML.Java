@@ -4,7 +4,6 @@ import dk.gov.oio.saml.audit.AuditService;
 import dk.gov.oio.saml.session.InternalSessionHandlerFactory;
 import dk.gov.oio.saml.session.SessionCleanerService;
 import dk.gov.oio.saml.session.SessionHandlerFactory;
-import dk.gov.oio.saml.util.InternalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.opensaml.core.config.InitializationException;

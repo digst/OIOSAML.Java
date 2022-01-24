@@ -23,13 +23,7 @@
  */
 package dk.gov.oio.saml.session;
 
-import dk.gov.oio.saml.config.Configuration;
 import dk.gov.oio.saml.util.InternalException;
-import org.opensaml.core.config.InitializationException;
-import org.opensaml.saml.saml2.core.Assertion;
-import org.opensaml.saml.saml2.core.AuthnStatement;
-import org.opensaml.saml.saml2.core.LogoutRequest;
-
 import javax.servlet.http.HttpSession;
 
 /**
