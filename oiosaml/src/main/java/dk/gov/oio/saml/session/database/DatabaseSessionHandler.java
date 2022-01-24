@@ -209,38 +209,6 @@ public class DatabaseSessionHandler implements SessionHandler {
         }
     }
 
-    private AssertionWrapper getAssertionFromSessionId(String sessionId) {
-        try (Connection connection=ds.getConnection()){
-            connection.setAutoCommit(true);
-
-            AssertionWrapper assertionWrapper = null;
-
-            try(PreparedStatement ps = connection.prepareStatement("SELECT xml_object FROM assertions_tbl WHERE session_id = ?")) {
-                ps.setString(1, sessionId);
-                try(ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        assertionWrapper = new AssertionWrapper(
-                                (Assertion) StringUtil.base64ToXMLObject(new String(rs.getBytes(1), StandardCharsets.UTF_8)));
-                    }
-                }
-            }
-
-            if (null != assertionWrapper) {
-                try(PreparedStatement ps = connection.prepareStatement("UPDATE assertions_tbl SET access_time = ? WHERE session_id = ?")) {
-                    ps.setTimestamp(1, Timestamp.valueOf(java.time.LocalDateTime.now(Clock.systemDefaultZone())));
-                    ps.setString(2, sessionId);
-                    ps.executeUpdate();
-                }
-            }
-
-            return assertionWrapper;
-
-        } catch (SQLException | InternalException e) {
-            log.error("Failed retrieving assertion matching sessionId", e);
-            throw new RuntimeException("Failed retrieving assertion matching sessionId", e);
-        }
-    }
-
     /**
      * Get Assertion from the current session
      *
@@ -388,25 +356,6 @@ public class DatabaseSessionHandler implements SessionHandler {
         logout(getSessionId(session));
     }
 
-    private void logout(String sessionId) {
-        log.debug("Invalidate OIOSAML session '{}'", sessionId);
-        try (Connection connection=ds.getConnection()) {
-            connection.setAutoCommit(true);
-
-            if (StringUtil.isEmpty(sessionId)) {
-                return;
-            }
-
-            try (PreparedStatement ps = connection.prepareStatement("DELETE FROM assertions_tbl WHERE session_id = ?")) {
-                ps.setString(1, sessionId);
-                ps.executeUpdate();
-            }
-
-        } catch (SQLException e) {
-            log.error("Failed logging out", e);
-        }
-    }
-
     /**
      * Clean stored ids and sessions.
      *
@@ -466,6 +415,57 @@ public class DatabaseSessionHandler implements SessionHandler {
 
         } catch (SQLException e) {
             log.error("Failed running cleanup", e);
+        }
+    }
+
+    private void logout(String sessionId) {
+        log.debug("Invalidate OIOSAML session '{}'", sessionId);
+        try (Connection connection=ds.getConnection()) {
+            connection.setAutoCommit(true);
+
+            if (StringUtil.isEmpty(sessionId)) {
+                return;
+            }
+
+            try (PreparedStatement ps = connection.prepareStatement("DELETE FROM assertions_tbl WHERE session_id = ?")) {
+                ps.setString(1, sessionId);
+                ps.executeUpdate();
+            }
+
+        } catch (SQLException e) {
+            log.error("Failed logging out", e);
+        }
+    }
+
+    private AssertionWrapper getAssertionFromSessionId(String sessionId) {
+        try (Connection connection=ds.getConnection()){
+            connection.setAutoCommit(true);
+
+            AssertionWrapper assertionWrapper = null;
+
+            try(PreparedStatement ps = connection.prepareStatement("SELECT xml_object FROM assertions_tbl WHERE session_id = ?")) {
+                ps.setString(1, sessionId);
+                try(ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        assertionWrapper = new AssertionWrapper(
+                                (Assertion) StringUtil.base64ToXMLObject(new String(rs.getBytes(1), StandardCharsets.UTF_8)));
+                    }
+                }
+            }
+
+            if (null != assertionWrapper) {
+                try(PreparedStatement ps = connection.prepareStatement("UPDATE assertions_tbl SET access_time = ? WHERE session_id = ?")) {
+                    ps.setTimestamp(1, Timestamp.valueOf(java.time.LocalDateTime.now(Clock.systemDefaultZone())));
+                    ps.setString(2, sessionId);
+                    ps.executeUpdate();
+                }
+            }
+
+            return assertionWrapper;
+
+        } catch (SQLException | InternalException e) {
+            log.error("Failed retrieving assertion matching sessionId", e);
+            throw new RuntimeException("Failed retrieving assertion matching sessionId", e);
         }
     }
 }
