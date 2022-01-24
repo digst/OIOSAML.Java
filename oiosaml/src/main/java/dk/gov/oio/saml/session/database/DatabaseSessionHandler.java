@@ -343,17 +343,6 @@ public class DatabaseSessionHandler implements SessionHandler {
     }
 
     /**
-     * Get OIOSAML session ID for current session
-     *
-     * @param session HTTP session
-     * @return OIOSAML session ID (for audit logging)
-     */
-    @Override
-    public String getSessionId(HttpSession session) {
-        return session.getId();
-    }
-
-    /**
      * Get OIOSAML session ID for session with session index
      *
      * @param sessionIndex Session index to lookup session ID for

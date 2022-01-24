@@ -66,18 +66,6 @@ public class AuthenticatedFilter implements Filter {
         }
     }
 
-    private boolean userNeedsAuthentication(HttpServletRequest req, SessionHandler sessionHandler, AssertionWrapper assertionWrapper) {
-        if (null == assertionWrapper || !sessionHandler.isAuthenticated(req.getSession())) {
-            log.debug("Unauthenticated session, Required NSIS Level: {}", requiredNsisLevel);
-            return true;
-        } else if (!isAssuranceSufficient(requiredNsisLevel, assertionWrapper.getNsisLevel(), assertionWrapper.getAssuranceLevel())) {
-            log.debug("Current NSIS Level on session: {}, Required NSIS Level: {}", assertionWrapper.getNsisLevel(), requiredNsisLevel);
-            return true;
-        }
-        log.debug("Authenticated session, NSIS Level: {}", requiredNsisLevel);
-        return false;
-    }
-
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
@@ -130,6 +118,24 @@ public class AuthenticatedFilter implements Filter {
         }
     }
 
+    @Override
+    public void destroy() {
+        OIOSAML3Service.getSessionCleanerService().stopCleaner();
+        OIOSAML3Service.getSessionHandlerFactory().close();
+    }
+
+    private boolean userNeedsAuthentication(HttpServletRequest req, SessionHandler sessionHandler, AssertionWrapper assertionWrapper) {
+        if (null == assertionWrapper || !sessionHandler.isAuthenticated(req.getSession())) {
+            log.debug("Unauthenticated session, Required NSIS Level: {}", requiredNsisLevel);
+            return true;
+        } else if (!isAssuranceSufficient(requiredNsisLevel, assertionWrapper.getNsisLevel(), assertionWrapper.getAssuranceLevel())) {
+            log.debug("Current NSIS Level on session: {}, Required NSIS Level: {}", assertionWrapper.getNsisLevel(), requiredNsisLevel);
+            return true;
+        }
+        log.debug("Authenticated session, NSIS Level: {}", requiredNsisLevel);
+        return false;
+    }
+
     private boolean isAssuranceSufficient(NSISLevel requiredNsisLevel, NSISLevel authenticatedNsisLevel, String authenticatedAssuranceLevel) {
         Configuration configuration = OIOSAML3Service.getConfig();
         // We do not have anything but the old AssuranceLevel
@@ -145,12 +151,6 @@ public class AuthenticatedFilter implements Filter {
         }
 
         return requiredNsisLevel.equalOrLesser(authenticatedNsisLevel);
-    }
-
-    @Override
-    public void destroy() {
-        OIOSAML3Service.getSessionCleanerService().stopCleaner();
-        OIOSAML3Service.getSessionHandlerFactory().close();
     }
 
     private void removeAssertionFromThreadLocal() {

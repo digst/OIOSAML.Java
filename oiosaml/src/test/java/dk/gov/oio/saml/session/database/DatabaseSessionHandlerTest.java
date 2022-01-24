@@ -122,26 +122,9 @@ class DatabaseSessionHandlerTest {
 
     @BeforeEach
     void setUp() throws Exception {
-
-
-
         sessionHandler = new DatabaseSessionHandler(dataSource);
         session = Mockito.mock(HttpSession.class);
         Mockito.when(session.getId()).thenReturn(SESSION_ID);
-    }
-
-    private Assertion createAssertion() throws Exception {
-        AssertionService assertionService = new AssertionService();
-        return assertionService.getAssertion(IdpUtil.createResponse(false, true, true,  "NAMEID", TestConstants.SP_ENTITY_ID, TestConstants.SP_ASSERTION_CONSUMER_URL, UUID.randomUUID().toString()));
-    }
-
-    private AuthnRequest createAuthnRequest() throws InitializationException {
-        AuthnRequestService authnRequestService = AuthnRequestService.getInstance();
-        return authnRequestService.createAuthnRequest(TestConstants.SP_ASSERTION_CONSUMER_URL, false, false, NSIS_LEVEL);
-    }
-
-    private LogoutRequest createLogoutRequest() throws InitializationException {
-        return IdpUtil.createLogoutRequest("NAMEID", NameID.PERSISTENT, TestConstants.IDP_LOGOUT_REQUEST_URL);
     }
 
     @DisplayName("Test stored missing AuthnRequest will exit")
@@ -342,7 +325,7 @@ class DatabaseSessionHandlerTest {
 
     @DisplayName("Test that assertion is removed after logout when assertion is wrong")
     @Test
-    void testLogoutWringAssertion() throws Exception {
+    void testLogoutWrongAssertion() throws Exception {
         AssertionWrapper assertionWrapperWrong = new AssertionWrapper(createAssertion());
         AssertionWrapper assertionWrapperInput = new AssertionWrapper(createAssertion());
 
@@ -401,5 +384,19 @@ class DatabaseSessionHandlerTest {
 
         AssertionWrapper assertionWrapperLogoutOutput = sessionHandler.getAssertion(sessionUser);
         Assertions.assertNull(assertionWrapperLogoutOutput);
+    }
+
+    private Assertion createAssertion() throws Exception {
+        AssertionService assertionService = new AssertionService();
+        return assertionService.getAssertion(IdpUtil.createResponse(false, true, true,  "NAMEID", TestConstants.SP_ENTITY_ID, TestConstants.SP_ASSERTION_CONSUMER_URL, UUID.randomUUID().toString()));
+    }
+
+    private AuthnRequest createAuthnRequest() throws InitializationException {
+        AuthnRequestService authnRequestService = AuthnRequestService.getInstance();
+        return authnRequestService.createAuthnRequest(TestConstants.SP_ASSERTION_CONSUMER_URL, false, false, NSIS_LEVEL);
+    }
+
+    private LogoutRequest createLogoutRequest() throws InitializationException {
+        return IdpUtil.createLogoutRequest("NAMEID", NameID.PERSISTENT, TestConstants.IDP_LOGOUT_REQUEST_URL);
     }
 }

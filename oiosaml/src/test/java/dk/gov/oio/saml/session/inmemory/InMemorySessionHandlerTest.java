@@ -3,7 +3,6 @@ package dk.gov.oio.saml.session.inmemory;
 import dk.gov.oio.saml.model.NSISLevel;
 import dk.gov.oio.saml.service.AssertionService;
 import dk.gov.oio.saml.service.AuthnRequestService;
-import dk.gov.oio.saml.service.BaseServiceTest;
 import dk.gov.oio.saml.session.AssertionWrapper;
 import dk.gov.oio.saml.session.AuthnRequestWrapper;
 import dk.gov.oio.saml.session.LogoutRequestWrapper;
@@ -24,7 +23,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class InMemorySessionHandlerTest {
-    private static int TRECKED_SESSION_IDS = 2;
+    private static int TRACKED_SESSION_IDS = 2;
     private static NSISLevel NSIS_LEVEL = NSISLevel.SUBSTANTIAL;
     private static String SESSION_ID = "SESSION_ID";
     private static String REQUEST_URL = "REQUEST_URL";
@@ -34,23 +33,9 @@ class InMemorySessionHandlerTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        sessionHandler = new InMemorySessionHandler(TRECKED_SESSION_IDS);
+        sessionHandler = new InMemorySessionHandler(TRACKED_SESSION_IDS);
         session = Mockito.mock(HttpSession.class);
         Mockito.when(session.getId()).thenReturn(SESSION_ID);
-    }
-
-    private Assertion createAssertion() throws Exception {
-        AssertionService assertionService = new AssertionService();
-        return assertionService.getAssertion(IdpUtil.createResponse(false, true, true,  "NAMEID", TestConstants.SP_ENTITY_ID, TestConstants.SP_ASSERTION_CONSUMER_URL, UUID.randomUUID().toString()));
-    }
-
-    private AuthnRequest createAuthnRequest() throws InitializationException {
-        AuthnRequestService authnRequestService = AuthnRequestService.getInstance();
-        return authnRequestService.createAuthnRequest(TestConstants.SP_ASSERTION_CONSUMER_URL, false, false, NSIS_LEVEL);
-    }
-
-    private LogoutRequest createLogoutRequest() throws InitializationException {
-        return IdpUtil.createLogoutRequest("NAMEID", NameID.PERSISTENT, TestConstants.IDP_LOGOUT_REQUEST_URL);
     }
 
     @DisplayName("Test stored missing AuthnRequest will exit")
@@ -67,7 +52,7 @@ class InMemorySessionHandlerTest {
     @Test
     void testStoreAuthnRequest() throws InternalException, InitializationException {
         AuthnRequestWrapper authnRequestWrapperOld = new AuthnRequestWrapper(createAuthnRequest(), NSIS_LEVEL, REQUEST_URL);
-        AuthnRequestWrapper authnRequestWrapperInput = new AuthnRequestWrapper(createAuthnRequest(), NSIS_LEVEL, REQUEST_URL);
+        AuthnRequestWrapper authnRequestWrapperNew = new AuthnRequestWrapper(createAuthnRequest(), NSIS_LEVEL, REQUEST_URL);
 
         // No output returned before
         AuthnRequestWrapper authnRequestWrapperPreOutput = sessionHandler.getAuthnRequest(session);
@@ -81,11 +66,11 @@ class InMemorySessionHandlerTest {
         Assertions.assertEquals(authnRequestWrapperOld.getAuthnRequestAsBase64(), authnRequestWrapperOldOutput.getAuthnRequestAsBase64());
 
         // input is replaced
-        sessionHandler.storeAuthnRequest(session, authnRequestWrapperInput);
+        sessionHandler.storeAuthnRequest(session, authnRequestWrapperNew);
 
         AuthnRequestWrapper authnRequestWrapperOutput = sessionHandler.getAuthnRequest(session);
-        Assertions.assertEquals(authnRequestWrapperInput, authnRequestWrapperOutput);
-        Assertions.assertEquals(authnRequestWrapperInput.getAuthnRequestAsBase64(), authnRequestWrapperOutput.getAuthnRequestAsBase64());
+        Assertions.assertEquals(authnRequestWrapperNew, authnRequestWrapperOutput);
+        Assertions.assertEquals(authnRequestWrapperNew.getAuthnRequestAsBase64(), authnRequestWrapperOutput.getAuthnRequestAsBase64());
     }
 
     @DisplayName("Test that stored AuthnRequest is removed after timeout")
@@ -114,7 +99,7 @@ class InMemorySessionHandlerTest {
     @Test
     void testStoreAssertion() throws Exception {
         AssertionWrapper assertionWrapperOldInput = new AssertionWrapper(createAssertion());
-        AssertionWrapper assertionWrapperInput = new AssertionWrapper(createAssertion());
+        AssertionWrapper assertionWrapperNewInput = new AssertionWrapper(createAssertion());
 
         // No output returned before
         AssertionWrapper assertionWrapperPreOutput = sessionHandler.getAssertion(session);
@@ -128,11 +113,11 @@ class InMemorySessionHandlerTest {
         Assertions.assertEquals(assertionWrapperOldInput.getAssertionAsBase64(), assertionWrapperOldOutput.getAssertionAsBase64());
 
         // input is replaced
-        sessionHandler.storeAssertion(session, assertionWrapperInput);
+        sessionHandler.storeAssertion(session, assertionWrapperNewInput);
 
-        AssertionWrapper assertionWrapperOutput = sessionHandler.getAssertion(session);
-        Assertions.assertEquals(assertionWrapperInput, assertionWrapperOutput);
-        Assertions.assertEquals(assertionWrapperInput.getAssertionAsBase64(), assertionWrapperOutput.getAssertionAsBase64());
+        AssertionWrapper assertionWrapperNewOutput = sessionHandler.getAssertion(session);
+        Assertions.assertEquals(assertionWrapperNewInput, assertionWrapperNewOutput);
+        Assertions.assertEquals(assertionWrapperNewInput.getAssertionAsBase64(), assertionWrapperNewOutput.getAssertionAsBase64());
     }
 
     @DisplayName("Test that stored Assertion can be retrieved using session index")
@@ -207,7 +192,7 @@ class InMemorySessionHandlerTest {
     @Test
     void testStoreLogoutRequest() throws InitializationException, InternalException {
         LogoutRequestWrapper logoutRequestWrapperOldInput = new LogoutRequestWrapper(createLogoutRequest());
-        LogoutRequestWrapper logoutRequestWrapperInput = new LogoutRequestWrapper(createLogoutRequest());
+        LogoutRequestWrapper logoutRequestWrapperNewInput = new LogoutRequestWrapper(createLogoutRequest());
 
         // No output returned before
         LogoutRequestWrapper logoutRequestWrapperPreOutput = sessionHandler.getLogoutRequest(session);
@@ -220,10 +205,10 @@ class InMemorySessionHandlerTest {
         Assertions.assertEquals(logoutRequestWrapperOldInput.getLogoutRequestAsBase64(), logoutRequestWrapperOldOutput.getLogoutRequestAsBase64());
 
         // input is replaced
-        sessionHandler.storeLogoutRequest(session, logoutRequestWrapperInput);
-        LogoutRequestWrapper logoutRequestWrapperOutput = sessionHandler.getLogoutRequest(session);
-        Assertions.assertEquals(logoutRequestWrapperInput, logoutRequestWrapperOutput);
-        Assertions.assertEquals(logoutRequestWrapperInput.getLogoutRequestAsBase64(), logoutRequestWrapperOutput.getLogoutRequestAsBase64());
+        sessionHandler.storeLogoutRequest(session, logoutRequestWrapperNewInput);
+        LogoutRequestWrapper logoutRequestWrapperNewOutput = sessionHandler.getLogoutRequest(session);
+        Assertions.assertEquals(logoutRequestWrapperNewInput, logoutRequestWrapperNewOutput);
+        Assertions.assertEquals(logoutRequestWrapperNewInput.getLogoutRequestAsBase64(), logoutRequestWrapperNewOutput.getLogoutRequestAsBase64());
     }
 
     @DisplayName("Test that stored LogoutRequest is removed after timeout")
@@ -317,5 +302,19 @@ class InMemorySessionHandlerTest {
 
         AssertionWrapper assertionWrapperLogoutOutput = sessionHandler.getAssertion(sessionUser);
         Assertions.assertNull(assertionWrapperLogoutOutput);
+    }
+
+    private Assertion createAssertion() throws Exception {
+        AssertionService assertionService = new AssertionService();
+        return assertionService.getAssertion(IdpUtil.createResponse(false, true, true,  "NAMEID", TestConstants.SP_ENTITY_ID, TestConstants.SP_ASSERTION_CONSUMER_URL, UUID.randomUUID().toString()));
+    }
+
+    private AuthnRequest createAuthnRequest() throws InitializationException {
+        AuthnRequestService authnRequestService = AuthnRequestService.getInstance();
+        return authnRequestService.createAuthnRequest(TestConstants.SP_ASSERTION_CONSUMER_URL, false, false, NSIS_LEVEL);
+    }
+
+    private LogoutRequest createLogoutRequest() throws InitializationException {
+        return IdpUtil.createLogoutRequest("NAMEID", NameID.PERSISTENT, TestConstants.IDP_LOGOUT_REQUEST_URL);
     }
 }

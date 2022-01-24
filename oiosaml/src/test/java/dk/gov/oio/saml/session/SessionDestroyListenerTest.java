@@ -88,6 +88,6 @@ class SessionDestroyListenerTest {
 
         sessionDestroyListener.sessionDestroyed(httpSessionEvent);
 
-        Mockito.verify(sessionHandler,Mockito.never()).logout(Mockito.eq(session),Mockito.any(AssertionWrapper.class));
+        Mockito.verify(sessionHandler,Mockito.never()).logout(Mockito.any(HttpSession.class),Mockito.any(AssertionWrapper.class));
     }
 }

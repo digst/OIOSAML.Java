@@ -118,7 +118,10 @@ public interface SessionHandler {
      * @param session HTTP session
      * @return OIOSAML session ID (for audit logging)
      */
-    String getSessionId(HttpSession session);
+    default String getSessionId(HttpSession session) {
+        return session.getId();
+    }
+
 
     /**
      * Get OIOSAML session ID for session with session index
