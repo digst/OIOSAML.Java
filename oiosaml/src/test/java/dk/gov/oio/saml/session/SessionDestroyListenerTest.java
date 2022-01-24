@@ -4,6 +4,7 @@ import dk.gov.oio.saml.config.Configuration;
 import dk.gov.oio.saml.service.OIOSAML3Service;
 import dk.gov.oio.saml.util.TestConstants;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -14,8 +15,8 @@ import javax.servlet.http.HttpSessionEvent;
 
 class SessionDestroyListenerTest {
 
-    @BeforeAll
-    public static void beforeAll() throws Exception {
+    @BeforeEach
+    void beforeEach() throws Exception {
         Configuration configuration = new Configuration.Builder()
                 .setSpEntityID(TestConstants.SP_ENTITY_ID)
                 .setBaseUrl(TestConstants.SP_BASE_URL)
@@ -39,7 +40,7 @@ class SessionDestroyListenerTest {
 
     @DisplayName("Test that current session is logged out after execution")
     @Test
-    public void logoutCurrentSession() throws Exception {
+    void testLogoutCurrentSession() throws Exception {
         SessionDestroyListener sessionDestroyListener = new SessionDestroyListener();
 
         // mock session with state: not logged in at any NSIS level
@@ -68,7 +69,7 @@ class SessionDestroyListenerTest {
 
     @DisplayName("Test that session is ignored if not logged in")
     @Test
-    public void ignoreMissingSession() throws Exception {
+    void testIgnoreMissingSession() throws Exception {
         SessionDestroyListener sessionDestroyListener = new SessionDestroyListener();
 
         // mock session with state: not logged in at any NSIS level
