@@ -9,6 +9,7 @@ import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.Map;
 
+import dk.gov.oio.saml.util.ResourceUtil;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.criterion.EntityIdCriterion;
 import org.opensaml.security.SecurityException;
@@ -99,7 +100,7 @@ public class CredentialService {
     private KeyStore keyStore(String location, char[] password) throws InternalException {
         try {
             KeyStore keyStore = KeyStore.getInstance("PKCS12");
-            InputStream in = getClass().getClassLoader().getResourceAsStream(location);
+            InputStream in = ResourceUtil.getResourceAsStream(location);
             keyStore.load(in, password);
             return keyStore;
         }

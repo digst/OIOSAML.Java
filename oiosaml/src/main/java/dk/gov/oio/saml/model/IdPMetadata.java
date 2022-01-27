@@ -17,6 +17,7 @@ import java.util.Set;
 
 import javax.net.ssl.SSLContext;
 
+import dk.gov.oio.saml.util.ResourceUtil;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
@@ -259,21 +260,7 @@ public class IdPMetadata {
 
                 if (metadataFilePath != null) {
                     log.debug("MetadataFilePath supplied. Using file based metadata resolver");
-
-                    File file = null;
-                    URL url = getClass().getClassLoader().getResource(metadataFilePath);
-                    if (url != null) {
-                        file = new File(url.toURI());
-                    }
-                    else {
-                        file = new File(metadataFilePath);
-                    }
-
-                    if (!file.exists()) {
-                        throw new InternalException("Could not get the configured metadata file at path: " + metadataFilePath);
-                    }
-
-                    resolver = new FilesystemMetadataResolver(file);
+                    resolver = new FilesystemMetadataResolver(ResourceUtil.getResourceAsFile(metadataFilePath));
                 } else {
                     log.debug("MetadataFilePath not supplied. Using URL based metadata resolver");
                     resolver = new HTTPMetadataResolver(httpClient, metadataURL);
@@ -282,7 +269,7 @@ public class IdPMetadata {
                 resolver.setId(entityId);
                 resolver.setMinRefreshDelay(1000L * 60 * 60 * config.getIdpMetadataMinRefreshDelay());
                 resolver.setMaxRefreshDelay(1000L * 60 * 60 * config.getIdpMetadataMaxRefreshDelay());
-            } catch (ResolverException | KeyManagementException | NoSuchAlgorithmException | URISyntaxException | KeyStoreException e) {
+            } catch (ResolverException | KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
                 throw new InternalException("Could not create MetadataResolver", e);
             }
 
