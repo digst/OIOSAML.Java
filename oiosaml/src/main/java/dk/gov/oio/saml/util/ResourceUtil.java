@@ -3,10 +3,7 @@ package dk.gov.oio.saml.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Enumeration;
@@ -29,7 +26,7 @@ public class ResourceUtil {
         }
         try {
             File file;
-            URL url = ResourceUtil.class.getClassLoader().getResource(resourceName);
+            URL url = ResourceUtil.getClassLoader().getResource(resourceName);
             if (url != null) {
                 file = new File(url.toURI());
             } else {
@@ -57,11 +54,18 @@ public class ResourceUtil {
         if (StringUtil.isEmpty(resourceName)) {
             throw new InternalException(String.format("Unable to load resource '%s'", resourceName));
         }
-        try {
-            return new FileInputStream(getResourceAsFile(resourceName));
-        } catch (FileNotFoundException e) {
-            throw new InternalException(String.format("Unable to load resource '%s'", resourceName), e);
+        // Try to load resource from classpath to support JAR retrieval
+        InputStream inputStream = getClassLoader().getResourceAsStream(resourceName);
+
+        if (null == inputStream) {
+            try {
+                // Try to load from file to support external resources
+                return new FileInputStream(getResourceAsFile(resourceName));
+            } catch (FileNotFoundException e) {
+                throw new InternalException(String.format("Unable to load resource '%s'", resourceName), e);
+            }
         }
+        return inputStream;
     }
 
     /**
@@ -90,5 +94,13 @@ public class ResourceUtil {
             }
         }
         return configMap;
+    }
+
+    private static ClassLoader getClassLoader() {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        if (classLoader == null) {
+            classLoader = Class.class.getClassLoader();
+        }
+        return classLoader;
     }
 }
