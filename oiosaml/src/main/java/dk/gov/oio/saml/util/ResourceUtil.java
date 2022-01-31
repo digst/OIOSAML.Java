@@ -36,7 +36,7 @@ public class ResourceUtil {
                 // To access resources as files inside a jar we need to copy them to disk (use when unable to access as stream)
                 try (InputStream inputStream = ResourceUtil.getResourceAsStream(resourceName)) {
                     Path path = Files.createTempFile(resourceName, "tmp");
-                    java.nio.file.Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+                    java.nio.file.Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
                     file = path.toFile();
                 }
             } else if (url != null) {
