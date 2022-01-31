@@ -6,6 +6,10 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +31,15 @@ public class ResourceUtil {
         try {
             File file;
             URL url = ResourceUtil.getClassLoader().getResource(resourceName);
-            if (url != null) {
+
+            if (url != null && "jar".equals(url.getProtocol())) {
+                // To access resources as files inside a jar we need to copy them to disk (use when unable to access as stream)
+                try (InputStream inputStream = ResourceUtil.getResourceAsStream(resourceName)) {
+                    Path path = Files.createTempFile(resourceName, "tmp");
+                    java.nio.file.Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+                    file = path.toFile();
+                }
+            } else if (url != null) {
                 file = new File(url.toURI());
             } else {
                 file = new File(resourceName);
@@ -39,7 +51,7 @@ public class ResourceUtil {
 
             return file;
 
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | IOException e) {
             throw new InternalException(String.format("Unable to load resource file '%s'", resourceName), e);
         }
     }
