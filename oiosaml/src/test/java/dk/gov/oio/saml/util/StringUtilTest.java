@@ -58,10 +58,10 @@ class StringUtilTest {
     @DisplayName("Test that isNotEmpty return false on null and blank string and otherwise true")
     @Test
     void testIsNotEmpty() {
-        Assertions.assertFalse(StringUtil.isEmpty(null));
-        Assertions.assertFalse(StringUtil.isEmpty(""));
-        Assertions.assertFalse(StringUtil.isEmpty("  "));
-        Assertions.assertTrue(StringUtil.isEmpty("TEST"));
+        Assertions.assertFalse(StringUtil.isNotEmpty(null));
+        Assertions.assertFalse(StringUtil.isNotEmpty(""));
+        Assertions.assertFalse(StringUtil.isNotEmpty("  "));
+        Assertions.assertTrue(StringUtil.isNotEmpty("TEST"));
     }
 
     @DisplayName("Test that defaultIfEmpty return defaultIfEmpty on null and blank string and otherwise input value")
