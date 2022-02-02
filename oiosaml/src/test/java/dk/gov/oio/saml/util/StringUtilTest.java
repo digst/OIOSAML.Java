@@ -1,6 +1,7 @@
 package dk.gov.oio.saml.util;
 
 import dk.gov.oio.saml.model.NSISLevel;
+import dk.gov.oio.saml.service.AssertionService;
 import dk.gov.oio.saml.service.AuthnRequestService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -95,13 +96,12 @@ class StringUtilTest {
         String inResponseToId = authnRequest.getID();
 
         String nameID = "https://data.gov.dk/model/core/eid/person/uuid/37a5a1aa-67ce-4f70-b7c0-b8e678d585f7";
-        MessageContext<SAMLObject> messageContext = IdpUtil.createMessageWithAssertion(true, false, true,  nameID, TestConstants.SP_ENTITY_ID, TestConstants.SP_ASSERTION_CONSUMER_URL, inResponseToId);
-        Assertion assertionInput = (Assertion) messageContext.getMessage();
+        AssertionService assertionService = new AssertionService();
+        Assertion assertionInput = assertionService.getAssertion(IdpUtil.createResponse(true, true, true, nameID, TestConstants.SP_ENTITY_ID, TestConstants.SP_ASSERTION_CONSUMER_URL, UUID.randomUUID().toString()));
 
         String base64Input = StringUtil.xmlObjectToBase64(assertionInput);
 
         Assertion assertionOutput = (Assertion) StringUtil.base64ToXMLObject(base64Input);
-        Assertions.assertEquals(assertionOutput, assertionInput);
         Assertions.assertEquals(assertionOutput.getID(), assertionInput.getID());
         Assertions.assertEquals(assertionOutput.getNoNamespaceSchemaLocation(), assertionInput.getNoNamespaceSchemaLocation());
         Assertions.assertEquals(assertionOutput.getSchemaLocation(), assertionInput.getSchemaLocation());
@@ -110,6 +110,6 @@ class StringUtilTest {
         Assertions.assertEquals(assertionOutput.getClass().getName(), assertionInput.getClass().getName());
 
         String base64Output = StringUtil.xmlObjectToBase64(assertionOutput);
-        Assertions.assertEquals(base64Output, base64Input);
+        Assertions.assertEquals(base64Input, base64Output);
     }
 }
