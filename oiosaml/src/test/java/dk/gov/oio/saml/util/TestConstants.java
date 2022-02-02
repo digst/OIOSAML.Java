@@ -12,6 +12,9 @@ public class TestConstants {
     public static final String SP_ASSERTION_CONSUMER_URL = "http://localhost:8080/saml/assertionConsumer";
     public static final String SP_LOGOUT_REQUEST_URL = "http://localhost:8080/saml/logout";
     public static final String SP_LOGOUT_RESPONSE_URL = "http://localhost:8080/saml/logout/response";
+    public static final String SP_KEYSTORE_LOCATION = "sp.pfx";
+    public static final String SP_KEYSTORE_ALIAS = "1";
+    public static final String SP_KEYSTORE_PASSWORD = "Test1234";
 
     public static final String IDP_ENTITY_ID = "http://mockidp.localhost";
     public static final String IDP_METADATA_URL = "http://localhost:8081/saml/metadata";

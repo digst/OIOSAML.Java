@@ -51,9 +51,9 @@ public class AuthenticatedFilterTest {
                 .setServletRoutingPathSuffixAssertion(TestConstants.SP_ROUTING_ASSERTION)
                 .setIdpEntityID(TestConstants.IDP_ENTITY_ID)
                 .setIdpMetadataUrl(TestConstants.IDP_METADATA_URL)
-                .setKeystoreLocation("sp.pfx")
-                .setKeystorePassword("Test1234")
-                .setKeyAlias("1")
+                .setKeystoreLocation(TestConstants.SP_KEYSTORE_LOCATION)
+                .setKeystorePassword(TestConstants.SP_KEYSTORE_PASSWORD)
+                .setKeyAlias(TestConstants.SP_KEYSTORE_ALIAS)
                 .build();
 
         OIOSAML3Service.init(configuration);

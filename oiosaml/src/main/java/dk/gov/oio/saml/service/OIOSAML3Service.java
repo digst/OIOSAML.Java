@@ -15,6 +15,7 @@ public class OIOSAML3Service {
     public static boolean initialized = false;
     private static Configuration configuration;
     private static AuditService auditService;
+    private static CredentialService credentialService;
 
     public static void init(Configuration configuration) throws InitializationException {
         log.debug("Initializing OIOSAML");
@@ -32,6 +33,7 @@ public class OIOSAML3Service {
         log.debug("Setting OIOSAML Configuration");
         OIOSAML3Service.configuration = configuration;
         OIOSAML3Service.auditService = new AuditService(configuration);
+        OIOSAML3Service.credentialService = new CredentialService(configuration);
         initialized = true;
 
         log.debug("OIOSAML Initialized");
@@ -51,5 +53,13 @@ public class OIOSAML3Service {
         }
 
         return auditService;
+    }
+
+    public static CredentialService getCredentialService() {
+        if (!initialized) {
+            throw new RuntimeException("Configuration not set");
+        }
+
+        return credentialService;
     }
 }

@@ -2,6 +2,7 @@
 
 ## 3.2.0 (planned)
 - CVE-2021-45105, CVE-2021-44832: Update log4j-core to version 2.17.1
+- NLRFIM-153: Fail on missing credentials
 
 ## 3.1.0
 - CVE-2021-44228: Update log4j-core to version 2.16.0

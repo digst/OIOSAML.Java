@@ -9,6 +9,7 @@ import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.Map;
 
+import dk.gov.oio.saml.util.StringUtil;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.criterion.EntityIdCriterion;
 import org.opensaml.security.SecurityException;
@@ -22,36 +23,49 @@ import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import dk.gov.oio.saml.config.Configuration;
 import dk.gov.oio.saml.util.InternalException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CredentialService {
-    // Single instance
-    private static CredentialService singleInstance = new CredentialService();
+    private static final Logger log = LoggerFactory.getLogger(CredentialService.class);
 
-    public static CredentialService getInstance() {
-        return singleInstance;
-    }
-
-    // Credential service
     private BasicX509Credential primaryBasicX509Credential;
     private BasicX509Credential secondaryBasicX509Credential;
 
-    public BasicX509Credential getPrimaryBasicX509Credential() throws InternalException, InitializationException {
-        if (primaryBasicX509Credential != null) {
-            return primaryBasicX509Credential;
+    public CredentialService(Configuration config) throws InitializationException {
+        log.debug("Configure credential service: '{}'", config);
+
+        if (null == config) {
+            throw new InitializationException("Cannot create credential service, missing configuration");
         }
 
-        Configuration config = OIOSAML3Service.getConfig();
-        primaryBasicX509Credential = getBasicX509Credential(config.getKeystoreLocation(), config.getKeystorePassword(), config.getKeyAlias());
+        try {
+            primaryBasicX509Credential = getBasicX509Credential(config.getKeystoreLocation(), config.getKeystorePassword(), config.getKeyAlias());
+
+            // Validate primary keystore
+            if (null == primaryBasicX509Credential) {
+                throw new InternalException(String.format("Unable to retrieve '%s' from keystore file '%s'", config.getKeyAlias(), config.getKeystoreLocation()));
+            }
+
+            // Validate secondary keystore if in use
+            if (StringUtil.isNotEmpty(config.getSecondaryKeystoreLocation())) {
+                secondaryBasicX509Credential = getBasicX509Credential(config.getSecondaryKeystoreLocation(), config.getSecondaryKeystorePassword(), config.getSecondaryKeyAlias());
+
+                if (null == secondaryBasicX509Credential) {
+                    throw new InternalException(String.format("Unable to retrieve '%s' from secondary keystore file '%s'", config.getSecondaryKeyAlias(), config.getSecondaryKeystoreLocation()));
+                }
+            }
+        } catch (InternalException e) {
+            throw new InitializationException("Malformed configuration in 'oiosaml.servlet.keystore' or keystore file", e);
+        }
+    }
+
+
+    public BasicX509Credential getPrimaryBasicX509Credential() throws InternalException, InitializationException {
         return primaryBasicX509Credential;
     }
 
     public BasicX509Credential getSecondaryBasicX509Credential() throws InternalException, InitializationException {
-        if (secondaryBasicX509Credential != null) {
-            return secondaryBasicX509Credential;
-        }
-
-        Configuration config = OIOSAML3Service.getConfig();
-        secondaryBasicX509Credential = getBasicX509Credential(config.getSecondaryKeystoreLocation(), config.getSecondaryKeystorePassword(), config.getSecondaryKeyAlias());
         return secondaryBasicX509Credential;
     }
 

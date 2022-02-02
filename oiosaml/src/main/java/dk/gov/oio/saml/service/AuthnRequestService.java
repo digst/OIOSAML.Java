@@ -96,12 +96,7 @@ public class AuthnRequestService {
 
         // Signing info
         SignatureSigningParameters signatureSigningParameters = new SignatureSigningParameters();
-
-        try {
-            signatureSigningParameters.setSigningCredential(CredentialService.getInstance().getPrimaryBasicX509Credential());
-        } catch (InitializationException e) {
-            throw new InternalException("Credential service was not initialized", e);
-        }
+        signatureSigningParameters.setSigningCredential(OIOSAML3Service.getCredentialService().getPrimaryBasicX509Credential());
 
         // we do not actually use relayState for anything, but some IdP's require it
         SAMLBindingSupport.setRelayState(messageContext, "_" + UUID.randomUUID().toString());
