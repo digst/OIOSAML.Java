@@ -18,8 +18,6 @@ public class BaseServiceTest {
         ClassLoader classLoader = AssertionServiceTest.class.getClassLoader();
         String keystoreLocation = classLoader.getResource(TestConstants.SP_KEYSTORE_LOCATION).getFile();
 
-        System.out.println(keystoreLocation);
-
         Configuration configuration = new Configuration.Builder()
                 .setSpEntityID(TestConstants.SP_ENTITY_ID)
                 .setBaseUrl(TestConstants.SP_BASE_URL)
