@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import dk.gov.oio.saml.util.StringUtil;
+import dk.gov.oio.saml.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.opensaml.core.config.InitializationException;
@@ -21,9 +21,6 @@ import org.opensaml.core.config.InitializationException;
 import dk.gov.oio.saml.config.Configuration;
 import dk.gov.oio.saml.service.OIOSAML3Service;
 import dk.gov.oio.saml.servlet.ErrorHandler.ERROR_TYPE;
-import dk.gov.oio.saml.util.Constants;
-import dk.gov.oio.saml.util.ExternalException;
-import dk.gov.oio.saml.util.InternalException;
 
 public class DispatcherServlet extends HttpServlet {
     private static final long serialVersionUID = 6183080772970327975L;
@@ -250,26 +247,7 @@ public class DispatcherServlet extends HttpServlet {
             configMap.put(key, value);
         }
 
-        // load external configuration if one is supplied
-        String externalConfigurationFile = configMap.get(Constants.EXTERNAL_CONFIGURATION_FILE);
-        if (StringUtil.isNotEmpty(externalConfigurationFile)) {
-            try (InputStream is = getClass().getClassLoader().getResourceAsStream(externalConfigurationFile)) {
-                Properties p = new Properties();
-                p.load(is);
-                
-                @SuppressWarnings("unchecked")
-                Enumeration<String> enums = (Enumeration<String>) p.propertyNames();
-                while (enums.hasMoreElements()) {
-                  String key = enums.nextElement();
-                  String value = p.getProperty(key);
-                  
-                  configMap.put(key,  value);
-                }
-            }
-            catch (Exception ex) {
-                log.warn("Failed to load external configuration file: {}", externalConfigurationFile, ex);
-            }
-        }
+        configMap.putAll(ResourceUtil.getConfig(configMap.get(Constants.EXTERNAL_CONFIGURATION_FILE)));
 
         return configMap;
     }
