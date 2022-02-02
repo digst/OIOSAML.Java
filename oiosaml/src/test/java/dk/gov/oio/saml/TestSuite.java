@@ -10,7 +10,9 @@ import org.junit.runner.RunWith;
     "dk.gov.oio.saml.oiobpp",
     "dk.gov.oio.saml.service",
     "dk.gov.oio.saml.service.validation",
-    "dk.gov.oio.saml.servlet"
+    "dk.gov.oio.saml.servlet",
+    "dk.gov.oio.saml.util",
+    "dk.gov.oio.saml.audit"
 })
 public class TestSuite {
 
