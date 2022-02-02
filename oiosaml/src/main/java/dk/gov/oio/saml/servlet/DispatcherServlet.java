@@ -26,7 +26,7 @@ import dk.gov.oio.saml.util.ExternalException;
 import dk.gov.oio.saml.util.InternalException;
 
 public class DispatcherServlet extends HttpServlet {
-    private static final long serialVersionUID = -9177718057493368235L;
+    private static final long serialVersionUID = 6183080772970327975L;
     private static final Logger log = LoggerFactory.getLogger(DispatcherServlet.class);
     private Map<String, SAMLHandler> handlers;
     private boolean initialized = false;

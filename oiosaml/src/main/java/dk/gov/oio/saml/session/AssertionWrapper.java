@@ -34,7 +34,7 @@ import dk.gov.oio.saml.util.SamlHelper;
 
 public class AssertionWrapper implements Serializable {
     private static final Logger log = LoggerFactory.getLogger(AssertionWrapper.class);
-    private static final long serialVersionUID = -338227958970338958L;
+    private static final long serialVersionUID = -4561395634523843337L;
 
     private String id;
     private String assertionString;

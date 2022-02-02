@@ -14,7 +14,7 @@ import dk.gov.oio.saml.util.InternalException;
 import org.opensaml.saml.saml2.core.Issuer;
 
 public class AuthnRequestWrapper implements Serializable {
-    private static final long serialVersionUID = -6155927753076931485L;
+    private static final long serialVersionUID = -2647272712207296480L;
     private String id;
     private boolean forceAuthn;
     private boolean passive;
