@@ -23,6 +23,10 @@
  */
 package dk.gov.oio.saml.session.inmemory;
 
+/**
+ * In memory session timeout functionality, enabling cleanup session data that has expired/timed out
+ * @param <T>
+ */
 public class TimeOutWrapper<T> {
 	private final T object;
 	private long accesstime;

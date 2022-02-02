@@ -217,7 +217,7 @@ public class DispatcherServlet extends HttpServlet {
         log.debug("Selected MessageHandler: {}", samlHandler.getClass().getName());
 
         try {
-            if (StringUtil.isNotEmpty(req.getHeader("SOAPAction"))) {
+            if (null != req.getHeader("SOAPAction")) {
                 samlHandler.handleSOAP(req, res);
             } else {
                 samlHandler.handlePost(req, res);
@@ -267,7 +267,7 @@ public class DispatcherServlet extends HttpServlet {
                 }
             }
             catch (Exception ex) {
-                log.error("Failed to load external configuration file: {}", externalConfigurationFile, ex);
+                log.warn("Failed to load external configuration file: {}", externalConfigurationFile, ex);
             }
         }
 

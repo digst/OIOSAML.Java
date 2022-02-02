@@ -24,55 +24,56 @@ public class OIOSAML3Service {
     public static void init(Configuration configuration) throws InitializationException {
         log.debug("Initializing OIOSAML");
 
-        // Validate Crypto
-        log.debug("Validating Java Cryptographic Architecture");
-        JavaCryptoValidationInitializer cryptoValidationInitializer = new JavaCryptoValidationInitializer();
-        cryptoValidationInitializer.init();
+        try {
+            // Validate Crypto
+            log.debug("Validating Java Cryptographic Architecture");
+            JavaCryptoValidationInitializer cryptoValidationInitializer = new JavaCryptoValidationInitializer();
+            cryptoValidationInitializer.init();
 
-        // Initialize OpenSAML
-        log.debug("Initializing OpenSAML");
-        InitializationService.initialize();
+            // Initialize OpenSAML
+            log.debug("Initializing OpenSAML");
+            InitializationService.initialize();
 
-        // Set configuration
-        log.debug("Setting OIOSAML Configuration");
-        OIOSAML3Service.configuration = configuration;
-        OIOSAML3Service.auditService = new AuditService(configuration);
-        OIOSAML3Service.sessionHandlerFactory = new InternalSessionHandlerFactory();
-        OIOSAML3Service.sessionHandlerFactory.configure(configuration);
-        OIOSAML3Service.sessionCleanerService = new SessionCleanerService(configuration);
+            // Set configuration
+            log.debug("Setting OIOSAML Configuration");
+            OIOSAML3Service.configuration = configuration;
+            OIOSAML3Service.auditService = new AuditService(configuration);
+            OIOSAML3Service.sessionCleanerService = new SessionCleanerService(configuration);
+            OIOSAML3Service.sessionHandlerFactory = new InternalSessionHandlerFactory();
+            OIOSAML3Service.sessionHandlerFactory.configure(configuration);
 
-        initialized = true;
+            initialized = true;
+        } catch (Exception exception) {
+            log.error("Unable to initialize OIOSAML",exception);
+            throw new InitializationException(String.format("Unable to initialize OIOSAML '%s'", exception.getMessage()), exception);
+        }
 
         log.debug("OIOSAML Initialized");
     }
 
     public static Configuration getConfig() throws RuntimeException {
-        if (!initialized) {
-            throw new RuntimeException("Configuration not set");
-        }
-
+        ifNotInitializedThrowRuntimeException("Configuration");
         return configuration;
     }
 
     public static AuditService getAuditService() throws RuntimeException {
-        if (!initialized) {
-            throw new RuntimeException("Configuration not set");
-        }
-
+        ifNotInitializedThrowRuntimeException("AuditService");
         return auditService;
     }
 
     public static SessionHandlerFactory getSessionHandlerFactory() throws RuntimeException {
-        if (!initialized) {
-            throw new RuntimeException("Configuration not set");
-        }
+        ifNotInitializedThrowRuntimeException("SessionHandlerFactory");
         return sessionHandlerFactory;
     }
 
     public static SessionCleanerService getSessionCleanerService() {
-        if (!initialized) {
-            throw new RuntimeException("Configuration not set");
-        }
+        ifNotInitializedThrowRuntimeException("SessionCleanerService");
         return sessionCleanerService;
+    }
+
+    private static void ifNotInitializedThrowRuntimeException(String entity) {
+        if (!initialized) {
+            throw new RuntimeException(String.format("OIOSAML3 is uninitialized, '%s' is unavailable", entity));
+        }
     }
 }

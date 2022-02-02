@@ -42,7 +42,7 @@ public class SessionDestroyListener implements HttpSessionListener {
     private static final Logger log = LoggerFactory.getLogger(SessionDestroyListener.class);
 
     public void sessionCreated(HttpSessionEvent httpSessionEvent) {
-        log.debug("Session: {}", httpSessionEvent);
+        log.debug("Session: {}", httpSessionEvent.getSession().getId());
     }
 
     /**

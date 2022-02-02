@@ -16,6 +16,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 
+/**
+ * Factory for creating database session handler, created by the JDBC configuration defined in oiosaml.proeprties
+ */
 public class JdbcSessionHandlerFactory implements SessionHandlerFactory {
 
     private static final Logger log = LoggerFactory.getLogger(JdbcSessionHandlerFactory.class);

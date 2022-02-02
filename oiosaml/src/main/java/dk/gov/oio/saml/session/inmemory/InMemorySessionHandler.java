@@ -39,6 +39,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
+/**
+ * Handle session state across requests and instances, using an in memory session storage.
+ */
 public class InMemorySessionHandler implements SessionHandler {
     private static final Logger log = LoggerFactory.getLogger(InMemorySessionHandler.class);
 

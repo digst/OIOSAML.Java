@@ -11,6 +11,9 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+/**
+ * Internal factory for creating session handlers based on the configuration defined in oiosaml.proeprties
+ */
 public class InternalSessionHandlerFactory implements SessionHandlerFactory {
     private static final Logger log = LoggerFactory.getLogger(InternalSessionHandlerFactory.class);
 

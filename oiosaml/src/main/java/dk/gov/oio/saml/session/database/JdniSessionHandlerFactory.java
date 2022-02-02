@@ -12,6 +12,9 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+/**
+ * Factory for creating database session handler, created by the JNDI configuration defined in oiosaml.proeprties
+ */
 public class JdniSessionHandlerFactory implements SessionHandlerFactory {
     private static final Logger log = LoggerFactory.getLogger(JdniSessionHandlerFactory.class);
 

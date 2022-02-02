@@ -497,7 +497,7 @@ public class Configuration {
             configuration.auditRequestAttributePort = StringUtil.defaultIfEmpty(this.auditRequestAttributePort, "request:remotePort");
             configuration.auditRequestAttributeSessionId = StringUtil.defaultIfEmpty(this.auditRequestAttributeSessionId, "request:remoteUser");
             configuration.auditRequestAttributeServiceProviderUserId = StringUtil.defaultIfEmpty(this.auditRequestAttributeServiceProviderUserId, "request:sessionId");
-            configuration.sessionHandlerFactoryClassName = StringUtil.defaultIfEmpty(this.sessionHandlerFactoryClassName, "dk.gov.oio.saml.session.inmemory.InMemorySessionHandlerFactory");
+            configuration.sessionHandlerFactoryClassName = StringUtil.defaultIfEmpty(this.sessionHandlerFactoryClassName, null);
             configuration.sessionHandlerJndiName = StringUtil.defaultIfEmpty(this.sessionHandlerJndiName, null);
             configuration.sessionHandlerJdbcUrl = StringUtil.defaultIfEmpty(this.sessionHandlerJdbcUrl, null);
             configuration.sessionHandlerJdbcUsername = StringUtil.defaultIfEmpty(this.sessionHandlerJdbcUsername, null);

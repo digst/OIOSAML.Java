@@ -74,7 +74,7 @@ public class AuthenticatedFilter implements Filter {
         log.debug("AuthenticatedFilter invoked by endpoint: '{}{}'", req.getContextPath(), req.getServletPath());
 
         try {
-            OIOSAML3Service.getSessionCleanerService().updateCleaner(req.getSession());
+            OIOSAML3Service.getSessionCleanerService().startCleanerIfMissing(req.getSession());
             SessionHandler sessionHandler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
             AssertionWrapper assertionWrapper = sessionHandler.getAssertion(req.getSession());
 

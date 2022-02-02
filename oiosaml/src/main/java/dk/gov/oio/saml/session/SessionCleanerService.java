@@ -8,57 +8,67 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpSession;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
+/**
+ * The purpose for SessionCleanerService is removing OIOSAML sessions that has timed out,
+ * but have not been removed by the SessionDestroyListener.
+ * SessionCleanerService runs with a regular interval defined by the server session timeout.
+ * SessionCleanerService is initialized in the OIOSAML3Service.
+ */
 public class SessionCleanerService {
     private static final Logger log = LoggerFactory.getLogger(SessionCleanerService.class);
 
+    private ScheduledExecutorService scheduledThreadPool;
     private boolean initialized = false;
-    private Timer cleanupTimer;
 
     public SessionCleanerService(Configuration configuration) {
     }
 
-    public synchronized void updateCleaner(HttpSession session) {
+    /**
+     * startCleanerIfMissing starts the cleanup task, if it is not already running.
+     * SessionCleanerService needs a running session to access MaxInactiveInterval.
+     * @param session
+     */
+    public void startCleanerIfMissing(HttpSession session) {
+        if (!initialized) {
+            initializeCleanerService(session);
+        }
+    }
+
+    private synchronized void initializeCleanerService(HttpSession session) {
+        if (initialized) {
+            // Exit if already initialized
+            return;
+        }
+
+        // Get session timeout from the session
+        long maxInactiveIntervalSeconds = session.getMaxInactiveInterval() > 0 ?
+                (long) session.getMaxInactiveInterval() :
+                30L * 60L /* defaults to 30 minutes */;
+
         try {
-            if (!initialized) {
-                long maxInactiveIntervalSeconds = session.getMaxInactiveInterval() > 0 ?
-                        (long)session.getMaxInactiveInterval() :
-                        30L * 60L /* defaults to 30 minutes */;
+            log.info("Starting session cleaner with timeout '{}'", maxInactiveIntervalSeconds);
 
-                initializeCleaner(maxInactiveIntervalSeconds);
+            scheduledThreadPool = Executors.newScheduledThreadPool(1);
 
-                initialized = true;
-            }
+            scheduledThreadPool.scheduleWithFixedDelay(
+                    new SessionCleanerTask(maxInactiveIntervalSeconds), 0, maxInactiveIntervalSeconds, TimeUnit.SECONDS);
+
+            initialized = true;
         } catch (Exception e) {
             log.error("Unable to start session cleaner", e);
         }
     }
 
-    private void initializeCleaner(final long maxInactiveIntervalSeconds) {
-        log.info("Starting session cleaner with timeout '{}'", maxInactiveIntervalSeconds);
-        if (cleanupTimer != null) {
-            stopCleaner();
-        }
-
-        cleanupTimer = new Timer("Session Cleanup");
-
-        cleanupTimer.schedule(new TimerTask() {
-            public void run() {
-                log.debug("Cleaning session data, time: {}, timeout: {}", System.currentTimeMillis(), maxInactiveIntervalSeconds * 1000);
-                try {
-                    SessionHandler sessionHandler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
-                    sessionHandler.cleanup(maxInactiveIntervalSeconds);
-                } catch (Exception e) {
-                    log.error("Failed removing old session data", e);
-                }
-            }
-        }, 0, maxInactiveIntervalSeconds * 1000);
-    }
-
     public synchronized void stopCleaner() {
-        if (cleanupTimer != null) {
-            cleanupTimer.cancel();
-            cleanupTimer = null;
+        if (scheduledThreadPool != null) {
+            scheduledThreadPool.shutdown();
         }
+        scheduledThreadPool = null;
+        initialized = false;
     }
 }

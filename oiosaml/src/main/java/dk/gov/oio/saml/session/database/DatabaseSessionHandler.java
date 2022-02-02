@@ -49,12 +49,16 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 import java.io.ByteArrayInputStream;
+import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.time.Clock;
 import java.util.Date;
 
+/**
+ * Handle session state across requests and instances, using a database as session storage.
+ */
 public class DatabaseSessionHandler implements SessionHandler {
     private static final Logger log = LoggerFactory.getLogger(DatabaseSessionHandler.class);
 
@@ -94,7 +98,7 @@ public class DatabaseSessionHandler implements SessionHandler {
                 ps.setTimestamp(2, Timestamp.valueOf(java.time.LocalDateTime.now(Clock.systemDefaultZone())));
                 ps.setString(3, request.getRequestedNsisLevel().name());
                 ps.setString(4, request.getRequestPath());
-                ps.setBytes(5,  request.getAuthnRequestAsBase64().getBytes(StandardCharsets.UTF_8));
+                ps.setClob(5, new StringReader(request.getAuthnRequestAsBase64()));
                 ps.executeUpdate();
             }
 
@@ -154,7 +158,7 @@ public class DatabaseSessionHandler implements SessionHandler {
                 ps.setString(3, assertion.getID());
                 ps.setString(4, assertion.getSubjectNameId());
                 ps.setTimestamp(5, Timestamp.valueOf(java.time.LocalDateTime.now(Clock.systemDefaultZone())));
-                ps.setBytes(6,  assertion.getAssertionAsBase64().getBytes(StandardCharsets.UTF_8));
+                ps.setClob(6, new StringReader(assertion.getAssertionAsBase64()));
                 ps.executeUpdate();
             }
 
@@ -199,7 +203,7 @@ public class DatabaseSessionHandler implements SessionHandler {
             try(PreparedStatement ps = connection.prepareStatement("INSERT INTO logout_requests_tbl (session_id, access_time, xml_object) VALUES (?,?,?)")) {
                 ps.setString(1, getSessionId(session));
                 ps.setTimestamp(2, Timestamp.valueOf(java.time.LocalDateTime.now(Clock.systemDefaultZone())));
-                ps.setBytes(3,  request.getLogoutRequestAsBase64().getBytes(StandardCharsets.UTF_8));
+                ps.setClob(3, new StringReader(request.getLogoutRequestAsBase64()));
                 ps.executeUpdate();
             }
 
@@ -249,7 +253,7 @@ public class DatabaseSessionHandler implements SessionHandler {
                 try(ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         authnRequestWrapper = new AuthnRequestWrapper(
-                                (AuthnRequest) StringUtil.base64ToXMLObject(new String(rs.getBytes(1), StandardCharsets.UTF_8)),
+                                (AuthnRequest) StringUtil.base64ToXMLObject(rs.getString(1)),
                                 NSISLevel.valueOf(rs.getString(2)),
                                 rs.getString(3));
                     }
@@ -289,7 +293,7 @@ public class DatabaseSessionHandler implements SessionHandler {
                 ps.setString(1, getSessionId(session));
                 try(ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        logoutRequestWrapper = new LogoutRequestWrapper((LogoutRequest) StringUtil.base64ToXMLObject(new String(rs.getBytes(1), StandardCharsets.UTF_8)));
+                        logoutRequestWrapper = new LogoutRequestWrapper((LogoutRequest) StringUtil.base64ToXMLObject(rs.getString(1)));
                     }
                 }
             }
@@ -448,7 +452,7 @@ public class DatabaseSessionHandler implements SessionHandler {
                 try(ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         assertionWrapper = new AssertionWrapper(
-                                (Assertion) StringUtil.base64ToXMLObject(new String(rs.getBytes(1), StandardCharsets.UTF_8)));
+                                (Assertion) StringUtil.base64ToXMLObject(rs.getString(1)));
                     }
                 }
             }

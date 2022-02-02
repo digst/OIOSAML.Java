@@ -31,6 +31,9 @@ import org.opensaml.core.config.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Factory for creating in memory session handler.
+ */
 public class InMemorySessionHandlerFactory implements SessionHandlerFactory {
     private static final Logger log = LoggerFactory.getLogger(InMemorySessionHandlerFactory.class);
 
