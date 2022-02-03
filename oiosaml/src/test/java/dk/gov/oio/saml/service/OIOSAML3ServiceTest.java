@@ -2,19 +2,12 @@ package dk.gov.oio.saml.service;
 
 import dk.gov.oio.saml.config.Configuration;
 import dk.gov.oio.saml.session.TestSessionHandlerFactory;
-import dk.gov.oio.saml.util.ExternalException;
-import dk.gov.oio.saml.util.IdpUtil;
 import dk.gov.oio.saml.util.InternalException;
 import dk.gov.oio.saml.util.TestConstants;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.opensaml.core.config.InitializationException;
-
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class OIOSAML3ServiceTest {
 
