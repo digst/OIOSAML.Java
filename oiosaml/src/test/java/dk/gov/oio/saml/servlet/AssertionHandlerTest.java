@@ -6,7 +6,6 @@ import dk.gov.oio.saml.service.OIOSAML3Service;
 import dk.gov.oio.saml.session.AssertionWrapper;
 import dk.gov.oio.saml.session.AuthnRequestWrapper;
 import dk.gov.oio.saml.session.SessionHandler;
-import dk.gov.oio.saml.util.Constants;
 import dk.gov.oio.saml.util.IdpUtil;
 import dk.gov.oio.saml.util.InternalException;
 import dk.gov.oio.saml.util.TestConstants;

@@ -25,7 +25,7 @@ public class SessionCleanerTask implements Runnable {
             SessionHandler sessionHandler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
             sessionHandler.cleanup(maxInactiveIntervalSeconds);
         } catch (Exception e) {
-            log.error("Failed removing old session data", e);
+            log.warn("Failed removing old session data", e);
         }
     }
 }

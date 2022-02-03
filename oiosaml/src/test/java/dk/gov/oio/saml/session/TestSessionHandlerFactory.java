@@ -1,7 +1,6 @@
 package dk.gov.oio.saml.session;
 
 import dk.gov.oio.saml.config.Configuration;
-import dk.gov.oio.saml.session.inmemory.InMemorySessionHandler;
 import dk.gov.oio.saml.session.inmemory.InMemorySessionHandlerFactory;
 import dk.gov.oio.saml.util.InternalException;
 import org.mockito.Mockito;

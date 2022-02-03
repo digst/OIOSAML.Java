@@ -40,7 +40,7 @@ public class AuditRequestUtil {
         String[] name = Objects.toString(parameter, "").split(":", 2);
 
         if (name.length != 2) {
-            log.error("Custom request parameter '{}' is malformed, should be '<protocol>:<attribute>'",parameter);
+            log.warn("Custom request parameter '{}' is malformed, should be '<protocol>:<attribute>'",parameter);
             return defaultValue;
         }
 
@@ -56,7 +56,7 @@ public class AuditRequestUtil {
             case "request":
                 return getRequestAttributeFromRequest(request, name[1], defaultValue);
             default:
-                log.error("Custom parameter protocol '{}' is malformed, should be [request|query|header|cookie|session]",name[0]);
+                log.warn("Custom parameter protocol '{}' is malformed, should be [request|query|header|cookie|session]",name[0]);
         }
         return defaultValue;
     }
@@ -89,7 +89,7 @@ public class AuditRequestUtil {
             case "sessionId" :
                 return Objects.toString(request.getSession().getId(), defaultValue);
             default:
-                log.error("Request parameter '{}' is missing, should be [remoteHost|remoteAddr|remotePort|remoteUser]",parameter);
+                log.warn("Request parameter '{}' is missing, should be [remoteHost|remoteAddr|remotePort|remoteUser]",parameter);
         }
         return defaultValue;
     }

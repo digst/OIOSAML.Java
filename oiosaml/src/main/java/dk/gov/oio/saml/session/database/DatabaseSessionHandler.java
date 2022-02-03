@@ -30,16 +30,8 @@ import dk.gov.oio.saml.session.AssertionWrapper;
 import dk.gov.oio.saml.session.AuthnRequestWrapper;
 import dk.gov.oio.saml.session.LogoutRequestWrapper;
 import dk.gov.oio.saml.session.SessionHandler;
-import dk.gov.oio.saml.session.inmemory.TimeOutWrapper;
 import dk.gov.oio.saml.util.InternalException;
 import dk.gov.oio.saml.util.StringUtil;
-import net.shibboleth.utilities.java.support.xml.SerializeSupport;
-import net.shibboleth.utilities.java.support.xml.XMLParserException;
-import org.apache.commons.codec.binary.Base64;
-import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
-import org.opensaml.core.xml.io.MarshallingException;
-import org.opensaml.core.xml.io.UnmarshallingException;
-import org.opensaml.core.xml.util.XMLObjectSupport;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.LogoutRequest;
@@ -48,13 +40,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
-import java.io.ByteArrayInputStream;
 import java.io.StringReader;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.time.Clock;
-import java.util.Date;
 
 /**
  * Handle session state across requests and instances, using a database as session storage.
@@ -437,7 +425,7 @@ public class DatabaseSessionHandler implements SessionHandler {
             }
 
         } catch (SQLException e) {
-            log.error("Failed logging out", e);
+            log.warn("Unable to remove OIOSAML session '{}'", sessionId, e);
         }
     }
 

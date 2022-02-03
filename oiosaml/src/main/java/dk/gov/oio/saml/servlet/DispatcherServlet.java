@@ -1,11 +1,9 @@
 package dk.gov.oio.saml.servlet;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -56,7 +54,7 @@ public class DispatcherServlet extends HttpServlet {
                 configuration.setMinimumAssuranceLevel(i);
             }
             catch (Exception ex) {
-                log.error("Invalid value {} = {}", Constants.OIOSAML_ASSURANCE_LEVEL_MINIMUM, value, ex);
+                log.warn("Invalid value {} = {}", Constants.OIOSAML_ASSURANCE_LEVEL_MINIMUM, value, ex);
             }
         }
         
@@ -107,7 +105,7 @@ public class DispatcherServlet extends HttpServlet {
                 configuration.setIdpMetadataMinRefreshDelay(i);
             }
             catch (Exception ex) {
-                log.error("Invalid value {} = {}", Constants.IDP_METADATA_MIN_REFRESH, value, ex);
+                log.warn("Invalid value {} = {}", Constants.IDP_METADATA_MIN_REFRESH, value, ex);
             }
         }
         
@@ -118,7 +116,7 @@ public class DispatcherServlet extends HttpServlet {
                 configuration.setIdpMetadataMaxRefreshDelay(i);
             }
             catch (Exception ex) {
-                log.error("Invalid value {} = {}", Constants.IDP_METADATA_MAX_REFRESH, value, ex);
+                log.warn("Invalid value {} = {}", Constants.IDP_METADATA_MAX_REFRESH, value, ex);
             }
         }
 
@@ -148,7 +146,7 @@ public class DispatcherServlet extends HttpServlet {
         }
         catch (Exception ex) {
             configuration.setSessionHandlerInMemoryMaxNumberOfTrackedAssertionIds(10000);
-            log.error("Invalid value {} = {}", Constants.SP_SESSION_HANDLER_MAX_NUM_TRACKED_ASSERTIONIDS, value, ex);
+            log.warn("Invalid value {} = {}", Constants.SP_SESSION_HANDLER_MAX_NUM_TRACKED_ASSERTIONIDS, value, ex);
         }
     }
 
@@ -169,7 +167,7 @@ public class DispatcherServlet extends HttpServlet {
 
         SAMLHandler samlHandler = handlers.get(action);
         if (samlHandler == null) {
-            log.error("No handler registered for action: {}", action);
+            log.warn("No handler registered for action: {}", action);
             
             ErrorHandler.handle(req, res, ERROR_TYPE.CONFIGURATION_ERROR, "No handler registered for action: " + action);
             return;
@@ -181,7 +179,7 @@ public class DispatcherServlet extends HttpServlet {
             samlHandler.handleGet(req, res);
         }
         catch (ExternalException | InternalException | InitializationException e) {
-            log.error("Unexpected error during SAML processing", e);
+            log.warn("Unexpected error during SAML processing", e);
             
             ErrorHandler.handle(req, res, ERROR_TYPE.EXCEPTION, e.getMessage());
             return;
@@ -205,7 +203,7 @@ public class DispatcherServlet extends HttpServlet {
 
         SAMLHandler samlHandler = handlers.get(action);
         if (samlHandler == null) {
-            log.error("No handler registered for action: {}", action);
+            log.warn("No handler registered for action: {}", action);
             
             ErrorHandler.handle(req, res, ERROR_TYPE.CONFIGURATION_ERROR, "No handler registered for action: " + action);
             return;
@@ -221,7 +219,7 @@ public class DispatcherServlet extends HttpServlet {
             }
         }
         catch (ExternalException | InternalException e) {
-            log.error("Unexpected error during SAML processing", e);
+            log.warn("Unexpected error during SAML processing", e);
             
             ErrorHandler.handle(req, res, ERROR_TYPE.EXCEPTION, e.getMessage());
             return;

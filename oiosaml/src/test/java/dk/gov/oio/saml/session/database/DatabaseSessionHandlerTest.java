@@ -103,6 +103,7 @@ class DatabaseSessionHandlerTest {
                 stream.forEach(s -> contentBuilder.append(s));
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
+                Assertions.fail(e.getMessage());
             }
 
             Arrays.stream(contentBuilder.toString().split(";"))
@@ -110,12 +111,13 @@ class DatabaseSessionHandlerTest {
                         try {
                             connection.createStatement().executeUpdate(sql);
                         } catch (SQLException e) {
-                            log.error(e.getMessage(), e);
+                            // HQSQL unable to run statement from DDL script
+                            log.debug("Continue without '{}'", sql, e);
                         }
                     });
 
         } catch (SQLException e) {
-            log.error("Failure to persist authn request", e);
+            log.error("Failure to setup tables", e);
             throw new InternalException("Failure to setup tables for databaseSessionHandler", e);
         }
     }

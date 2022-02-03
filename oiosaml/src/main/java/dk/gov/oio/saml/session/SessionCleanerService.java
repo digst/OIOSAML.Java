@@ -1,16 +1,12 @@
 package dk.gov.oio.saml.session;
 
 import dk.gov.oio.saml.config.Configuration;
-import dk.gov.oio.saml.service.OIOSAML3Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpSession;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -60,7 +56,7 @@ public class SessionCleanerService {
 
             initialized = true;
         } catch (Exception e) {
-            log.error("Unable to start session cleaner", e);
+            log.warn("Unable to start session cleaner", e);
         }
     }
 

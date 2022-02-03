@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
-
 /**
  * Listener for cleaning up when sessions are destroyed by the container.
  * @author recht
@@ -75,7 +74,7 @@ public class SessionDestroyListener implements HttpSessionListener {
                 log.debug("Session destroyed without saml assertion");
             }
         } catch (InternalException ex) {
-            log.error("Error trying to logout http session {}", httpSessionEvent.getSession().getId(), ex);
+            log.warn("Failed to logout OIOSAML session {}", httpSessionEvent.getSession().getId(), ex);
         }
     }
 }

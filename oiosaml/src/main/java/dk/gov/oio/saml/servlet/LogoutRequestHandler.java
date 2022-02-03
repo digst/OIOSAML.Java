@@ -1,26 +1,23 @@
 package dk.gov.oio.saml.servlet;
 
 import java.io.IOException;
-import java.util.stream.Collectors;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
-import dk.gov.oio.saml.session.AssertionWrapper;
-import dk.gov.oio.saml.session.LogoutRequestWrapper;
-import dk.gov.oio.saml.session.SessionHandler;
-import dk.gov.oio.saml.util.*;
-import org.opensaml.core.xml.io.MarshallingException;
-import org.opensaml.saml.saml2.core.SessionIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.saml.saml2.core.SessionIndex;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.saml2.core.LogoutRequest;
 
+import dk.gov.oio.saml.session.AssertionWrapper;
+import dk.gov.oio.saml.session.LogoutRequestWrapper;
+import dk.gov.oio.saml.session.SessionHandler;
+import dk.gov.oio.saml.util.*;
 import dk.gov.oio.saml.config.Configuration;
 import dk.gov.oio.saml.service.IdPMetadataService;
 import dk.gov.oio.saml.service.LogoutRequestService;
@@ -129,7 +126,7 @@ public class LogoutRequestHandler extends SAMLHandler {
                 Element element = SamlHelper.marshallObject(logoutRequest.getLogoutRequest());
                 log.debug("LogoutRequest: {}", StringUtil.elementToString(element));
             } catch (MarshallingException e) {
-                log.error("Could not marshall LogoutRequest for logging purposes");
+                log.warn("Could not marshall LogoutRequest for logging purposes");
             }
             log.info("Outgoing LogoutRequest - ID:'{}' Issuer:'{}' IssueInstant:'{}' SessionIndexes:'{}' Destination:'{}'",
                     logoutRequest.getID(),
@@ -154,7 +151,7 @@ public class LogoutRequestHandler extends SAMLHandler {
             Element element = SamlHelper.marshallObject(logoutRequest.getLogoutRequest());
             log.debug("LogoutRequest: {}", StringUtil.elementToString(element));
         } catch (MarshallingException e) {
-            log.error("Could not marshall LogoutRequest for logging purposes");
+            log.warn("Could not marshall LogoutRequest for logging purposes");
         }
         log.info("Incoming LogoutRequest - ID:'{}' Issuer:'{}' IssueInstant:'{}' SessionIndexes:'{}' Destination:'{}'",
                 logoutRequest.getID(),
@@ -215,7 +212,7 @@ public class LogoutRequestHandler extends SAMLHandler {
                 Element element = SamlHelper.marshallObject(logoutRequest.getLogoutRequest());
                 log.debug("LogoutRequest: {}", StringUtil.elementToString(element));
             } catch (MarshallingException e) {
-                log.error("Could not marshall LogoutRequest for logging purposes");
+                log.warn("Could not marshall LogoutRequest for logging purposes");
             }
             log.info("Outgoing LogoutRequest - ID:'{}' Issuer:'{}' IssueInstant:'{}' SessionIndexes:'{}' Destination:'{}'",
                     logoutRequest.getID(),

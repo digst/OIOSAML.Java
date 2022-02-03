@@ -177,7 +177,7 @@ public class AuthenticatedFilter implements Filter {
             log.debug("AuthnRequest: {}", StringUtil.elementToString(SamlHelper.marshallObject(authnRequest.getMessage())));
         }
         catch (MarshallingException e) {
-            log.error("Could not marshall AuthnRequest for logging purposes");
+            log.warn("Could not marshall AuthnRequest for logging purposes");
         }
 
         // Save authnRequest on session

@@ -116,7 +116,7 @@ public class LogoutResponseService {
             Signer.signObject(signature);
 
         } catch (SignatureException | InitializationException | InternalException | MarshallingException e) {
-            log.error("Signing of '{}' failed", logoutResponse.getID(), e);
+            log.warn("Signing of '{}' failed", logoutResponse.getID(), e);
         }
         return logoutResponse;
     }

@@ -3,7 +3,6 @@ package dk.gov.oio.saml.session;
 import dk.gov.oio.saml.config.Configuration;
 import dk.gov.oio.saml.service.OIOSAML3Service;
 import dk.gov.oio.saml.util.TestConstants;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

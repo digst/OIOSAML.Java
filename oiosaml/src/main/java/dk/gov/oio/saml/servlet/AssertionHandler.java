@@ -1,8 +1,6 @@
 package dk.gov.oio.saml.servlet;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,7 +16,6 @@ import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.common.assertion.AssertionValidationException;
 import org.opensaml.saml.saml2.core.*;
 
-import dk.gov.oio.saml.model.NSISLevel;
 import dk.gov.oio.saml.service.AssertionService;
 import dk.gov.oio.saml.service.OIOSAML3Service;
 import dk.gov.oio.saml.service.validation.AssertionValidationService;
@@ -55,7 +52,7 @@ public class AssertionHandler extends SAMLHandler {
             Element element = SamlHelper.marshallObject(response);
             log.debug("Response: {}", StringUtil.elementToString(element));
         } catch (MarshallingException e) {
-            log.error("Could not marshall Response for logging purposes");
+            log.warn("Could not marshall Response for logging purposes");
         }
 
         // Get response status
