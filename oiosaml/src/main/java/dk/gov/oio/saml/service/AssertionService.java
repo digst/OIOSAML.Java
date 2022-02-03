@@ -44,12 +44,10 @@ public class AssertionService {
         try {
             KeyInfoCredentialResolver keyResolver = null;
             try {
-                CredentialService credentialService = CredentialService.getInstance();
-
                 List<Credential> credentials = new ArrayList<>();
-                credentials.add(credentialService.getPrimaryBasicX509Credential());
+                credentials.add(OIOSAML3Service.getCredentialService().getPrimaryBasicX509Credential());
 
-                BasicX509Credential secondaryBasicX509Credential = credentialService.getSecondaryBasicX509Credential();
+                BasicX509Credential secondaryBasicX509Credential = OIOSAML3Service.getCredentialService().getSecondaryBasicX509Credential();
                 if (secondaryBasicX509Credential != null) {
                     credentials.add(secondaryBasicX509Credential);
                 }

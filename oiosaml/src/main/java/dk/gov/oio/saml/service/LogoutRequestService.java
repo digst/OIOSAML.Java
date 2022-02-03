@@ -44,7 +44,7 @@ public class LogoutRequestService {
 
         // Signing info
         SignatureSigningParameters signatureSigningParameters = new SignatureSigningParameters();
-        signatureSigningParameters.setSigningCredential(CredentialService.getInstance().getPrimaryBasicX509Credential());
+        signatureSigningParameters.setSigningCredential(OIOSAML3Service.getCredentialService().getPrimaryBasicX509Credential());
         signatureSigningParameters.setSignatureAlgorithm(OIOSAML3Service.getConfig().getSignatureAlgorithm());
         messageContext.getSubcontext(SecurityParametersContext.class, true).setSignatureSigningParameters(signatureSigningParameters);
 

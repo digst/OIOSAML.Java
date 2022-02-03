@@ -204,7 +204,7 @@ public class SPMetadataService {
     private List<KeyDescriptor> getKeyDescriptors() throws InternalException {
         try {
             ArrayList<KeyDescriptor> keyDescriptors = new ArrayList<>();
-            CredentialService credentialService = CredentialService.getInstance();
+            CredentialService credentialService = OIOSAML3Service.getCredentialService();
 
             BasicX509Credential primaryBasicX509Credential = credentialService.getPrimaryBasicX509Credential();
             keyDescriptors.add(getKeyDescriptor(UsageType.SIGNING, credentialService.getPublicKeyInfo(primaryBasicX509Credential)));

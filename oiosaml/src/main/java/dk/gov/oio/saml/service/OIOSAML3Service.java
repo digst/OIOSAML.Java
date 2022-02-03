@@ -18,11 +18,13 @@ public class OIOSAML3Service {
     public static boolean initialized = false;
     private static Configuration configuration;
     private static AuditService auditService;
+    private static CredentialService credentialService;
     private static SessionHandlerFactory sessionHandlerFactory;
     private static SessionCleanerService sessionCleanerService;
 
     public static void init(Configuration configuration) throws InitializationException {
         log.debug("Initializing OIOSAML");
+        initialized = false;
 
         try {
             // Validate Crypto
@@ -38,6 +40,7 @@ public class OIOSAML3Service {
             log.debug("Setting OIOSAML Configuration");
             OIOSAML3Service.configuration = configuration;
             OIOSAML3Service.auditService = new AuditService(configuration);
+            OIOSAML3Service.credentialService = new CredentialService(configuration);
             OIOSAML3Service.sessionCleanerService = new SessionCleanerService(configuration);
             OIOSAML3Service.sessionHandlerFactory = new InternalSessionHandlerFactory();
             OIOSAML3Service.sessionHandlerFactory.configure(configuration);
@@ -47,7 +50,6 @@ public class OIOSAML3Service {
             log.error("Unable to initialize OIOSAML",exception);
             throw new InitializationException(String.format("Unable to initialize OIOSAML '%s'", exception.getMessage()), exception);
         }
-
         log.debug("OIOSAML Initialized");
     }
 
@@ -69,6 +71,11 @@ public class OIOSAML3Service {
     public static SessionCleanerService getSessionCleanerService() {
         ifNotInitializedThrowRuntimeException("SessionCleanerService");
         return sessionCleanerService;
+    }
+
+    public static CredentialService getCredentialService() {
+        ifNotInitializedThrowRuntimeException("CredentialService");
+        return credentialService;
     }
 
     private static void ifNotInitializedThrowRuntimeException(String entity) {

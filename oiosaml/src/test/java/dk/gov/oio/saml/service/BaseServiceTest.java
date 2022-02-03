@@ -17,7 +17,7 @@ public class BaseServiceTest {
     @BeforeAll
     public static void beforeAll(MockServerClient idp) throws Exception {
         ClassLoader classLoader = AssertionServiceTest.class.getClassLoader();
-        String keystoreLocation = classLoader.getResource("sp.pfx").getFile();
+        String keystoreLocation = classLoader.getResource(TestConstants.SP_KEYSTORE_LOCATION).getFile();
 
         Configuration configuration = new Configuration.Builder()
                 .setSpEntityID(TestConstants.SP_ENTITY_ID)
@@ -32,8 +32,8 @@ public class BaseServiceTest {
                 .setIdpMetadataUrl(TestConstants.IDP_METADATA_URL)
                 .setSessionHandlerFactoryClassName(TestSessionHandlerFactory.class.getName())
                 .setKeystoreLocation(keystoreLocation)
-                .setKeystorePassword("Test1234")
-                .setKeyAlias("1")
+                .setKeystorePassword(TestConstants.SP_KEYSTORE_PASSWORD)
+                .setKeyAlias(TestConstants.SP_KEYSTORE_ALIAS)
                 .build();
 
         configuration.setCRLCheckEnabled(false);

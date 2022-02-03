@@ -59,7 +59,7 @@ public class LogoutResponseService {
 
         // Signing info
         SignatureSigningParameters signatureSigningParameters = new SignatureSigningParameters();
-        signatureSigningParameters.setSigningCredential(CredentialService.getInstance().getPrimaryBasicX509Credential());
+        signatureSigningParameters.setSigningCredential(OIOSAML3Service.getCredentialService().getPrimaryBasicX509Credential());
         signatureSigningParameters.setSignatureAlgorithm(OIOSAML3Service.getConfig().getSignatureAlgorithm());
         messageContext.getSubcontext(SecurityParametersContext.class, true).setSignatureSigningParameters(signatureSigningParameters);
 
@@ -101,13 +101,13 @@ public class LogoutResponseService {
         try {
             Signature signature = SamlHelper.build(Signature.class);
 
-            BasicX509Credential x509Credential = CredentialService.getInstance().getPrimaryBasicX509Credential();
+            BasicX509Credential x509Credential = OIOSAML3Service.getCredentialService().getPrimaryBasicX509Credential();
             SignatureRSASHA256 signatureRSASHA256 = new SignatureRSASHA256();
 
             signature.setSigningCredential(x509Credential);
             signature.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
             signature.setSignatureAlgorithm(signatureRSASHA256.getURI());
-            signature.setKeyInfo(CredentialService.getInstance().getPublicKeyInfo(x509Credential));
+            signature.setKeyInfo(OIOSAML3Service.getCredentialService().getPublicKeyInfo(x509Credential));
 
             logoutResponse.setSignature(signature);
 
