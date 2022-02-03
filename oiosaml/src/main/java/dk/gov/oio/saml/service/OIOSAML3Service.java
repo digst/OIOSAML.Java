@@ -24,6 +24,7 @@ public class OIOSAML3Service {
 
     public static void init(Configuration configuration) throws InitializationException {
         log.debug("Initializing OIOSAML");
+        initialized = false;
 
         try {
             // Validate Crypto

@@ -81,7 +81,7 @@ public class ResourceUtil {
 
     /**
      * Get configuration from resource
-     * @param configurationFile
+     * @param configurationFile name and location of configuration file
      * @return Map containing properties from the configuration file map is empty if unable to load file
      */
     public static Map<String, String> getConfig(String configurationFile) {

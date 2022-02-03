@@ -25,7 +25,7 @@ package dk.gov.oio.saml.session.inmemory;
 
 /**
  * In memory session timeout functionality, enabling cleanup session data that has expired/timed out
- * @param <T>
+ * @param <T> Add timeout functionality to this class
  */
 public class TimeOutWrapper<T> {
 	private final T object;

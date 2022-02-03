@@ -27,7 +27,7 @@ public class SessionCleanerService {
     /**
      * startCleanerIfMissing starts the cleanup task, if it is not already running.
      * SessionCleanerService needs a running session to access MaxInactiveInterval.
-     * @param session
+     * @param session HTTP session
      */
     public void startCleanerIfMissing(HttpSession session) {
         if (!initialized) {
@@ -60,6 +60,9 @@ public class SessionCleanerService {
         }
     }
 
+    /**
+     * Stop Session cleaner service
+     */
     public synchronized void stopCleaner() {
         if (scheduledThreadPool != null) {
             scheduledThreadPool.shutdown();
