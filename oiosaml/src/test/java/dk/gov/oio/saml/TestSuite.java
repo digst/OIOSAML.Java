@@ -12,7 +12,10 @@ import org.junit.runner.RunWith;
     "dk.gov.oio.saml.service.validation",
     "dk.gov.oio.saml.servlet",
     "dk.gov.oio.saml.util",
-    "dk.gov.oio.saml.audit"
+    "dk.gov.oio.saml.audit",
+    "dk.gov.oio.saml.session",
+    "dk.gov.oio.saml.session.database",
+    "dk.gov.oio.saml.session.inmenory"
 })
 public class TestSuite {
 

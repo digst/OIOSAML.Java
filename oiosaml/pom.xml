@@ -211,6 +211,13 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>2.4.1</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Use nop SLF4J logger in unit tests to silence log output-->
         <dependency>
             <groupId>org.slf4j</groupId>

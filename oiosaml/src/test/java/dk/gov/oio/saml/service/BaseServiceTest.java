@@ -1,5 +1,6 @@
 package dk.gov.oio.saml.service;
 
+import dk.gov.oio.saml.session.TestSessionHandlerFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockserver.client.MockServerClient;
@@ -29,6 +30,7 @@ public class BaseServiceTest {
                 .setServletRoutingPathSuffixAssertion(TestConstants.SP_ROUTING_ASSERTION)
                 .setIdpEntityID(TestConstants.IDP_ENTITY_ID)
                 .setIdpMetadataUrl(TestConstants.IDP_METADATA_URL)
+                .setSessionHandlerFactoryClassName(TestSessionHandlerFactory.class.getName())
                 .setKeystoreLocation(keystoreLocation)
                 .setKeystorePassword(TestConstants.SP_KEYSTORE_PASSWORD)
                 .setKeyAlias(TestConstants.SP_KEYSTORE_ALIAS)

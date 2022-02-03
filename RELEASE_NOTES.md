@@ -1,6 +1,9 @@
 # OIO SAML 3 (Artifact ID: oiosaml3.java)
 
 ## 3.2.0 (planned)
+- NLRFIM-120: Support SOAP bindings in Java OIO SAML 3
+- NLRFIM-121: Session handling and storage in Java OIO SAML 3
+- NLRFIM-123: Replay protection in Java OIO SAML 3
 - CVE-2021-45105, CVE-2021-44832: Update log4j-core to version 2.17.1
 - NLRFIM-153: Fail on missing credentials
 - NLRFIM-139: Absolute path OIOSAML configuration

@@ -1,9 +1,6 @@
 package dk.gov.oio.saml.model;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -225,7 +222,7 @@ public class IdPMetadata {
                     lastCRLCheck = DateTime.now();
                 }
                 catch (ExternalException | InternalException | InitializationException e) {
-                    log.error("CRL check failed", e);
+                    log.warn("CRL check failed", e);
                     return;
                 }
             }

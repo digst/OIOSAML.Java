@@ -66,7 +66,7 @@ public class CRLChecker {
                 log.debug("Certificate validated successfully: {}", certificate.getSubjectDN());
             }
             else {
-                log.error("Certificate did not validate: {}", certificate.getSubjectDN());
+                log.warn("Certificate did not validate: {}", certificate.getSubjectDN());
             }
         }
 
@@ -153,7 +153,7 @@ public class CRLChecker {
                 log.info("Certificate revoked, cert[{}] : {}", cpve.getIndex(), cpve.getMessage());
             }
             else {
-                log.error("Validation failure, cert[{}] : {}", cpve.getIndex(), cpve.getMessage());
+                log.warn("Validation failure, cert[{}] : {}", cpve.getIndex(), cpve.getMessage());
                 throw cpve;
             }
         }

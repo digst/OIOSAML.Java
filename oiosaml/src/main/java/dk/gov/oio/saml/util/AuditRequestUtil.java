@@ -2,6 +2,7 @@ package dk.gov.oio.saml.util;
 
 import dk.gov.oio.saml.audit.AuditService;
 import dk.gov.oio.saml.service.OIOSAML3Service;
+import dk.gov.oio.saml.session.SessionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +40,7 @@ public class AuditRequestUtil {
         String[] name = Objects.toString(parameter, "").split(":", 2);
 
         if (name.length != 2) {
-            log.error("Custom request parameter '{}' is malformed, should be '<protocol>:<attribute>'",parameter);
+            log.warn("Custom request parameter '{}' is malformed, should be '<protocol>:<attribute>'",parameter);
             return defaultValue;
         }
 
@@ -55,7 +56,7 @@ public class AuditRequestUtil {
             case "request":
                 return getRequestAttributeFromRequest(request, name[1], defaultValue);
             default:
-                log.error("Custom parameter protocol '{}' is malformed, should be [request|query|header|cookie|session]",name[0]);
+                log.warn("Custom parameter protocol '{}' is malformed, should be [request|query|header|cookie|session]",name[0]);
         }
         return defaultValue;
     }
@@ -88,7 +89,7 @@ public class AuditRequestUtil {
             case "sessionId" :
                 return Objects.toString(request.getSession().getId(), defaultValue);
             default:
-                log.error("Request parameter '{}' is missing, should be [remoteHost|remoteAddr|remotePort|remoteUser]",parameter);
+                log.warn("Request parameter '{}' is missing, should be [remoteHost|remoteAddr|remotePort|remoteUser]",parameter);
         }
         return defaultValue;
     }
@@ -100,8 +101,10 @@ public class AuditRequestUtil {
      * @param action Identifier for the event which is audited
      * @param description Descriptive name for the event which is audited
      * @return Builder for audit record
+     * @throws InternalException on failure to initialize builder with default parameters from configuration
      */
-    public static AuditService.Builder createBasicAuditBuilder(HttpServletRequest request, String action, String description) {
+    public static AuditService.Builder createBasicAuditBuilder(HttpServletRequest request, String action, String description) throws InternalException {
+        SessionHandler handler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
         return new AuditService
                 .Builder()
                 .withAuthnAttribute("ACTION", action)
@@ -109,6 +112,7 @@ public class AuditRequestUtil {
                 .withAuthnAttribute("IP", getAttributeFromRequest(request, OIOSAML3Service.getConfig().getAuditRequestAttributeIP(), request.getRemoteAddr()))
                 .withAuthnAttribute("PORT", getAttributeFromRequest(request, OIOSAML3Service.getConfig().getAuditRequestAttributePort(), String.valueOf(request.getRemotePort())))
                 .withAuthnAttribute("SESSION_ID", getAttributeFromRequest(request, OIOSAML3Service.getConfig().getAuditRequestAttributeSessionId(), request.getSession().getId()))
+                .withAuthnAttribute("SP_SESSION_ID", handler.getSessionId(request.getSession()))
                 .withAuthnAttribute("REQUESTED_SESSION_ID", request.getRequestedSessionId())
                 .withAuthnAttribute("USER", getAttributeFromRequest(request, OIOSAML3Service.getConfig().getAuditRequestAttributeServiceProviderUserId(), request.getRemoteUser()))
                 .withAuthnAttribute("USER-AGENT", getAttributeFromRequest(request, "header:User-Agent",

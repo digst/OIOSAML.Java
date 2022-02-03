@@ -1,11 +1,9 @@
 package dk.gov.oio.saml.servlet;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -23,7 +21,7 @@ import dk.gov.oio.saml.service.OIOSAML3Service;
 import dk.gov.oio.saml.servlet.ErrorHandler.ERROR_TYPE;
 
 public class DispatcherServlet extends HttpServlet {
-    private static final long serialVersionUID = -9177718057493368235L;
+    private static final long serialVersionUID = 6183080772970327975L;
     private static final Logger log = LoggerFactory.getLogger(DispatcherServlet.class);
     private Map<String, SAMLHandler> handlers;
     private boolean initialized = false;
@@ -56,7 +54,7 @@ public class DispatcherServlet extends HttpServlet {
                 configuration.setMinimumAssuranceLevel(i);
             }
             catch (Exception ex) {
-                log.error("Invalid value {} = {}", Constants.OIOSAML_ASSURANCE_LEVEL_MINIMUM, value, ex);
+                log.warn("Invalid value {} = {}", Constants.OIOSAML_ASSURANCE_LEVEL_MINIMUM, value, ex);
             }
         }
         
@@ -107,7 +105,7 @@ public class DispatcherServlet extends HttpServlet {
                 configuration.setIdpMetadataMinRefreshDelay(i);
             }
             catch (Exception ex) {
-                log.error("Invalid value {} = {}", Constants.IDP_METADATA_MIN_REFRESH, value, ex);
+                log.warn("Invalid value {} = {}", Constants.IDP_METADATA_MIN_REFRESH, value, ex);
             }
         }
         
@@ -118,7 +116,7 @@ public class DispatcherServlet extends HttpServlet {
                 configuration.setIdpMetadataMaxRefreshDelay(i);
             }
             catch (Exception ex) {
-                log.error("Invalid value {} = {}", Constants.IDP_METADATA_MAX_REFRESH, value, ex);
+                log.warn("Invalid value {} = {}", Constants.IDP_METADATA_MAX_REFRESH, value, ex);
             }
         }
 
@@ -141,6 +139,15 @@ public class DispatcherServlet extends HttpServlet {
         if (StringUtil.isNotEmpty(value)) {
             configuration.setSignatureAlgorithm(value);
         }
+
+        value = config.get(Constants.SP_SESSION_HANDLER_MAX_NUM_TRACKED_ASSERTIONIDS);
+        try {
+            configuration.setSessionHandlerInMemoryMaxNumberOfTrackedAssertionIds(Integer.parseInt(StringUtil.defaultIfEmpty(value,"10000")));
+        }
+        catch (Exception ex) {
+            configuration.setSessionHandlerInMemoryMaxNumberOfTrackedAssertionIds(10000);
+            log.warn("Invalid value {} = {}", Constants.SP_SESSION_HANDLER_MAX_NUM_TRACKED_ASSERTIONIDS, value, ex);
+        }
     }
 
     @Override
@@ -160,7 +167,7 @@ public class DispatcherServlet extends HttpServlet {
 
         SAMLHandler samlHandler = handlers.get(action);
         if (samlHandler == null) {
-            log.error("No handler registered for action: {}", action);
+            log.warn("No handler registered for action: {}", action);
             
             ErrorHandler.handle(req, res, ERROR_TYPE.CONFIGURATION_ERROR, "No handler registered for action: " + action);
             return;
@@ -172,7 +179,7 @@ public class DispatcherServlet extends HttpServlet {
             samlHandler.handleGet(req, res);
         }
         catch (ExternalException | InternalException | InitializationException e) {
-            log.error("Unexpected error during SAML processing", e);
+            log.warn("Unexpected error during SAML processing", e);
             
             ErrorHandler.handle(req, res, ERROR_TYPE.EXCEPTION, e.getMessage());
             return;
@@ -196,7 +203,7 @@ public class DispatcherServlet extends HttpServlet {
 
         SAMLHandler samlHandler = handlers.get(action);
         if (samlHandler == null) {
-            log.error("No handler registered for action: {}", action);
+            log.warn("No handler registered for action: {}", action);
             
             ErrorHandler.handle(req, res, ERROR_TYPE.CONFIGURATION_ERROR, "No handler registered for action: " + action);
             return;
@@ -205,10 +212,14 @@ public class DispatcherServlet extends HttpServlet {
         log.debug("Selected MessageHandler: {}", samlHandler.getClass().getName());
 
         try {
-            samlHandler.handlePost(req, res);
+            if (null != req.getHeader("SOAPAction")) {
+                samlHandler.handleSOAP(req, res);
+            } else {
+                samlHandler.handlePost(req, res);
+            }
         }
         catch (ExternalException | InternalException e) {
-            log.error("Unexpected error during SAML processing", e);
+            log.warn("Unexpected error during SAML processing", e);
             
             ErrorHandler.handle(req, res, ERROR_TYPE.EXCEPTION, e.getMessage());
             return;
@@ -233,6 +244,7 @@ public class DispatcherServlet extends HttpServlet {
             String value = this.getInitParameter(key);
             configMap.put(key, value);
         }
+
         configMap.putAll(ResourceUtil.getConfig(configMap.get(Constants.EXTERNAL_CONFIGURATION_FILE)));
 
         return configMap;
@@ -266,6 +278,12 @@ public class DispatcherServlet extends HttpServlet {
                         .setAuditRequestAttributePort(config.get(Constants.SP_AUDIT_ATTRIBUTE_PORT))
                         .setAuditRequestAttributeServiceProviderUserId(config.get(Constants.SP_AUDIT_ATTRIBUTE_USER_ID))
                         .setAuditRequestAttributeSessionId(config.get(Constants.SP_AUDIT_ATTRIBUTE_SESSION_ID))
+                        .setSessionHandlerFactoryClassName(config.get(Constants.SP_SESSION_HANDLER_FACTORY_CLASSNAME))
+                        .setSessionHandlerJndiName(config.get(Constants.SP_SESSION_HANDLER_JNDI_NAME))
+                        .setSessionHandlerJdbcUrl(config.get(Constants.SP_SESSION_HANDLER_JDBC_URL))
+                        .setSessionHandlerJdbcUsername(config.get(Constants.SP_SESSION_HANDLER_JDBC_USERNAME))
+                        .setSessionHandlerJdbcPassword(config.get(Constants.SP_SESSION_HANDLER_JDBC_PASSWORD))
+                        .setSessionHandlerJdbcDriverClassName(config.get(Constants.SP_SESSION_HANDLER_JDBC_DRIVER_CLASSNAME))
                         .build();
 
                 handleOptionalValues(config, configuration);

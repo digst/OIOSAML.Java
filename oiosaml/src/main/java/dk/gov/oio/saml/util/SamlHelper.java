@@ -20,9 +20,12 @@ import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.AttributeStatement;
 import org.opensaml.saml.saml2.core.AttributeValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 public class SamlHelper {
+    private static final Logger log = LoggerFactory.getLogger(SamlHelper.class);
 
     @SuppressWarnings("unchecked")
     public static <T> T build(final Class<T> clazz) {
@@ -58,6 +61,29 @@ public class SamlHelper {
         return result;
     }
 
+    public static Element marshallObject(XMLObject object) throws MarshallingException {
+        if (object.getDOM() == null) {
+            Marshaller m = getMarshaller(object);
+
+            if (m == null) {
+                throw new IllegalArgumentException("No unmarshaller for " + object);
+            }
+
+            return m.marshall(object);
+        }
+
+        return object.getDOM();
+    }
+
+    public static XMLObject unmarshallObject(Element marshalledObject) throws UnmarshallingException {
+        Unmarshaller unmarshaller = getUnmarshaller(marshalledObject);
+        if (unmarshaller == null) {
+            throw new IllegalArgumentException("No unmarshaller for " + marshalledObject);
+        }
+
+        return unmarshaller.unmarshall(marshalledObject);
+    }
+
     private static String extractAttributeValueValue(Attribute attribute) {
         for (int i = 0; i < attribute.getAttributeValues().size(); i++) {
             if (attribute.getAttributeValues().get(i) instanceof XSString) {
@@ -82,7 +108,7 @@ public class SamlHelper {
                                 res.append(SerializeSupport.nodeToString(marshallObject(obj)));
                             }
                             catch (MarshallingException ex) {
-//                                log.warn("Failed to marshall attribute - ignoring attribute", ex);
+                                log.debug("Failed to marshall attribute - ignoring attribute", ex);
                             }
                         }
 
@@ -112,28 +138,5 @@ public class SamlHelper {
 
     private static Unmarshaller getUnmarshaller(Element marshalledObject) {
         return getProviderRegistry().getUnmarshallerFactory().getUnmarshaller(marshalledObject);
-    }
-
-    public static Element marshallObject(XMLObject object) throws MarshallingException {
-        if (object.getDOM() == null) {
-            Marshaller m = getMarshaller(object);
-
-            if (m == null) {
-                throw new IllegalArgumentException("No unmarshaller for " + object);
-            }
-
-            return m.marshall(object);
-        }
-
-        return object.getDOM();
-    }
-
-    public static XMLObject unmarshallObject(Element marshalledObject) throws UnmarshallingException {
-        Unmarshaller unmarshaller = getUnmarshaller(marshalledObject);
-        if (unmarshaller == null) {
-            throw new IllegalArgumentException("No unmarshaller for " + marshalledObject);
-        }
-
-        return unmarshaller.unmarshall(marshalledObject);
     }
 }
