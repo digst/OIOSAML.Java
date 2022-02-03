@@ -14,7 +14,7 @@ import dk.gov.oio.saml.util.InternalException;
 import org.opensaml.saml.saml2.core.Issuer;
 
 public class AuthnRequestWrapper implements Serializable {
-    private static final long serialVersionUID = -6155927753076931485L;
+    private static final long serialVersionUID = -2647272712207296480L;
     private String id;
     private boolean forceAuthn;
     private boolean passive;
@@ -23,8 +23,12 @@ public class AuthnRequestWrapper implements Serializable {
     private String issuer;
     private String issueInstant;
     private String destination;
+    private String authnRequestAsBase64;
+    private String requestPath;
 
-    public AuthnRequestWrapper(AuthnRequest authnRequest, NSISLevel requestedNsisLevel) throws InternalException {
+    public AuthnRequestWrapper(AuthnRequest authnRequest, NSISLevel requestedNsisLevel, String requestPath) throws InternalException {
+        this.authnRequestAsBase64 = StringUtil.xmlObjectToBase64(authnRequest);
+
         // get ContextClassRefs
         authnContextClassRefValues = new ArrayList<String>();
         if (authnRequest.getRequestedAuthnContext() != null) {
@@ -42,6 +46,7 @@ public class AuthnRequestWrapper implements Serializable {
         this.passive = authnRequest.isPassive();
         this.forceAuthn = authnRequest.isForceAuthn();
         this.requestedNsisLevel = requestedNsisLevel;
+        this.requestPath = requestPath;
         this.destination = authnRequest.getDestination();
 
         Issuer issuer = authnRequest.getIssuer();
@@ -84,5 +89,13 @@ public class AuthnRequestWrapper implements Serializable {
 
     public String getDestination() {
         return destination;
+    }
+
+    public String getRequestPath() {
+        return requestPath;
+    }
+
+    public String getAuthnRequestAsBase64() {
+        return authnRequestAsBase64;
     }
 }

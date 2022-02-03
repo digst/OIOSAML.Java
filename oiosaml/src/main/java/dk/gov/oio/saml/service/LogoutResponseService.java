@@ -1,5 +1,6 @@
 package dk.gov.oio.saml.service;
 
+import dk.gov.oio.saml.session.LogoutRequestWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
@@ -11,7 +12,6 @@ import org.opensaml.saml.common.messaging.context.SAMLEndpointContext;
 import org.opensaml.saml.common.messaging.context.SAMLPeerEntityContext;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.saml2.core.Issuer;
-import org.opensaml.saml.saml2.core.LogoutRequest;
 import org.opensaml.saml.saml2.core.LogoutResponse;
 import org.opensaml.saml.saml2.core.Status;
 import org.opensaml.saml.saml2.core.StatusCode;
@@ -37,7 +37,7 @@ public class LogoutResponseService {
         return;
     }
 
-    public static MessageContext<SAMLObject> createMessageWithLogoutResponse(LogoutRequest logoutRequest, String destination) throws InitializationException, InternalException {
+    public static MessageContext<SAMLObject> createMessageWithLogoutResponse(LogoutRequestWrapper logoutRequest, String destination) throws InitializationException, InternalException {
         log.debug("Create and sign logout response message for  request id '{}'", logoutRequest.getID());
 
         // Create message context
@@ -66,7 +66,7 @@ public class LogoutResponseService {
         return messageContext;
     }
 
-    private static LogoutResponse createLogoutResponse(String destination, LogoutRequest logoutRequest) throws InitializationException {
+    private static LogoutResponse createLogoutResponse(String destination, LogoutRequestWrapper logoutRequest) throws InitializationException {
         log.debug("Create logout response message for  request id '{}'", logoutRequest.getID());
 
         LogoutResponse logoutResponse = SamlHelper.build(LogoutResponse.class);
@@ -116,7 +116,7 @@ public class LogoutResponseService {
             Signer.signObject(signature);
 
         } catch (SignatureException | InitializationException | InternalException | MarshallingException e) {
-            log.error("Signing of '{}' failed", logoutResponse.getID(), e);
+            log.warn("Signing of '{}' failed", logoutResponse.getID(), e);
         }
         return logoutResponse;
     }

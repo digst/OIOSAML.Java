@@ -56,7 +56,7 @@ public class LogoutResponseHandler extends SAMLHandler {
             Element element = SamlHelper.marshallObject(logoutResponse);
             log.debug("LogoutResponse: {}", StringUtil.elementToString(element));
         } catch (MarshallingException e) {
-            log.error("Could not marshall LogoutResponse for logging purposes");
+            log.warn("Could not marshall LogoutResponse for logging purposes");
         }
         log.info("Incoming LogoutResponse - ID:'{}' InResponseTo:'{}' Issuer:'{}' Status:'{} {}' IssueInstant:'{}' Destination:'{}'",
                 logoutResponse.getID(),

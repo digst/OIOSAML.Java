@@ -1,12 +1,22 @@
 package dk.gov.oio.saml.util;
 
+import net.shibboleth.utilities.java.support.xml.XMLParserException;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.core.xml.io.UnmarshallingException;
+import org.opensaml.core.xml.util.XMLObjectSupport;
 import org.w3c.dom.Element;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Utility class related to string operations in the OIOSAML library.
@@ -21,7 +31,7 @@ public class StringUtil {
      * @return Context path + page (URL)
      */
     public static String getUrl(HttpServletRequest request, String page) {
-        String url = (request.getContextPath() != null) ? request.getContextPath() : "/";
+        String url = StringUtil.isNotEmpty(request.getContextPath()) ? request.getContextPath() : "/";
 
         int slashCount = (url.endsWith("/")) ? 1 : 0;
         slashCount += (page != null && page.startsWith("/")) ? 1 : 0;
@@ -42,7 +52,7 @@ public class StringUtil {
     }
 
     /**
-     * Create string representation of XML element.
+     * Create string representation of XML element (pretty printed).
      *
      * @param element Any XML element
      * @return XML is parsed to string, if this fails null is returned
@@ -65,6 +75,50 @@ public class StringUtil {
         }
         catch (Exception ex) {
             return null;
+        }
+    }
+
+    /**
+     * Convert OPENSAML object to base64 encoded XML string
+     * @param xmlObject OPENSAML object
+     * @return Base64 encoded XML string
+     * @throws InternalException on serialization failure
+     */
+    public static String xmlObjectToBase64(XMLObject xmlObject) throws InternalException {
+        try {
+            Element element = SamlHelper.marshallObject(xmlObject);
+
+            Source source = new DOMSource(element);
+            TransformerFactory transFactory = TransformerFactory.newInstance();
+            Transformer transformer = transFactory.newTransformer();
+            StringWriter buffer = new StringWriter();
+
+            // Remove spacing to ensure that f'(f(input)) == input
+            transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+            transformer.setOutputProperty("{http://xml.apache.org/xslt}strip-spaces", "*");
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            transformer.setOutputProperty(OutputKeys.INDENT, "no");
+            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+            transformer.transform(source, new StreamResult(buffer));
+
+            return Base64.getEncoder().encodeToString(buffer.toString().getBytes(StandardCharsets.UTF_8));
+        } catch (TransformerException | MarshallingException e) {
+            throw new InternalException("Unable to parse XML object to string",e);
+        }
+    }
+
+    /**
+     * Convert base64 encoded XML string to OPENSAML object
+     * @param base64  Base64 encoded XML string representation of an OPENSAML object
+     * @return OPENSAML object
+     * @throws InternalException on serialization failure
+     */
+    public static XMLObject base64ToXMLObject(String base64) throws InternalException {
+        try {
+            byte[] decodedInput = Base64.getDecoder().decode(base64.getBytes(StandardCharsets.UTF_8));
+            return XMLObjectSupport.unmarshallFromInputStream(XMLObjectProviderRegistrySupport.getParserPool(), new ByteArrayInputStream(decodedInput));
+        } catch (UnmarshallingException | XMLParserException e) {
+            throw new InternalException("Unable to parse input to XML object",e);
         }
     }
 
@@ -110,7 +164,7 @@ public class StringUtil {
         return sb.toString();
     }
 
-    /**
+   /**
      * Check if input string is empty
      * @param input any string
      * @return true if input string is null, empty or only contain whitespaces
@@ -142,5 +196,18 @@ public class StringUtil {
             return defaultString;
         }
         return input;
+    }
+
+    /**
+     * Convert an input map into a JSON string
+     * @param map input map
+     * @return string representation of the input map
+     */
+    public static String map2json(Map<String, String> map) {
+        return map.entrySet()
+                .stream()
+                .map(entry -> String.format("\"%s\":\"%s\"", entry.getKey(), StringUtil.jsonEscape(entry.getValue())))
+                .collect(Collectors
+                        .joining(",", "{", "}"));
     }
 }

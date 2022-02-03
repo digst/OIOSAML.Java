@@ -15,6 +15,7 @@ import javax.servlet.http.HttpSession;
 
 import dk.gov.oio.saml.config.Configuration;
 import dk.gov.oio.saml.service.OIOSAML3Service;
+import dk.gov.oio.saml.session.*;
 import dk.gov.oio.saml.util.*;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.slf4j.Logger;
@@ -27,9 +28,6 @@ import org.opensaml.saml.saml2.core.AuthnRequest;
 
 import dk.gov.oio.saml.model.NSISLevel;
 import dk.gov.oio.saml.service.AuthnRequestService;
-import dk.gov.oio.saml.session.AssertionWrapper;
-import dk.gov.oio.saml.session.AssertionWrapperHolder;
-import dk.gov.oio.saml.session.AuthnRequestWrapper;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 
 public class AuthenticatedFilter implements Filter {
@@ -75,47 +73,35 @@ public class AuthenticatedFilter implements Filter {
         
         log.debug("AuthenticatedFilter invoked by endpoint: '{}{}'", req.getContextPath(), req.getServletPath());
 
-        HttpSession session = req.getSession();
-
         try {
-            // default: not logged in, and no authenticated NSIS level
-            boolean authenticated = false;
-            NSISLevel authenticatedNsisLevel = tryExtractNSISLevel(session, NSISLevel.NONE);
-            String authenticatedAssuranceLevel = tryExtractAssuranceLevel(session);
-
-            // Get current authenticated and NSIS level states from session
-            Object attribute = session.getAttribute(Constants.SESSION_AUTHENTICATED);
-            if (attribute != null && "true".equals(attribute)) {
-                authenticated = true;
-            }
-
-            log.debug("Current NSIS Level on session: {}, Required NSIS Level: {}", authenticatedNsisLevel, requiredNsisLevel);
+            OIOSAML3Service.getSessionCleanerService().startCleanerIfMissing(req.getSession());
+            SessionHandler sessionHandler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
+            AssertionWrapper assertionWrapper = sessionHandler.getAssertion(req.getSession());
 
             // Is the user authenticated, and at the required level?
-            if (!authenticated || !isAssuranceSufficient(requiredNsisLevel, authenticatedNsisLevel, authenticatedAssuranceLevel)) {
+            if (userNeedsAuthentication(req, sessionHandler, assertionWrapper)) {
                 log.debug("Filter config: isPassive: {}, forceAuthn: {}", isPassive, forceAuthn);
 
                 AuthnRequestService authnRequestService = AuthnRequestService.getInstance();
 
-                String reqPath = req.getRequestURI();
+                String requestPath = req.getRequestURI();
                 if(req.getQueryString() != null) {
-                    reqPath += "?" + req.getQueryString();
+                    requestPath += "?" + req.getQueryString();
                 }
 
-                req.getSession().setAttribute(Constants.SESSION_REQUESTED_PATH, reqPath);
                 MessageContext<SAMLObject> authnRequest = authnRequestService.createMessageWithAuthnRequest(isPassive, forceAuthn, requiredNsisLevel, attributeProfile);
 
                 //Audit logging
                 OIOSAML3Service.getAuditService().auditLog(AuditRequestUtil
                         .createBasicAuditBuilder(req, "BSA1", "AuthnRequest")
                         .withAuthnAttribute("AUTHN_REQUEST_ID", ((AuthnRequest)authnRequest.getMessage()).getID())
-                        .withAuthnAttribute("URL", req.getContextPath()));
+                        .withAuthnAttribute("URL", requestPath));
 
-                sendAuthnRequest(req, res, authnRequest, requiredNsisLevel);
+                sendAuthnRequest(req, res, authnRequest, requiredNsisLevel, requestPath);
             }
             else {
                 try {
-                    putAssertionOnThreadLocal(session);
+                    putAssertionOnThreadLocal(req.getSession());
 
                     // User already authenticated to the correct level
                     chain.doFilter(req, res);
@@ -132,29 +118,22 @@ public class AuthenticatedFilter implements Filter {
         }
     }
 
-    private NSISLevel tryExtractNSISLevel(HttpSession session, NSISLevel defaultValue) {
-        NSISLevel authenticatedNsisLevel = defaultValue;
-
-        Object attribute = session.getAttribute(Constants.SESSION_NSIS_LEVEL);
-        if (attribute != null) {
-            try {
-                authenticatedNsisLevel = (NSISLevel) attribute;
-            }
-            catch (Exception ex) {
-                log.warn("Unknown NSIS level on session: " + attribute);
-            }
-        }
-
-        return authenticatedNsisLevel;
+    @Override
+    public void destroy() {
+        OIOSAML3Service.getSessionCleanerService().stopCleaner();
+        OIOSAML3Service.getSessionHandlerFactory().close();
     }
 
-    private String tryExtractAssuranceLevel(HttpSession session) {
-        Object attribute = session.getAttribute(Constants.SESSION_ASSURANCE_LEVEL);
-        if(!(attribute instanceof String)) {
-            return null;
+    private boolean userNeedsAuthentication(HttpServletRequest req, SessionHandler sessionHandler, AssertionWrapper assertionWrapper) {
+        if (null == assertionWrapper || !sessionHandler.isAuthenticated(req.getSession())) {
+            log.debug("Unauthenticated session, Required NSIS Level: {}", requiredNsisLevel);
+            return true;
+        } else if (!isAssuranceSufficient(requiredNsisLevel, assertionWrapper.getNsisLevel(), assertionWrapper.getAssuranceLevel())) {
+            log.debug("Current NSIS Level on session: {}, Required NSIS Level: {}", assertionWrapper.getNsisLevel(), requiredNsisLevel);
+            return true;
         }
-
-        return (String) attribute;
+        log.debug("Authenticated session, NSIS Level: {}", requiredNsisLevel);
+        return false;
     }
 
     private boolean isAssuranceSufficient(NSISLevel requiredNsisLevel, NSISLevel authenticatedNsisLevel, String authenticatedAssuranceLevel) {
@@ -174,19 +153,15 @@ public class AuthenticatedFilter implements Filter {
         return requiredNsisLevel.equalOrLesser(authenticatedNsisLevel);
     }
 
-    @Override
-    public void destroy() {
-        ;
-    }
-
     private void removeAssertionFromThreadLocal() {
         AssertionWrapperHolder.clear();
     }
 
-    private void putAssertionOnThreadLocal(HttpSession session) {
-        Object assertionObject = session.getAttribute(Constants.SESSION_ASSERTION);
-        if (assertionObject != null && assertionObject instanceof AssertionWrapper) {
-            AssertionWrapperHolder.set((AssertionWrapper) assertionObject);
+    private void putAssertionOnThreadLocal(HttpSession session) throws InternalException {
+        SessionHandler sessionHandler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
+        AssertionWrapper assertion = sessionHandler.getAssertion(session);
+        if (assertion != null) {
+            AssertionWrapperHolder.set(assertion);
 
             if (log.isDebugEnabled()) {
                 log.debug("Saved Wrapped Assertion to ThreadLocal");
@@ -197,18 +172,19 @@ public class AuthenticatedFilter implements Filter {
         }
     }
 
-    private void sendAuthnRequest(HttpServletRequest req, HttpServletResponse res, MessageContext<SAMLObject> authnRequest, NSISLevel requestedNsisLevel) throws InternalException {
+    private void sendAuthnRequest(HttpServletRequest req, HttpServletResponse res, MessageContext<SAMLObject> authnRequest, NSISLevel requestedNsisLevel, String requestPath) throws InternalException {
         try {
             log.debug("AuthnRequest: {}", StringUtil.elementToString(SamlHelper.marshallObject(authnRequest.getMessage())));
         }
         catch (MarshallingException e) {
-            log.error("Could not marshall AuthnRequest for logging purposes");
+            log.warn("Could not marshall AuthnRequest for logging purposes");
         }
 
         // Save authnRequest on session
-        HttpSession session = req.getSession();
-        AuthnRequestWrapper wrapper = new AuthnRequestWrapper((AuthnRequest) authnRequest.getMessage(), requiredNsisLevel);
-        session.setAttribute(Constants.SESSION_AUTHN_REQUEST, wrapper);
+        SessionHandler sessionHandler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
+        AuthnRequestWrapper wrapper = new AuthnRequestWrapper((AuthnRequest) authnRequest.getMessage(), requiredNsisLevel, requestPath);
+
+        sessionHandler.storeAuthnRequest(req.getSession(), wrapper);
 
         log.info("Outgoing AuthnRequest - ID:'{}' Issuer:'{}' IssueInstant:'{}' Destination:'{}'", wrapper.getId(), wrapper.getIssuer(), wrapper.getIssueInstant(), wrapper.getDestination());
 

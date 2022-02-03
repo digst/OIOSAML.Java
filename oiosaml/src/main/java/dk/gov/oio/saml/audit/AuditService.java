@@ -12,7 +12,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class AuditService {
     private static final Logger log = LoggerFactory.getLogger(AuditService.class);
@@ -29,6 +28,7 @@ public class AuditService {
 
     /**
      * Audit log a message, e.g. AuthnRequest or Assertion from SAML
+     * @param auditBuilder audit log statement
      */
     public void auditLog(Builder auditBuilder) {
         if (null != auditBuilder) {
@@ -49,12 +49,7 @@ public class AuditService {
         }
 
         public String toJSON() {
-            return auditMap
-                    .entrySet()
-                    .stream()
-                    .map(entry -> String.format("\"%s\":\"%s\"", entry.getKey(), StringUtil.jsonEscape(entry.getValue())))
-                    .collect(Collectors
-                            .joining(",", "{", "}"));
+            return StringUtil.map2json(auditMap);
         }
     }
 

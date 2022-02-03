@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -102,7 +101,7 @@ public class ResourceUtil {
                 }
             }
             catch (Exception ex) {
-                log.error("Failed to load external configuration file: '{}'", configurationFile, ex);
+                log.warn("Failed to load external configuration file: '{}'", configurationFile, ex);
             }
         }
         return configMap;
