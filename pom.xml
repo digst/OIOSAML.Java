@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>dk.digst</groupId>
     <artifactId>oiosaml3-parent</artifactId>
-    <version>3.2.0-SNAPSHOT</version>
+    <version>3.2.0</version>
     <name>OIOSAML v3 for Java</name>
     <packaging>pom</packaging>
 
