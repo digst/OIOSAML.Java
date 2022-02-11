@@ -1,6 +1,8 @@
 # OIO SAML 3 (Artifact ID: oiosaml3.java)
 
-## 3.2.0 (planned)
+## 3.2.1 (planned)
+
+## 3.2.0
 - NLRFIM-120: Support SOAP bindings in Java OIO SAML 3
 - NLRFIM-121: Session handling and storage in Java OIO SAML 3
 - NLRFIM-123: Replay protection in Java OIO SAML 3
