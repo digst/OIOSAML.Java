@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.opensaml.core.config.InitializationException;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.common.assertion.AssertionValidationException;
@@ -42,7 +43,7 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
 
         // Create AuthnRequest
         AuthnRequestService authnRequestService = AuthnRequestService.getInstance();
-        AuthnRequest authnRequest = authnRequestService.createAuthnRequest(TestConstants.SP_ASSERTION_CONSUMER_URL, false, false, NSISLevel.SUBSTANTIAL);
+        AuthnRequest authnRequest = getAuthnRequest(authnRequestService);
         String inResponseToId = authnRequest.getID();
 
         // Create MessageContext, Response and Assertion
@@ -68,7 +69,7 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
 
         // Create AuthnRequest
         AuthnRequestService authnRequestService = AuthnRequestService.getInstance();
-        AuthnRequest authnRequest = authnRequestService.createAuthnRequest(TestConstants.SP_ASSERTION_CONSUMER_URL, false, false, NSISLevel.SUBSTANTIAL);
+        AuthnRequest authnRequest = getAuthnRequest(authnRequestService);
         String inResponseToId = authnRequest.getID();
 
         // Create MessageContext, Response and Assertion
@@ -97,7 +98,7 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
 
         // Create AuthnRequest
         AuthnRequestService authnRequestService = AuthnRequestService.getInstance();
-        AuthnRequest authnRequest = authnRequestService.createAuthnRequest(TestConstants.SP_ASSERTION_CONSUMER_URL, false, false, NSISLevel.SUBSTANTIAL);
+        AuthnRequest authnRequest = getAuthnRequest(authnRequestService);
         String inResponseToId = authnRequest.getID();
 
         // Create MessageContext, Response and Assertion
@@ -128,7 +129,7 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
 
         // Create AuthnRequest
         AuthnRequestService authnRequestService = AuthnRequestService.getInstance();
-        AuthnRequest authnRequest = authnRequestService.createAuthnRequest(TestConstants.SP_ASSERTION_CONSUMER_URL, false, false, NSISLevel.SUBSTANTIAL);
+        AuthnRequest authnRequest = getAuthnRequest(authnRequestService);
         String inResponseToId = authnRequest.getID();
 
         // Create MessageContext, Response and Assertion
@@ -156,7 +157,7 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
 
         // Create AuthnRequest
         AuthnRequestService authnRequestService = AuthnRequestService.getInstance();
-        AuthnRequest authnRequest = authnRequestService.createAuthnRequest(TestConstants.SP_ASSERTION_CONSUMER_URL, false, false, NSISLevel.SUBSTANTIAL);
+        AuthnRequest authnRequest = getAuthnRequest(authnRequestService);
         String inResponseToId = authnRequest.getID();
 
         // Create MessageContext, Response and EncryptedAssertion
@@ -208,7 +209,7 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
 
         // Create AuthnRequest
         AuthnRequestService authnRequestService = AuthnRequestService.getInstance();
-        AuthnRequest authnRequest = authnRequestService.createAuthnRequest(TestConstants.SP_ASSERTION_CONSUMER_URL, false, false, NSISLevel.SUBSTANTIAL);
+        AuthnRequest authnRequest = getAuthnRequest(authnRequestService);
         String inResponseToId = authnRequest.getID();
 
         // Create MessageContext, Response and Assertion
@@ -242,7 +243,7 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
 
         // Create AuthnRequest
         AuthnRequestService authnRequestService = AuthnRequestService.getInstance();
-        AuthnRequest authnRequest = authnRequestService.createAuthnRequest(TestConstants.SP_ASSERTION_CONSUMER_URL, false, false, NSISLevel.SUBSTANTIAL);
+        AuthnRequest authnRequest = getAuthnRequest(authnRequestService);
         String inResponseToId = authnRequest.getID();
 
         // Create MessageContext, Response and Assertion
@@ -270,7 +271,7 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
 
         // Create AuthnRequest
         AuthnRequestService authnRequestService = AuthnRequestService.getInstance();
-        AuthnRequest authnRequest = authnRequestService.createAuthnRequest(TestConstants.SP_ASSERTION_CONSUMER_URL, false, false, NSISLevel.SUBSTANTIAL);
+        AuthnRequest authnRequest = getAuthnRequest(authnRequestService);
         String inResponseToId = authnRequest.getID();
 
         // Create MessageContext, Response and Assertion
@@ -308,7 +309,7 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
 
         // Create AuthnRequest
         AuthnRequestService authnRequestService = AuthnRequestService.getInstance();
-        AuthnRequest authnRequest = authnRequestService.createAuthnRequest(TestConstants.SP_ASSERTION_CONSUMER_URL, false, false, NSISLevel.SUBSTANTIAL);
+        AuthnRequest authnRequest = getAuthnRequest(authnRequestService);
         String inResponseToId = authnRequest.getID();
 
         // Create MessageContext, Response and Assertion
@@ -323,5 +324,10 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
         Assertions.assertThrows(AssertionValidationException.class , () -> {
             validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL, ""));
         });
+    }
+
+    private static AuthnRequest getAuthnRequest(AuthnRequestService authnRequestService) throws InitializationException {
+        AuthnRequest authnRequest = authnRequestService.createAuthnRequest( TestConstants.SP_ASSERTION_CONSUMER_URL, false, false, NSISLevel.SUBSTANTIAL, null);
+        return authnRequest;
     }
 }

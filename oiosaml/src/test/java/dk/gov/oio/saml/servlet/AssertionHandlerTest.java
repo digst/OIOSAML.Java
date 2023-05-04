@@ -52,7 +52,7 @@ public class AssertionHandlerTest {
 
         // Create AuthnRequest
         AuthnRequestService authnRequestService = new AuthnRequestService();
-        MessageContext<SAMLObject> authnRequestMessageContext = authnRequestService.createMessageWithAuthnRequest(false, false, NSISLevel.SUBSTANTIAL, null);
+        MessageContext<SAMLObject> authnRequestMessageContext = authnRequestService.createMessageWithAuthnRequest(false, false, NSISLevel.SUBSTANTIAL, null, null);
         AuthnRequest authnRequest = (AuthnRequest) authnRequestMessageContext.getMessage();
         authnRequest.setID(inResponseToId);
         AuthnRequestWrapper wrapper = new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL, "");
@@ -100,7 +100,7 @@ public class AssertionHandlerTest {
 
         // Create AuthnRequest
         AuthnRequestService authnRequestService = new AuthnRequestService();
-        MessageContext<SAMLObject> authnRequestMessageContext = authnRequestService.createMessageWithAuthnRequest(false, false, NSISLevel.SUBSTANTIAL, null);
+        MessageContext<SAMLObject> authnRequestMessageContext = authnRequestService.createMessageWithAuthnRequest(false, false, NSISLevel.SUBSTANTIAL, null, null);
         AuthnRequest authnRequest = (AuthnRequest) authnRequestMessageContext.getMessage();
         authnRequest.setID(inResponseToId);
         AuthnRequestWrapper wrapper = new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL, "");

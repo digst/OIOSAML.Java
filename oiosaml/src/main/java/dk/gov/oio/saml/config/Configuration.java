@@ -63,6 +63,10 @@ public class Configuration {
     private boolean crlCheckEnabled = true;
     private boolean ocspCheckEnabled = true;
 
+    // AppSwitch return URL settings
+    private String appSwitchReturnURLForAndroid;
+    private String appSwitchReturnURLForIOS;
+
     private Configuration() {
 
     }
@@ -417,6 +421,22 @@ public class Configuration {
 
     public int getSessionHandlerInMemoryMaxNumberOfTrackedAssertionIds() {
         return sessionHandlerInMemoryMaxNumberOfTrackedAssertionIds;
+    }
+
+    public void setAppSwitchReturnURLForAndroid(String returnURL) {
+        this.appSwitchReturnURLForAndroid = returnURL;
+    }
+
+    public void setAppSwitchReturnURLForIOS(String returnURL) {
+        this.appSwitchReturnURLForIOS = returnURL;
+    }
+
+    public String getAppSwitchReturnURLForAndroid() {
+        return this.appSwitchReturnURLForAndroid;
+    }
+
+    public String getAppSwitchReturnURLForIOS() {
+        return this.appSwitchReturnURLForIOS;
     }
 
     // Configuration builder for mandatory fields

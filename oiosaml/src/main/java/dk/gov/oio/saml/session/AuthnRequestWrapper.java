@@ -4,27 +4,32 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import dk.gov.oio.saml.extensions.appswitch.AppSwitch;
 import dk.gov.oio.saml.model.NSISLevel;
 import dk.gov.oio.saml.util.StringUtil;
 import org.joda.time.DateTime;
+import org.opensaml.core.xml.XMLObject;
 import org.opensaml.saml.saml2.core.AuthnContextClassRef;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 
 import dk.gov.oio.saml.util.InternalException;
+import org.opensaml.saml.saml2.core.Extensions;
 import org.opensaml.saml.saml2.core.Issuer;
 
 public class AuthnRequestWrapper implements Serializable {
     private static final long serialVersionUID = -2647272712207296480L;
-    private String id;
-    private boolean forceAuthn;
-    private boolean passive;
-    private NSISLevel requestedNsisLevel;
-    private List<String> authnContextClassRefValues;
-    private String issuer;
-    private String issueInstant;
-    private String destination;
-    private String authnRequestAsBase64;
-    private String requestPath;
+    private Extensions extensions;
+
+    private final String id;
+    private final boolean forceAuthn;
+    private final boolean passive;
+    private final NSISLevel requestedNsisLevel;
+    private final List<String> authnContextClassRefValues;
+    private final String issuer;
+    private final String issueInstant;
+    private final String destination;
+    private final String authnRequestAsBase64;
+    private final String requestPath;
 
     public AuthnRequestWrapper(AuthnRequest authnRequest, NSISLevel requestedNsisLevel, String requestPath) throws InternalException {
         this.authnRequestAsBase64 = StringUtil.xmlObjectToBase64(authnRequest);
@@ -57,6 +62,7 @@ public class AuthnRequestWrapper implements Serializable {
 
         // get id
         this.id = authnRequest.getID();
+        this.extensions = authnRequest.getExtensions();
     }
 
     public String getId() {
@@ -97,5 +103,21 @@ public class AuthnRequestWrapper implements Serializable {
 
     public String getAuthnRequestAsBase64() {
         return authnRequestAsBase64;
+    }
+
+    public AppSwitch getAppSwitch() {
+        return (AppSwitch) this.getExtensionOfType(AppSwitch.class);
+    }
+
+    private <TExtension extends XMLObject> Object getExtensionOfType(Class<TExtension> type) {
+        if(this.extensions == null)
+            return null;
+
+        for (XMLObject extension:extensions.getOrderedChildren()) {
+            if(extension instanceof AppSwitch)
+                return extension;
+        }
+
+        return null;
     }
 }

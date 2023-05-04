@@ -77,6 +77,23 @@
         </init-param>
     </filter>
 
+    <filter>
+        <filter-name>AppSwitchURLFilter</filter-name>
+        <filter-class>dk.gov.oio.saml.filter.AuthenticatedFilter</filter-class>
+        <init-param>
+            <param-name>oiosaml.filter.nsis.required</param-name>
+            <param-value>LOW</param-value>
+        </init-param>
+        <init-param>
+            <param-name>oiosaml.filter.ispassive.enabled</param-name>
+            <param-value>false</param-value>
+        </init-param>
+        <init-param>
+            <param-name>oiosaml.filter.forceauthn.enabled</param-name>
+            <param-value>false</param-value>
+        </init-param>
+    </filter>
+
     <!-- should be placed BEFORE the AuthenticationFilter to ensure it catches any sessions created -->
     <filter-mapping>
         <filter-name>SameSiteFilter</filter-name>
@@ -96,5 +113,10 @@
     <filter-mapping>
         <filter-name>NoNSISFilter</filter-name>
         <url-pattern>/nonsis/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>AppSwitchURLFilter</filter-name>
+        <url-pattern>/appswitch/*</url-pattern>
     </filter-mapping>
 </web-app>
