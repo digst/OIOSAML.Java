@@ -1,6 +1,7 @@
 # OIO SAML 3 (Artifact ID: oiosaml3.java)
 
 ## 3.2.1 (planned)
+- NLRFIM-168: Support AppSwitch extension on AuthnRequest in Java OIO SAML 3
 
 ## 3.2.0
 - NLRFIM-120: Support SOAP bindings in Java OIO SAML 3

@@ -11,7 +11,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import dk.gov.oio.saml.extensions.appswitch.*;
 import dk.gov.oio.saml.util.*;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.opensaml.core.config.InitializationException;
@@ -148,6 +150,16 @@ public class DispatcherServlet extends HttpServlet {
             configuration.setSessionHandlerInMemoryMaxNumberOfTrackedAssertionIds(10000);
             log.warn("Invalid value {} = {}", Constants.SP_SESSION_HANDLER_MAX_NUM_TRACKED_ASSERTIONIDS, value, ex);
         }
+
+        value = config.get(Constants.SP_APPSWITCH_RETURNURL_ANDROID);
+        if (StringUtil.isNotEmpty(value)) {
+            configuration.setAppSwitchReturnURLForAndroid(value);
+        }
+
+        value = config.get(Constants.SP_APPSWITCH_RETURNURL_IOS);
+        if (StringUtil.isNotEmpty(value)) {
+            configuration.setAppSwitchReturnURLForIOS(value);
+        }
     }
 
     @Override
@@ -257,6 +269,7 @@ public class DispatcherServlet extends HttpServlet {
             Map<String, String> config = getInitConfig();
 
             try {
+
                 // create configuration with mandatory settings
                 Configuration configuration = new Configuration.Builder()
                         .setSpEntityID(config.get(Constants.SP_ENTITY_ID))
@@ -296,6 +309,10 @@ public class DispatcherServlet extends HttpServlet {
                 handlers.put(configuration.getServletRoutingPathSuffixLogout(), new LogoutRequestHandler());
                 handlers.put(configuration.getServletRoutingPathSuffixLogoutResponse(), new LogoutResponseHandler());
                 handlers.put(configuration.getServletRoutingPathSuffixAssertion(), new AssertionHandler());
+
+                XMLObjectProviderRegistrySupport.registerObjectProvider(Platform.DEFAULT_ELEMENT_NAME, new PlatformBuilder(), new PlatformMarshaller(), new PlatformUnmarshaller());
+                XMLObjectProviderRegistrySupport.registerObjectProvider(ReturnURL.DEFAULT_ELEMENT_NAME, new ReturnURLBuilder(), new ReturnURLMarshaller(), new ReturnURLUnmarshaller());
+                XMLObjectProviderRegistrySupport.registerObjectProvider(AppSwitch.DEFAULT_ELEMENT_NAME, new AppSwitchBuilder(), new AppSwitchMarshaller(), new AppSwitchUnmarshaller());
 
                 initialized = true;
             }

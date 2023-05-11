@@ -1,6 +1,10 @@
 package dk.gov.oio.saml.service;
 
 import dk.gov.oio.saml.config.Configuration;
+import dk.gov.oio.saml.extensions.appswitch.AppSwitch;
+import dk.gov.oio.saml.extensions.appswitch.AppSwitchPlatform;
+import dk.gov.oio.saml.extensions.appswitch.Platform;
+import dk.gov.oio.saml.extensions.appswitch.ReturnURL;
 import dk.gov.oio.saml.model.NSISLevel;
 import dk.gov.oio.saml.util.Constants;
 import java.util.ArrayList;
@@ -8,6 +12,8 @@ import java.util.List;
 import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang.StringUtils;
+import org.opensaml.saml.saml2.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
@@ -20,11 +26,6 @@ import org.opensaml.saml.common.messaging.context.SAMLEndpointContext;
 import org.opensaml.saml.common.messaging.context.SAMLPeerEntityContext;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.saml2.binding.decoding.impl.HTTPRedirectDeflateDecoder;
-import org.opensaml.saml.saml2.core.AuthnContextClassRef;
-import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
-import org.opensaml.saml.saml2.core.AuthnRequest;
-import org.opensaml.saml.saml2.core.Issuer;
-import org.opensaml.saml.saml2.core.RequestedAuthnContext;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml.saml2.metadata.SingleSignOnService;
@@ -73,7 +74,7 @@ public class AuthnRequestService {
         return (AuthnRequest) messageContext.getMessage();
     }
 
-    public MessageContext<SAMLObject> createMessageWithAuthnRequest(boolean isPassive, boolean forceAuthn, NSISLevel requiredNsisLevel, String attributeProfile) throws InternalException, ExternalException, InitializationException {
+    public MessageContext<SAMLObject> createMessageWithAuthnRequest(boolean isPassive, boolean forceAuthn, NSISLevel requiredNsisLevel, String attributeProfile, AppSwitchPlatform platform) throws InternalException, ExternalException, InitializationException {
         // Create message context
         MessageContext<SAMLObject> messageContext = new MessageContext<>();
 
@@ -81,7 +82,7 @@ public class AuthnRequestService {
         String destination = getDestination();
 
         // Create AuthnRequest
-        AuthnRequest newAuthnRequest = createAuthnRequest(destination, isPassive, forceAuthn, requiredNsisLevel, attributeProfile);
+        AuthnRequest newAuthnRequest = createAuthnRequest(destination, isPassive, forceAuthn, requiredNsisLevel, attributeProfile, platform);
         messageContext.setMessage(newAuthnRequest);
 
         // Destination
@@ -107,11 +108,11 @@ public class AuthnRequestService {
         return messageContext;
     }
 
-    public AuthnRequest createAuthnRequest(String destination, boolean isPassive, boolean forceAuthn, NSISLevel requiredNsisLevel) throws InitializationException {
-        return createAuthnRequest(destination, isPassive, forceAuthn, requiredNsisLevel, null);
+    public AuthnRequest createAuthnRequest(String destination, boolean isPassive, boolean forceAuthn, NSISLevel requiredNsisLevel, AppSwitchPlatform platform) throws InitializationException {
+        return createAuthnRequest(destination, isPassive, forceAuthn, requiredNsisLevel, null, platform);
     }
 
-    public AuthnRequest createAuthnRequest(String destination, boolean isPassive, boolean forceAuthn, NSISLevel requiredNsisLevel, String attributeProfile) throws InitializationException {
+    public AuthnRequest createAuthnRequest(String destination, boolean isPassive, boolean forceAuthn, NSISLevel requiredNsisLevel, String attributeProfile, AppSwitchPlatform platform) throws InitializationException {
         // Create new AuthnRequest
         AuthnRequest authnRequest = SamlHelper.build(AuthnRequest.class);
 
@@ -165,7 +166,48 @@ public class AuthnRequestService {
             authnRequest.setRequestedAuthnContext(requestedAuthnContext);
         }
 
+        // If platform provided add AppSwitch extension
+        if(platform != null) {
+            addAppSwitchToExtensions(authnRequest, platform);
+        }
+
+
         return authnRequest;
+    }
+
+    private static void addAppSwitchToExtensions(AuthnRequest authnRequest, AppSwitchPlatform platform) {
+        Configuration config = OIOSAML3Service.getConfig();
+        ReturnURL returnURLNode = SamlHelper.build(ReturnURL.class);
+
+        String returnUrl = GetReturnURLForPlatform(platform, config);
+        returnURLNode.setValue(returnUrl);
+
+        Platform platformNode = SamlHelper.build(Platform.class);
+        platformNode.setValue(platform);
+
+        AppSwitch appSwitch = SamlHelper.build(AppSwitch.class);
+        appSwitch.setPlatform(platformNode);
+        appSwitch.setReturnURL(returnURLNode);
+
+        Extensions extensions = authnRequest.getExtensions();
+        if(extensions == null)
+            extensions = SamlHelper.build(Extensions.class);
+
+        extensions.getUnknownXMLObjects().add(appSwitch);
+        authnRequest.setExtensions(extensions);
+    }
+
+    private static String GetReturnURLForPlatform(AppSwitchPlatform platform, Configuration config) {
+        String returnURL = null;
+        if (platform == AppSwitchPlatform.Android)
+            returnURL = config.getAppSwitchReturnURLForAndroid();
+        else if(platform == AppSwitchPlatform.iOS)
+            returnURL = config.getAppSwitchReturnURLForIOS();
+
+        if(StringUtils.isBlank(returnURL))
+            throw new IllegalArgumentException("Missing configuration for '" + Constants.SP_APPSWITCH_RETURNURL_ANDROID +"'");
+
+        return returnURL;
     }
 
     private String getDestination() throws ExternalException, InternalException {

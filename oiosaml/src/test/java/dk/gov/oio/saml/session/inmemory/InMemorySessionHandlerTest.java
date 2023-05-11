@@ -311,7 +311,7 @@ class InMemorySessionHandlerTest {
 
     private AuthnRequest createAuthnRequest() throws InitializationException {
         AuthnRequestService authnRequestService = AuthnRequestService.getInstance();
-        return authnRequestService.createAuthnRequest(TestConstants.SP_ASSERTION_CONSUMER_URL, false, false, NSIS_LEVEL);
+        return authnRequestService.createAuthnRequest(TestConstants.SP_ASSERTION_CONSUMER_URL, false, false, NSIS_LEVEL, null);
     }
 
     private LogoutRequest createLogoutRequest() throws InitializationException {

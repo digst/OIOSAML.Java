@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import dk.gov.oio.saml.config.Configuration;
+import dk.gov.oio.saml.extensions.appswitch.AppSwitchPlatform;
 import dk.gov.oio.saml.service.OIOSAML3Service;
 import dk.gov.oio.saml.session.*;
 import dk.gov.oio.saml.util.*;
@@ -35,7 +36,7 @@ public class AuthenticatedFilter implements Filter {
     private boolean isPassive, forceAuthn;
     private String attributeProfile;
     private NSISLevel requiredNsisLevel = NSISLevel.NONE;
-    
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         HashMap<String, String> config = getConfig(filterConfig);
@@ -89,7 +90,8 @@ public class AuthenticatedFilter implements Filter {
                     requestPath += "?" + req.getQueryString();
                 }
 
-                MessageContext<SAMLObject> authnRequest = authnRequestService.createMessageWithAuthnRequest(isPassive, forceAuthn, requiredNsisLevel, attributeProfile);
+                AppSwitchPlatform appSwitchPlatform = getAppSwitchPlatformFromUrl(request);
+                MessageContext<SAMLObject> authnRequest = authnRequestService.createMessageWithAuthnRequest(isPassive, forceAuthn, requiredNsisLevel, attributeProfile, appSwitchPlatform);
 
                 //Audit logging
                 OIOSAML3Service.getAuditService().auditLog(AuditRequestUtil
@@ -216,5 +218,18 @@ public class AuthenticatedFilter implements Filter {
         }
 
         return configMap;
+    }
+
+    private static AppSwitchPlatform getAppSwitchPlatformFromUrl(ServletRequest request) {
+        if(!request.getParameterMap().containsKey(Constants.APPSWITCH_PLATFORM_QUERY_PARAMETER))
+            return null;
+
+        String parameter = request.getParameter(Constants.APPSWITCH_PLATFORM_QUERY_PARAMETER);
+        AppSwitchPlatform platform = AppSwitchPlatform.getPlatformOrNull(parameter);
+
+        if(platform == null)
+            throw new IllegalArgumentException("Could not parse platform from appSwitchPlatform query parameter: '" + parameter + "'");
+
+        return platform;
     }
 }

@@ -92,7 +92,7 @@ class StringUtilTest {
     void testXMLObjectToBase64() throws Exception {
         // Create AuthnRequest
         AuthnRequestService authnRequestService = AuthnRequestService.getInstance();
-        AuthnRequest authnRequest = authnRequestService.createAuthnRequest(TestConstants.SP_ASSERTION_CONSUMER_URL, false, false, NSISLevel.SUBSTANTIAL);
+        AuthnRequest authnRequest = authnRequestService.createAuthnRequest(TestConstants.SP_ASSERTION_CONSUMER_URL, false, false, NSISLevel.SUBSTANTIAL, null);
         String inResponseToId = authnRequest.getID();
 
         String nameID = "https://data.gov.dk/model/core/eid/person/uuid/37a5a1aa-67ce-4f70-b7c0-b8e678d585f7";

@@ -3,18 +3,18 @@ package dk.gov.oio.saml.filter;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Stream;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import dk.gov.oio.saml.extensions.appswitch.*;
 import dk.gov.oio.saml.session.AssertionWrapper;
 import dk.gov.oio.saml.session.SessionHandler;
 import dk.gov.oio.saml.session.TestSessionHandlerFactory;
@@ -23,6 +23,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockserver.client.MockServerClient;
@@ -36,6 +39,7 @@ import dk.gov.oio.saml.service.OIOSAML3Service;
 import dk.gov.oio.saml.session.AuthnRequestWrapper;
 import dk.gov.oio.saml.util.Constants;
 import dk.gov.oio.saml.util.TestConstants;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
 
 @ExtendWith(MockServerExtension.class)
 @MockServerSettings(ports = { 8081 })
@@ -74,6 +78,10 @@ public class AuthenticatedFilterTest {
                 response()
                    .withStatusCode(200)
                    .withBody(TestConstants.IDP_METADATA));
+
+        XMLObjectProviderRegistrySupport.registerObjectProvider(Platform.DEFAULT_ELEMENT_NAME, new PlatformBuilder(), new PlatformMarshaller(), new PlatformUnmarshaller());
+        XMLObjectProviderRegistrySupport.registerObjectProvider(ReturnURL.DEFAULT_ELEMENT_NAME, new ReturnURLBuilder(), new ReturnURLMarshaller(), new ReturnURLUnmarshaller());
+        XMLObjectProviderRegistrySupport.registerObjectProvider(AppSwitch.DEFAULT_ELEMENT_NAME, new AppSwitchBuilder(), new AppSwitchMarshaller(), new AppSwitchUnmarshaller());
     }
     
     @DisplayName("NSIS Substantial login with no existing session")
@@ -440,6 +448,103 @@ public class AuthenticatedFilterTest {
 
         // verify that authnrequest with URL is not added to the session
         Mockito.verify(sessionHandler, Mockito.never()).storeAuthnRequest(Mockito.eq(session), Mockito.any(AuthnRequestWrapper.class));
+    }
+
+    @DisplayName("login with appswitch platform provided")
+    @ParameterizedTest
+    @MethodSource("provideTestDataForAppSwitch")
+    public void whenAppSwitchPlatformIsProvidedInURL_ShouldAddExtension(String platform, String expectedReturnUrl) throws Exception {
+        AuthenticatedFilter filter = new AuthenticatedFilter();
+        filter.init(getConfig(false, false, "SUBSTANTIAL"));
+        Configuration config = OIOSAML3Service.getConfig();
+        config.setAppSwitchReturnURLForIOS("https://ios.return.url");
+        config.setAppSwitchReturnURLForAndroid("https://android.return.url");
+
+        // mock session with state: not logged in at any NSIS level
+        HttpSession session = Mockito.mock(HttpSession.class);
+
+        AssertionWrapper assertionWrapper = Mockito.mock(AssertionWrapper.class);
+        Mockito.when(assertionWrapper.getNsisLevel()).thenReturn(null);
+
+        SessionHandler sessionHandler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
+        Mockito.when(sessionHandler.getAssertion(session)).thenReturn(assertionWrapper);
+        Mockito.when(sessionHandler.isAuthenticated(session)).thenReturn(false);
+
+        // mock request
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getSession()).thenReturn(session);
+
+        HashMap<String, String[]> parameterMap = new HashMap<>();
+        String[] parameterValues = new String[1];
+        parameterValues[0] = platform;
+        parameterMap.put(Constants.APPSWITCH_PLATFORM_QUERY_PARAMETER, parameterValues);
+        Mockito.when(request.getParameterMap()).thenReturn(parameterMap);
+        Mockito.when(request.getParameter(Constants.APPSWITCH_PLATFORM_QUERY_PARAMETER)).thenReturn(platform);
+
+        // invoke method to be tested
+        filter.doFilter(request, Mockito.mock(HttpServletResponse.class), Mockito.mock(FilterChain.class));
+
+        ArgumentCaptor<AuthnRequestWrapper> authnRequestWrapperArgumentCaptor = ArgumentCaptor.forClass(AuthnRequestWrapper.class);
+        Mockito.verify(sessionHandler).storeAuthnRequest(Mockito.eq(session), authnRequestWrapperArgumentCaptor.capture());
+        AuthnRequestWrapper authnRequest = authnRequestWrapperArgumentCaptor.getValue();
+
+        // Assert
+        AppSwitch appSwitch = authnRequest.getAppSwitch();
+        Assertions.assertEquals(platform, appSwitch.getPlatform().getValue().toString());
+        Assertions.assertEquals(expectedReturnUrl, appSwitch.getReturnURL().getValue());
+    }
+
+    @DisplayName("when platform value is unknown should throw exception")
+    @ParameterizedTest
+    @MethodSource("provideTestDataForAppSwitchErrorScenarios")
+    public void whenPlatformIsUnknownShouldThrowException(String platform) throws Exception {
+        AuthenticatedFilter filter = new AuthenticatedFilter();
+        filter.init(getConfig(false, false, "SUBSTANTIAL"));
+        Configuration config = OIOSAML3Service.getConfig();
+        config.setAppSwitchReturnURLForIOS("https://ios.return.url");
+        config.setAppSwitchReturnURLForAndroid("https://android.return.url");
+
+        // mock session with state: not logged in at any NSIS level
+        HttpSession session = Mockito.mock(HttpSession.class);
+
+        AssertionWrapper assertionWrapper = Mockito.mock(AssertionWrapper.class);
+        Mockito.when(assertionWrapper.getNsisLevel()).thenReturn(null);
+
+        SessionHandler sessionHandler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
+        Mockito.when(sessionHandler.getAssertion(session)).thenReturn(assertionWrapper);
+        Mockito.when(sessionHandler.isAuthenticated(session)).thenReturn(false);
+
+        // mock request
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getSession()).thenReturn(session);
+        HashMap<String, String[]> parameterMap = new HashMap<>();
+        String[] parameterValues = new String[1];
+        parameterValues[0] = platform;
+        parameterMap.put(Constants.APPSWITCH_PLATFORM_QUERY_PARAMETER, parameterValues);
+        Mockito.when(request.getParameterMap()).thenReturn(parameterMap);
+        Mockito.when(request.getParameter(Constants.APPSWITCH_PLATFORM_QUERY_PARAMETER)).thenReturn(platform);
+
+        // Assert && Assert
+        ServletException thrownException = Assertions.assertThrows(ServletException.class , () -> {
+            filter.doFilter(request, Mockito.mock(HttpServletResponse.class), Mockito.mock(FilterChain.class));
+        });
+
+        Assertions.assertTrue(thrownException.getMessage().contains("Could not parse platform from appSwitchPlatform query parameter: '" + platform));
+    }
+
+    private static Stream<Arguments> provideTestDataForAppSwitch() {
+        return Stream.of(
+                Arguments.of( "Android", "https://android.return.url"),
+                Arguments.of( "iOS", "https://ios.return.url")
+        );
+    }
+
+    private static Stream<Arguments> provideTestDataForAppSwitchErrorScenarios() {
+        return Stream.of(
+                Arguments.of( "FireFoxOS"),
+                Arguments.of( " "),
+                Arguments.of( new Object[1])
+        );
     }
 
     private FilterConfig getConfig(boolean isPassive, boolean forceAuthn, String requiredLevel) {

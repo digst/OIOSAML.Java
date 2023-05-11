@@ -65,8 +65,7 @@ public class Constants {
     // Configuration values for AuthenticationFilter
     public static final String ATTRIBUTE_PROFILE_PERSON = "https://data.gov.dk/eid/Person";
     public static final String ATTRIBUTE_PROFILE_PROFESSIONAL = "https://data.gov.dk/eid/Professional";
-
-
+    
     // SAML Attributes constants
     public static final String SPEC_VER = "https://data.gov.dk/model/core/specVersion";
     public static final String SPEC_VER_VAL = "OIO-SAML-3.0";
@@ -75,4 +74,13 @@ public class Constants {
     public static final String CVR_NUMBER = "https://data.gov.dk/model/core/eid/professional/cvr";
     public static final String ORGANIZATION_NAME = "https://data.gov.dk/model/core/eid/professional/orgName";
     public static final String ASSURANCE_LEVEL = "dk:gov:saml:attribute:AssuranceLevel";
+
+    // Nemlog-in Public Extensions constants
+    public static final String NL_EXTENSIONS_PUBLIC_NAMESPACE = "https://data.gov.dk/eid/saml/extensions";
+    public static final String NL_EXTENSIONS_PUBLIC_NAMESPACE_PREFIX = "nl";
+
+    // AppSwitch Constants
+    public static final String APPSWITCH_PLATFORM_QUERY_PARAMETER = "appSwitchPlatform";
+    public static final String SP_APPSWITCH_RETURNURL_ANDROID = "oiosaml.appswitch.returnurl.android";
+    public static final String SP_APPSWITCH_RETURNURL_IOS = "oiosaml.appswitch.returnurl.ios";
 }
