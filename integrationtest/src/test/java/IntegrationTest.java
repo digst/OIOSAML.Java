@@ -18,7 +18,7 @@ public class IntegrationTest {
         //Navigate to login page
         driver.get("https://localhost:8443/oiosaml3-demo.java/index.jsp");
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText("Page requiring NSIS Substantial"))).click();
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("[href*='/login.aspx/mitidsim']"))).click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("[href*='mitidsim']"))).click();
 
         //Log in
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("ContentPlaceHolder_MitIdSimulatorControl_txtUsername"))).sendKeys("Tilo");
