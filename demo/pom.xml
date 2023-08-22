@@ -53,7 +53,7 @@
         <dependency>
             <groupId>dk.digst</groupId>
             <artifactId>oiosaml3.java</artifactId>
-            <version>3.2.1-SNAPSHOT</version>
+            <version>3.2.2-SNAPSHOT</version>
         </dependency>
 
         <!-- Write all logging to Log4j2 -->
