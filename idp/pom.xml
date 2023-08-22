@@ -3,7 +3,7 @@
     <groupId>dk.digst</groupId>
     <artifactId>oiosaml3-idp</artifactId>
     <name>Test Identity Provider</name>
-    <version>3.2.1-SNAPSHOT</version>
+    <version>3.2.2-SNAPSHOT</version>
     <description>IdP used for testing OIOSAML 3.0</description>
 
     <properties>
