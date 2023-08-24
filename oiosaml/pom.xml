@@ -6,7 +6,7 @@
     <artifactId>oiosaml3.java</artifactId>
     <name>OIOSAML for Java v3</name>
     <packaging>jar</packaging>
-    <version>3.2.1-SNAPSHOT</version>
+    <version>3.2.2-SNAPSHOT</version>
     <description>SAML Servlet Filter, configured to work with the danish SAML profile OIOSAML 3.0.0</description>
     <url>https://digitaliser.dk/group/42063/resources</url>
 

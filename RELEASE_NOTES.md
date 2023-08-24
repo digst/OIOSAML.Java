@@ -1,6 +1,8 @@
 # OIO SAML 3 (Artifact ID: oiosaml3.java)
 
-## 3.2.1 (planned)
+## 3.2.2 (planned)
+
+## 3.2.1
 - NLRFIM-168: Support AppSwitch extension on AuthnRequest in Java OIO SAML 3
 
 ## 3.2.0
