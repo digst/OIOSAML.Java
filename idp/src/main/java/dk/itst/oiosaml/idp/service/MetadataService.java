@@ -39,10 +39,10 @@ public class MetadataService {
     @Autowired
     private ServiceProviderConfig serviceProviderConfig;
 
-    @Value("${test.serviceProvider.entityId}")
+    @Value("test.serviceProvider.entityId")
     private String serviceProviderEntityId;
 
-    @Value("${test.serviceProvider.metadata.URL}")
+    @Value("test.serviceProvider.metadata.URL")
     private String serviceProviderMetadataURL;
 
     private HTTPMetadataResolver resourceResolver;
