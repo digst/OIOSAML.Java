@@ -5,10 +5,8 @@ import org.opensaml.core.config.InitializationService;
 import org.opensaml.xmlsec.config.impl.JavaCryptoValidationInitializer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication(scanBasePackages = "dk.itst.oiosaml.idp")
-@ComponentScan(basePackages = "dk.itst.oiosaml.idp")
 public class Application {
 
     public static void main(String[] args) {
