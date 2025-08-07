@@ -1,6 +1,5 @@
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -21,9 +20,9 @@ public class IntegrationTest {
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("[href*='mitidsim']"))).click();
 
         //Log in
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("ContentPlaceHolder_MitIdSimulatorControl_txtUsername"))).sendKeys("Tilo");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("ContentPlaceHolder_MitIdSimulatorControl_txtPassword"))).sendKeys("Test1234");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("ContentPlaceHolder_MitIdSimulatorControl_btnSubmit"))).click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("MitIDSimulator_InputUsername"))).sendKeys("tilo");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("MitIDSimulator_InputPassword"))).sendKeys("Test1234");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("MitIDSimulator_Submit"))).click();
 
         //Verify response
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[text()='Assertion Content']")));

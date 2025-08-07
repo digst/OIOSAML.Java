@@ -23,10 +23,10 @@ import java.util.Map;
 @Service
 @Log4j2
 public class CredentialService {
-    @Value("${keystore.location}")
+    @Value("keystore.location")
     private String keystoreLocation;
 
-    @Value("${keystore.password}")
+    @Value("keystore.password")
     private String keystorePassword;
 
     private BasicX509Credential basicX509Credential;

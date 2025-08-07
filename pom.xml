@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>dk.digst</groupId>
     <artifactId>oiosaml3-parent</artifactId>
-    <version>3.2.2-SNAPSHOT</version>
+    <version>3.2.2</version>
     <name>OIOSAML v3 for Java</name>
     <packaging>pom</packaging>
 
@@ -39,9 +39,7 @@
         <module>oiosaml</module>
         <module>demo</module>
         <module>integrationtest</module>
-        <!-- requires Java 11, enable if available
         <module>idp</module>
-        -->
     </modules>
 
     <distributionManagement>
