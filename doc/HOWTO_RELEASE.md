@@ -23,8 +23,10 @@ An example of such as issue can be seen here: https://issues.sonatype.org/browse
 
 ### Export Digitaliseringsstyrelsens private key from current deployers machine
 
-`gpg --list-secret-keys`
-`gpg --export-secret-keys > private.key`
+```bash
+gpg --list-secret-keys
+gpg --export-secret-keys > private.key
+```
 
 enter passphrase (same as the one used when releasing)
 
@@ -57,16 +59,44 @@ Add a server to your `/HOME/.m2/settings.xml` file. Example
 NB! Make sure that versions has been set to a non-SNAPSHOT version. 
 Snapshot versions are uploaded without any user approval/decline actions.
 
-`cd oiosaml`
-`mvn clean install deploy -Psign -DskipTests`
+```bash
+cd oiosaml
+mvn clean install -DskipTests
+mvn deploy -Psign -DskipTests
+```
 
-### Release on oss.sonatype.org
+### Release on Sonatype
 
-1. Go to https://oss.sonatype.org/#stagingRepositories and login
-2. Observe that a staging repository version has been uploaded.
-3. Select the version and click "Close" (which means "ready for release").
-4. Wait for Sonatype making some tests/inspections off the version
-5. When this has succeeded select the version and click "Release"
+1. Find the repository key using `cURL`
+```bash
+curl -u "<USERNAME>:<PASSWORD>" https://ossrh-staging-api.central.sonatype.com/manual/search/repositories?ip=any&profile_id=dk.digst
+```
+```json
+{
+  "repositories": [
+    {
+      "key": "<USERNAME>/<IP>/dk.digst--default-repository",
+      "state": "open",
+      "description": null,
+      "portal_deployment_id": null
+    }
+  ]
+}
+```
+2. Push deployment in Staging repository to Sonatype Central Publisher
+```bash
+curl -u "<USERNAME>:<PASSWORD>" -X POST -F "publishing_type=user_managed" -F "deployment_name=OIOSAML.Java-<VERSION>" https://ossrh-staging-api.central.sonatype.com/manual/upload/repository/<REPO KEY>
+```
+3. Browse to https://central.sonatype.com/publishing/deployments and authenticate using appropriate credentials
+4. Verify content of deployment and press "Publish"
 
 Now the version is uploaded to public maven repositories. This can take a couple of days. 
 You can check here https://mvnrepository.com/artifact/dk.digst/oiosaml3.java to see if it has been done.
+
+If for some reason the content uploaded to Staging repository is wrong the contents can be delete using the following `cURL` command
+```bash
+curl -u "<USERNAME>:<PASSWORD>" -X DELETE https://ossrh-staging-api.central.sonatype.com/manual/upload/repository/<REPO KEY>
+```
+This remove all files in Staging repository, which hasn't been published.
+
+Publishing process is documented at https://central.sonatype.org/publish/publish-portal-ossrh-staging-api/.
