@@ -6,7 +6,7 @@
     <artifactId>oiosaml3.java</artifactId>
     <name>OIOSAML for Java v3</name>
     <packaging>jar</packaging>
-    <version>3.2.2</version>
+    <version>3.2.3-SNAPSHOT</version>
     <description>SAML Servlet Filter, configured to work with the danish SAML profile OIOSAML 3.0.0</description>
     <url>https://digitaliser.dk/group/42063/resources</url>
 
@@ -245,11 +245,11 @@
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <url>https://ossrh-staging-api.central.sonatype.com/content/repositories/snapshots</url>
         </snapshotRepository>
         <repository>
             <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <url>https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
 
