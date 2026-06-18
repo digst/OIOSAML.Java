@@ -28,21 +28,8 @@ public class ResourceUtil {
             throw new InternalException(String.format("Unable to load resource file '%s'", resourceName));
         }
         try {
-            File file;
             URL url = ResourceUtil.getClassLoader().getResource(resourceName);
-
-            if (url != null && "jar".equals(url.getProtocol())) {
-                // To access resources as files inside a jar we need to copy them to disk (use when unable to access as stream)
-                try (InputStream inputStream = ResourceUtil.getResourceAsStream(resourceName)) {
-                    Path path = Files.createTempFile(resourceName, "tmp");
-                    java.nio.file.Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
-                    file = path.toFile();
-                }
-            } else if (url != null) {
-                file = new File(url.toURI());
-            } else {
-                file = new File(resourceName);
-            }
+            File file = toFile(url, resourceName);
 
             if (!file.exists()) {
                 throw new InternalException(String.format("Unable to load resource file '%s'", resourceName));
@@ -53,6 +40,37 @@ public class ResourceUtil {
         } catch (URISyntaxException | IOException e) {
             throw new InternalException(String.format("Unable to load resource file '%s'", resourceName), e);
         }
+    }
+
+    /**
+     * Resolve a classpath resource URL to a {@link File}.
+     * <p>
+     * A plain {@code file:} URL is used directly. Resources that are not backed by a real
+     * filesystem file - inside a jar ({@code jar:}), or served by an application server
+     * virtual file system such as WildFly/JBoss ({@code vfs:}, {@code vfszip:}) - cannot be
+     * turned into a File with {@code new File(url.toURI())} (that throws
+     * {@code IllegalArgumentException: URI scheme is not "file"}), so they are copied to a
+     * temporary file through their stream instead. See issue #80.
+     *
+     * @param url URL returned by the classloader, or {@code null} when the resource is not on the classpath
+     * @param resourceName original resource name, used as the absolute/external path fallback when {@code url} is null
+     * @return file pointing to the resource
+     */
+    static File toFile(URL url, String resourceName) throws URISyntaxException, IOException {
+        if (url != null && "file".equals(url.getProtocol())) {
+            return new File(url.toURI());
+        }
+
+        if (url != null) {
+            // Not a plain file (jar:, vfs:, vfszip:, ...) - copy to disk so it can be read as a File
+            try (InputStream inputStream = url.openStream()) {
+                Path path = Files.createTempFile(resourceName, "tmp");
+                Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
+                return path.toFile();
+            }
+        }
+
+        return new File(resourceName);
     }
 
     /**
