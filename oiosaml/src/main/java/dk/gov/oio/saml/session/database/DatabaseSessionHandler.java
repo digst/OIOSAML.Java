@@ -351,7 +351,7 @@ public class DatabaseSessionHandler implements SessionHandler {
     /**
      * Clean stored ids and sessions.
      *
-     * @param maxInactiveIntervalSeconds Milliseconds to store session, before it should be invalidated.
+     * @param maxInactiveIntervalSeconds Seconds to store session, before it should be invalidated.
      */
     @Override
     public void cleanup(final long maxInactiveIntervalSeconds) {

@@ -252,18 +252,23 @@ public class InMemorySessionHandler implements SessionHandler {
     /**
      * Clean stored ids and sessions.
      *
-     * @param maxInactiveIntervalSeconds Milliseconds to store session, before it should be invalidated.
+     * @param maxInactiveIntervalSeconds Seconds to store session, before it should be invalidated.
      */
     @Override
     public void cleanup(long maxInactiveIntervalSeconds) {
+        // TimeOutWrapper.isExpired() compares against System.currentTimeMillis(), so the timeout
+        // must be in milliseconds. The interval is supplied in seconds (see SessionHandler#cleanup),
+        // so convert before comparing - otherwise sessions expire 1000x too early (issue #76).
+        long maxInactiveIntervalMillis = maxInactiveIntervalSeconds * 1000L;
+
         // Trim usedAssertionIds to size with sessionHandlerNumTrackedSessionIds
         while (!usedAssertionIds.isEmpty() && usedAssertionIds.size() > sessionHandlerNumTrackedSessionIds) {
             usedAssertionIds.remove(usedAssertionIds.pollFirst());
         }
-        cleanup(sessionIndexMap, maxInactiveIntervalSeconds, "SessionIndexMap");
-        cleanup(assertions, maxInactiveIntervalSeconds, "Assertions");
-        cleanup(authnRequests, maxInactiveIntervalSeconds, "AuthnRequests");
-        cleanup(logoutRequests, maxInactiveIntervalSeconds, "LogoutRequests");
+        cleanup(sessionIndexMap, maxInactiveIntervalMillis, "SessionIndexMap");
+        cleanup(assertions, maxInactiveIntervalMillis, "Assertions");
+        cleanup(authnRequests, maxInactiveIntervalMillis, "AuthnRequests");
+        cleanup(logoutRequests, maxInactiveIntervalMillis, "LogoutRequests");
     }
 
     private <E, T> void cleanup(Map<E, TimeOutWrapper<T>> map, long cleanupDelay, String msg) {

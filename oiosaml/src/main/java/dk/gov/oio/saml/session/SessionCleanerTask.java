@@ -20,7 +20,7 @@ public class SessionCleanerTask implements Runnable {
 
     @Override
     public void run() {
-        log.debug("Cleaning session data, time: {}, timeout: {}", System.currentTimeMillis(), maxInactiveIntervalSeconds * 1000);
+        log.debug("Cleaning session data, time: {}, timeout (seconds): {}", System.currentTimeMillis(), maxInactiveIntervalSeconds);
         try {
             SessionHandler sessionHandler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
             sessionHandler.cleanup(maxInactiveIntervalSeconds);
