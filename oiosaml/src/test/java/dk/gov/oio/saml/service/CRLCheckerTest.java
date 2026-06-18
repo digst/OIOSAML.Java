@@ -18,8 +18,7 @@ import dk.gov.oio.saml.util.TestConstants;
 public class CRLCheckerTest extends BaseServiceTest {
 
     @DisplayName("Test revocation check on valid certificate using OCSP")
-    @Test
-    public void testOcspCheckOnValidCertificate() throws Exception {
+    @Test    public void testOcspCheckOnValidCertificate() throws Exception {
         OIOSAML3Service.getConfig().setCRLCheckEnabled(false);
         OIOSAML3Service.getConfig().setOcspCheckEnabled(true);
 
@@ -36,8 +35,7 @@ public class CRLCheckerTest extends BaseServiceTest {
     }
     
     @DisplayName("Test revocation check on valid certificate using CRL")
-    @Test
-    public void testCrlCheckOnValidCertificate() throws Exception {
+    @Test    public void testCrlCheckOnValidCertificate() throws Exception {
         OIOSAML3Service.getConfig().setCRLCheckEnabled(true);
         OIOSAML3Service.getConfig().setOcspCheckEnabled(false);
         
@@ -54,8 +52,7 @@ public class CRLCheckerTest extends BaseServiceTest {
     }
 
     @DisplayName("Test revocation check on revoked certificate using OCSP")
-    @Test
-    public void testOcspCheckOnRevokedCertificate() throws Exception {
+    @Test    public void testOcspCheckOnRevokedCertificate() throws Exception {
         OIOSAML3Service.getConfig().setCRLCheckEnabled(false);
         OIOSAML3Service.getConfig().setOcspCheckEnabled(true);
 
@@ -73,8 +70,7 @@ public class CRLCheckerTest extends BaseServiceTest {
     }
     
     @DisplayName("Test revocation check on revoked certificate using CRL")
-    @Test
-    public void testCrlCheckOnRevokedCertificate() throws Exception {
+    @Test    public void testCrlCheckOnRevokedCertificate() throws Exception {
         OIOSAML3Service.getConfig().setCRLCheckEnabled(true);
         OIOSAML3Service.getConfig().setOcspCheckEnabled(false);
 

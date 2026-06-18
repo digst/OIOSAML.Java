@@ -69,10 +69,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
+                <version>3.8.1</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <!-- Build runs on JDK 11+, but the published artifact must stay
+                         runnable on Java 8 consumers. release=8 compiles against the
+                         Java 8 API so no newer API can leak into the bytecode. -->
+                    <release>8</release>
                 </configuration>
             </plugin>
 
