@@ -90,13 +90,15 @@ public class CredentialService {
 
         KeyStore ks = keyStore(keystoreLocation, keystorePassword.toCharArray());
 
+        // OpenSAML's KeyStoreCredentialResolver looks up the key password by the alias
+        // supplied in the EntityIdCriterion below. Java's PKCS12 keystore lowercases
+        // aliases on load, so keying the password map by the keystore's stored alias
+        // broke whenever the configured alias used a different casing, surfacing as a
+        // misleading "incorrect keystore password" error (issue #73). Key it by the
+        // configured alias instead; PKCS12 key lookup is already case-insensitive, so
+        // alias resolution becomes fully case-insensitive.
         Map<String, String> passwords = new HashMap<>();
-        try {
-            passwords.put(ks.aliases().nextElement(), keystorePassword);
-        }
-        catch (KeyStoreException e) {
-            throw new InternalException("Keystore not initialized properly", e);
-        }
+        passwords.put(alias, keystorePassword);
 
         KeyStoreCredentialResolver resolver = new KeyStoreCredentialResolver(ks, passwords);
         CriteriaSet criteria = new CriteriaSet();
