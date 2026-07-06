@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import dk.gov.oio.saml.util.TestConstants;
@@ -51,6 +52,10 @@ public class CRLCheckerTest extends BaseServiceTest {
         Assertions.assertEquals(1, validCertificates.size());
     }
 
+    // Integration test: depends on the live NemLog-in test CA revocation infrastructure
+    // (the revoked certificate's real OCSP/CRL status). Tagged so it can be excluded from
+    // offline runs if needed, but it runs by default.
+    @Tag("integration")
     @DisplayName("Test revocation check on revoked certificate using OCSP")
     @Test    public void testOcspCheckOnRevokedCertificate() throws Exception {
         OIOSAML3Service.getConfig().setCRLCheckEnabled(false);
@@ -69,6 +74,10 @@ public class CRLCheckerTest extends BaseServiceTest {
         Assertions.assertEquals(0, validCertificates.size());
     }
     
+    // Integration test: depends on the live NemLog-in test CA revocation infrastructure
+    // (the revoked certificate's real OCSP/CRL status). Tagged so it can be excluded from
+    // offline runs if needed, but it runs by default.
+    @Tag("integration")
     @DisplayName("Test revocation check on revoked certificate using CRL")
     @Test    public void testCrlCheckOnRevokedCertificate() throws Exception {
         OIOSAML3Service.getConfig().setCRLCheckEnabled(true);
