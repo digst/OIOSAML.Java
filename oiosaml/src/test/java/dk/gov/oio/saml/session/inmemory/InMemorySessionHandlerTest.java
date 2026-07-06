@@ -152,6 +152,23 @@ class InMemorySessionHandlerTest {
         Assertions.assertNull(assertionWrapperOutput);
     }
 
+    @DisplayName("Test that stored Assertion survives until its timeout (seconds, not millis) - issue #76")
+    @Test
+    void testStoreAssertionNotRemovedBeforeTimeout() throws Exception {
+        AssertionWrapper assertionWrapperInput = new AssertionWrapper(createAssertion());
+
+        sessionHandler.storeAssertion(session, assertionWrapperInput);
+
+        // Wait far longer than the timeout-interpreted-as-milliseconds (the #76 bug: 5s -> 5ms),
+        // but far less than the real 5 second timeout. The assertion must still be present.
+        Thread.sleep(100);
+        sessionHandler.cleanup(5); // 5 seconds
+
+        AssertionWrapper assertionWrapperOutput = sessionHandler.getAssertion(session);
+        Assertions.assertNotNull(assertionWrapperOutput,
+                "Assertion must survive cleanup until its timeout elapses (timeout is in seconds, not milliseconds)");
+    }
+
     @DisplayName("Test that stored Assertion is removed after timeout and can not be retrieved using session index")
     @Test
     void testStoreAssertionTimeoutSessionIndex() throws Exception {

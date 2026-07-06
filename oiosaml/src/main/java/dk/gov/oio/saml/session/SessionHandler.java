@@ -134,7 +134,7 @@ public interface SessionHandler {
     /**
      * Clean stored ids and sessions.
      *
-     * @param maxInactiveIntervalSeconds Milliseconds to store session, before it should be invalidated.
+     * @param maxInactiveIntervalSeconds Seconds to store session, before it should be invalidated.
      */
     void cleanup(long maxInactiveIntervalSeconds);
 }
