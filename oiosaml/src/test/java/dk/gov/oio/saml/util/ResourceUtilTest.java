@@ -6,6 +6,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,6 +45,61 @@ class ResourceUtilTest {
     void testGetResourceAsFileFromJar() throws InternalException {
         File file = ResourceUtil.getResourceAsFile("LICENSE-junit.txt");
         Assertions.assertTrue(file.isFile() && file.canRead());
+    }
+
+    @DisplayName("Test GetResourceAsFile handles non-file (WildFly vfs:) URLs - issue #80")
+    @Test
+    void testToFileFromVfsUrl() throws Exception {
+        // Simulate an application-server VFS resource URL (e.g. WildFly 'vfs:') backed by a
+        // real file. Such URLs are not 'file:' URLs, so the old new File(url.toURI()) approach
+        // throws; toFile must instead copy the resource to a readable temp file.
+        URLStreamHandler vfsHandler = new URLStreamHandler() {
+            @Override
+            protected URLConnection openConnection(URL u) {
+                return new URLConnection(u) {
+                    @Override public void connect() { }
+                    @Override public InputStream getInputStream() throws IOException {
+                        return Files.newInputStream(externalPath);
+                    }
+                };
+            }
+        };
+        URL vfsUrl = new URL(null, "vfs:/content/app.war/WEB-INF/classes/oiosaml.properties", vfsHandler);
+
+        // The naive conversion that caused issue #80 fails for such URLs...
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new File(vfsUrl.toURI()));
+
+        // ...while toFile resolves it to a readable file holding the original content.
+        File file = ResourceUtil.toFile(vfsUrl, "oiosaml.properties");
+        Assertions.assertTrue(file.isFile() && file.canRead());
+        Assertions.assertEquals("this.is.a.test=1234",
+                new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8));
+    }
+
+    @DisplayName("Test GetResourceAsFile handles non-file URLs whose resource is in a subdirectory - issue #80")
+    @Test
+    void testToFileFromVfsUrlInSubdirectory() throws Exception {
+        // A resource that lives in a subdirectory (e.g. "config/oiosaml.properties") has a
+        // resourceName containing '/'. createTempFile rejects such a value as a prefix
+        // (IllegalArgumentException: Invalid prefix or suffix), so toFile must use only the
+        // last path segment. Regression guard for the subdirectory case of issue #80.
+        URLStreamHandler vfsHandler = new URLStreamHandler() {
+            @Override
+            protected URLConnection openConnection(URL u) {
+                return new URLConnection(u) {
+                    @Override public void connect() { }
+                    @Override public InputStream getInputStream() throws IOException {
+                        return Files.newInputStream(externalPath);
+                    }
+                };
+            }
+        };
+        URL vfsUrl = new URL(null, "vfs:/content/app.war/WEB-INF/classes/config/oiosaml.properties", vfsHandler);
+
+        File file = ResourceUtil.toFile(vfsUrl, "config/oiosaml.properties");
+        Assertions.assertTrue(file.isFile() && file.canRead());
+        Assertions.assertEquals("this.is.a.test=1234",
+                new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8));
     }
 
     @DisplayName("Test GetResourceAsStream from classpath")
