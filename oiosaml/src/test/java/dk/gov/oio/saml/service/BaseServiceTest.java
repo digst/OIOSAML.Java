@@ -16,6 +16,12 @@ public class BaseServiceTest {
 
     @BeforeAll
     public static void beforeAll(MockServerClient idp) throws Exception {
+        // Force the JDK OCSP client to POST the request instead of using the RFC 5019 GET form
+        // (request base64-encoded in the URL path). The NemLog-in test OCSP responder returns
+        // HTTP 404 for the GET form, which otherwise makes CRLCheckerTest's OCSP checks fail with
+        // UNDETERMINED_REVOCATION_STATUS. Must be set before the first OCSP check.
+        System.setProperty("com.sun.security.ocsp.useget", "false");
+
         ClassLoader classLoader = AssertionServiceTest.class.getClassLoader();
         String keystoreLocation = classLoader.getResource(TestConstants.SP_KEYSTORE_LOCATION).getFile();
 
