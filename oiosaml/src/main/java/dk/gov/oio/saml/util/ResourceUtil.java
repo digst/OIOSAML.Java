@@ -8,6 +8,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -62,9 +63,14 @@ public class ResourceUtil {
         }
 
         if (url != null) {
-            // Not a plain file (jar:, vfs:, vfszip:, ...) - copy to disk so it can be read as a File
+            // Not a plain file (jar:, vfs:, vfszip:, ...) - copy to disk so it can be read as a File.
+            // Use only the last path segment as the temp-file prefix: a resourceName that refers to a
+            // file in a subdirectory (e.g. "config/oiosaml.properties") contains '/', which
+            // createTempFile rejects with IllegalArgumentException. The "oiosaml-" prefix also
+            // guarantees the minimum 3-character length required for the prefix.
             try (InputStream inputStream = url.openStream()) {
-                Path path = Files.createTempFile(resourceName, "tmp");
+                String baseName = Paths.get(resourceName).getFileName().toString();
+                Path path = Files.createTempFile("oiosaml-" + baseName, ".tmp");
                 Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
                 return path.toFile();
             }
