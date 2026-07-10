@@ -515,8 +515,8 @@ public class Configuration {
             configuration.auditLoggerClassName = StringUtil.defaultIfEmpty(this.auditLoggerClassName, "dk.gov.oio.saml.audit.Slf4JAuditLogger");
             configuration.auditRequestAttributeIP = StringUtil.defaultIfEmpty(this.auditRequestAttributeIP, "request:remoteAddr");
             configuration.auditRequestAttributePort = StringUtil.defaultIfEmpty(this.auditRequestAttributePort, "request:remotePort");
-            configuration.auditRequestAttributeSessionId = StringUtil.defaultIfEmpty(this.auditRequestAttributeSessionId, "request:remoteUser");
-            configuration.auditRequestAttributeServiceProviderUserId = StringUtil.defaultIfEmpty(this.auditRequestAttributeServiceProviderUserId, "request:sessionId");
+            configuration.auditRequestAttributeSessionId = StringUtil.defaultIfEmpty(this.auditRequestAttributeSessionId, "request:sessionId");
+            configuration.auditRequestAttributeServiceProviderUserId = StringUtil.defaultIfEmpty(this.auditRequestAttributeServiceProviderUserId, "request:remoteUser");
             configuration.sessionHandlerFactoryClassName = StringUtil.defaultIfEmpty(this.sessionHandlerFactoryClassName, null);
             configuration.sessionHandlerJndiName = StringUtil.defaultIfEmpty(this.sessionHandlerJndiName, null);
             configuration.sessionHandlerJdbcUrl = StringUtil.defaultIfEmpty(this.sessionHandlerJdbcUrl, null);
