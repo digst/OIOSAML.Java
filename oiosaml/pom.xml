@@ -178,6 +178,14 @@
             <version>2.3.0</version>
         </dependency>
 
+        <!-- Used by the tests to mint a CA, certificates and CRLs, bcprov itself comes in through OpenSAML -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>1.59</version>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>

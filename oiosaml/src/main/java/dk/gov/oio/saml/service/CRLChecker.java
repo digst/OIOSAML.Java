@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CRLException;
@@ -21,11 +23,13 @@ import java.security.cert.X509CRLEntry;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -58,6 +62,11 @@ public class CRLChecker {
     // JDK system property deciding whether the built-in OCSP client may use the RFC 5019 GET form
     // (request base64-encoded into the URL path) for small requests, see sun.security.provider.certpath.OCSP
     private static final String JDK_OCSP_USE_GET_PROPERTY = "com.sun.security.ocsp.useget";
+
+    // Revocation data is fetched from locations named by the certificate being checked, a slow or
+    // unresponsive endpoint must not hold the revocation check open
+    private static final int CONNECT_TIMEOUT_MILLIS = 10000;
+    private static final int READ_TIMEOUT_MILLIS = 10000;
 
     private static Map<String, X509Certificate> certificateMap = new HashMap<String, X509Certificate>();
 
@@ -156,6 +165,8 @@ public class CRLChecker {
             throw new RuntimeException("No OCSP access location could be found");
         }
 
+        URI responder = toHttpUri(ocspServer);
+
         // try to retrieve issuing OCES CA certificate
         X509Certificate issuer = getIssuingCertificate(certificate);
         if (issuer == null) {
@@ -179,7 +190,7 @@ public class CRLChecker {
             // "ocsp.enable"/"ocsp.responderURL" security properties, leaks the responder of the certificate
             // being checked into every other PKIX validation in the JVM, and races with concurrent checks.
             PKIXRevocationChecker revocationChecker = (PKIXRevocationChecker) cpv.getRevocationChecker();
-            revocationChecker.setOcspResponder(new URI(ocspServer));
+            revocationChecker.setOcspResponder(responder);
 
             // Fallback to CRL is handled by checkCertificate, according to the OIOSAML configuration
             revocationChecker.setOptions(EnumSet.of(PKIXRevocationChecker.Option.NO_FALLBACK));
@@ -236,28 +247,90 @@ public class CRLChecker {
         Iterator<String> urlIt = issuingCaUrls.iterator();
         while (urlIt.hasNext()) {
             Object caUrl = new UntrustedUrlInput(urlIt.next());
+            String url = caUrl.toString();
 
-            return downloadCertificate(caUrl.toString());            
+            // A cached certificate is only reused while it still is the issuer, so that a CA replaced at the
+            // same location is picked up instead of failing every check until the process restarts
+            X509Certificate cached = certificateMap.get(url);
+            if (cached != null && isIssuerOf(cached, certificate)) {
+                return cached;
+            }
+
+            X509Certificate issuer = downloadCertificate(url);
+            if (issuer == null || !isIssuerOf(issuer, certificate)) {
+                return null;
+            }
+
+            certificateMap.put(url, issuer);
+
+            return issuer;
         }
 
         return null;
     }
+
+    /**
+     * The AIA location is named by the certificate being checked, so the certificate downloaded from it can
+     * only serve as trust anchor or CRL signer once it is known to be the CA that issued that certificate.
+     */
+    private static boolean isIssuerOf(X509Certificate issuer, X509Certificate certificate) {
+        if (!certificate.getIssuerX500Principal().equals(issuer.getSubjectX500Principal())) {
+            log.warn("Certificate fetched from the issuer location of {} is issued to somebody else", certificate.getSubjectDN());
+            return false;
+        }
+
+        try {
+            certificate.verify(issuer.getPublicKey());
+            return true;
+        }
+        catch (GeneralSecurityException e) {
+            log.warn("Certificate fetched from the issuer location of {} did not issue it", certificate.getSubjectDN(), e);
+            return false;
+        }
+    }
+
+    /**
+     * Open a stream to a location named by certificate content.
+     *
+     * <p>Only http and https are allowed. The OCES CAs serve revocation data over plain http, which is fine
+     * because the data is signed, but the scheme has to be constrained so that a certificate cannot make the
+     * SP read from file:, jar: or any other protocol the JVM happens to support.</p>
+     */
+    private static InputStream openStream(String url) throws IOException {
+        URL location = new URL(url);
+
+        String protocol = location.getProtocol().toLowerCase(Locale.ROOT);
+        if (!"http".equals(protocol) && !"https".equals(protocol)) {
+            throw new IOException(String.format("Refusing to fetch revocation data over '%s'", protocol));
+        }
+
+        URLConnection connection = location.openConnection();
+        connection.setConnectTimeout(CONNECT_TIMEOUT_MILLIS);
+        connection.setReadTimeout(READ_TIMEOUT_MILLIS);
+
+        return connection.getInputStream();
+    }
+
+    private static URI toHttpUri(String url) throws URISyntaxException {
+        URI uri = new URI(url);
+
+        String scheme = (uri.getScheme() != null) ? uri.getScheme().toLowerCase(Locale.ROOT) : "";
+        if (!"http".equals(scheme) && !"https".equals(scheme)) {
+            throw new RuntimeException(String.format("Refusing to use OCSP responder with scheme '%s'", scheme));
+        }
+
+        return uri;
+    }
     
     private static X509Certificate downloadCertificate(String url) {
-        if (certificateMap.containsKey(url)) {
-            return certificateMap.get(url);
-        }
-        
         try {
             CertificateFactory factory = CertificateFactory.getInstance("X.509");
-            try (InputStream is = new URL(url).openStream()) {
+            try (InputStream is = openStream(url)) {
                 X509Certificate certificate = (X509Certificate) factory.generateCertificate(is);
                 if (certificate != null) {
-                    certificateMap.put(url, certificate);
-                    
                     return certificate;
                 }
-                
+
                 log.warn("Failed to parse certificate from {}", url);
             }
             catch (IOException ex) {
@@ -345,7 +418,7 @@ public class CRLChecker {
         return urls;
     }
 
-    private static boolean doCRLCheck(X509Certificate certificate) throws IOException, CertificateException, CRLException, InitializationException {
+    private static boolean doCRLCheck(X509Certificate certificate) throws IOException, GeneralSecurityException, InitializationException {
         boolean revoked = true;
 
         String url = getCRLUrl(certificate);
@@ -353,12 +426,18 @@ public class CRLChecker {
             throw new RuntimeException("No CRL url could be found");
         }
 
-        URL u = new URL(url);
-        try (InputStream is = u.openStream()) {
+        X509Certificate issuer = getIssuingCertificate(certificate);
+        if (issuer == null) {
+            throw new RuntimeException("CA Certificate for CRL check could not be retrieved!");
+        }
+
+        try (InputStream is = openStream(url)) {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             X509CRL crl = (X509CRL) cf.generateCRL(is);
 
             log.debug("CRL for {}: {}", url, crl);
+
+            validateCRL(crl, certificate, issuer);
 
             X509CRLEntry revokedCertificate = crl.getRevokedCertificate(certificate.getSerialNumber());
             if (revokedCertificate != null) {
@@ -371,6 +450,33 @@ public class CRLChecker {
         }
 
         return !revoked;
+    }
+
+    /**
+     * A CRL is fetched from a location named by the certificate itself, so the absence of a serial number in
+     * it only means anything once the list is known to be signed by the issuing CA and to be current.
+     */
+    private static void validateCRL(X509CRL crl, X509Certificate certificate, X509Certificate issuer) throws GeneralSecurityException {
+        if (!crl.getIssuerX500Principal().equals(certificate.getIssuerX500Principal())) {
+            throw new CRLException("CRL was not issued by the CA that issued the certificate");
+        }
+
+        crl.verify(issuer.getPublicKey());
+
+        long clockSkewMillis = 1000L * 60 * OIOSAML3Service.getConfig().getClockSkew();
+        Date now = new Date();
+
+        Date thisUpdate = crl.getThisUpdate();
+        if (thisUpdate == null || thisUpdate.getTime() - clockSkewMillis > now.getTime()) {
+            throw new CRLException("CRL is not valid yet, thisUpdate is " + thisUpdate);
+        }
+
+        // RFC 5280 leaves nextUpdate optional, but a list that does not say when it is superseded cannot be
+        // told apart from one that was replaced long ago
+        Date nextUpdate = crl.getNextUpdate();
+        if (nextUpdate == null || nextUpdate.getTime() + clockSkewMillis < now.getTime()) {
+            throw new CRLException("CRL is no longer current, nextUpdate is " + nextUpdate);
+        }
     }
 
     private static String getCRLUrl(X509Certificate certificate) throws IOException {
