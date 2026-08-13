@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.xmlsec.encryption.support.EncryptionConstants;
 
 import dk.gov.oio.saml.util.ExternalException;
 import dk.gov.oio.saml.util.IdpUtil;
@@ -37,6 +38,43 @@ public class AssertionServiceTest extends BaseServiceTest {
         Assertions.assertNotNull(assertion);
     }
     
+    @DisplayName("Test retrieving Assertion encrypted with AES-GCM")
+    @Test
+    public void testGetAssertionEncryptedWithGcm() throws Exception {
+        String nameID = "https://data.gov.dk/model/core/edi/person/uuid/37a5a1aa-67ce-4f70-b7c0-b8e678d585f7";
+
+        AssertionService assertionService = new AssertionService();
+        Assertion assertion = assertionService.getAssertion(IdpUtil.createResponse(true, true, true, nameID, TestConstants.SP_ENTITY_ID, TestConstants.SP_ASSERTION_CONSUMER_URL, UUID.randomUUID().toString(),
+                EncryptionConstants.ALGO_ID_BLOCKCIPHER_AES256_GCM, EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSAOAEP));
+
+        Assertions.assertNotNull(assertion);
+        Assertions.assertEquals(nameID, assertion.getSubject().getNameID().getValue());
+    }
+
+    @DisplayName("Test that an Assertion with a key transport algorithm outside the profile is rejected")
+    @Test
+    public void testRejectAssertionWithDisallowedKeyTransportAlgorithm() throws Exception {
+        AssertionService assertionService = new AssertionService();
+
+        // RSA 1.5 key transport is not one of the algorithms allowed by [OIO-ALG-01]
+        Assertions.assertThrows(ExternalException.class, () -> {
+            assertionService.getAssertion(IdpUtil.createResponse(true, true, true, "NAMEID", TestConstants.SP_ENTITY_ID, TestConstants.SP_ASSERTION_CONSUMER_URL, UUID.randomUUID().toString(),
+                    EncryptionConstants.ALGO_ID_BLOCKCIPHER_AES256, EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSA15));
+        });
+    }
+
+    @DisplayName("Test that an Assertion with a block encryption algorithm outside the profile is rejected")
+    @Test
+    public void testRejectAssertionWithDisallowedBlockEncryptionAlgorithm() throws Exception {
+        AssertionService assertionService = new AssertionService();
+
+        // Triple DES block encryption is not one of the algorithms allowed by [OIO-ALG-01]
+        Assertions.assertThrows(ExternalException.class, () -> {
+            assertionService.getAssertion(IdpUtil.createResponse(true, true, true, "NAMEID", TestConstants.SP_ENTITY_ID, TestConstants.SP_ASSERTION_CONSUMER_URL, UUID.randomUUID().toString(),
+                    EncryptionConstants.ALGO_ID_BLOCKCIPHER_TRIPLEDES, EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSAOAEP));
+        });
+    }
+
     @DisplayName("Test retrieving badly formatted plaintext Assertion")
     @Test
     public void testGetBadlyEncryptedAssertion() throws Exception {

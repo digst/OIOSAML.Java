@@ -89,6 +89,24 @@ public class IdpUtil {
             String recipientEntityId,
             String assertionConsumerUrl,
             String inResponseToId) throws Exception {
+        return createResponse(encrypted, validCert, validSignature, subjectNameID, recipientEntityId, assertionConsumerUrl, inResponseToId,
+                EncryptionConstants.ALGO_ID_BLOCKCIPHER_AES256, EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSAOAEP);
+    }
+
+    /**
+     * @param dataAlgorithm         algorithm the assertion itself is encrypted with
+     * @param keyTransportAlgorithm algorithm the encryption key is wrapped with
+     */
+    public static Response createResponse(
+            boolean encrypted,
+            boolean validCert,
+            boolean validSignature,
+            String subjectNameID,
+            String recipientEntityId,
+            String assertionConsumerUrl,
+            String inResponseToId,
+            String dataAlgorithm,
+            String keyTransportAlgorithm) throws Exception {
 
         DateTime issueInstant = new DateTime();
 
@@ -113,7 +131,7 @@ public class IdpUtil {
         Assertion assertion = createAssertion(issueInstant, subjectNameID, recipientEntityId, assertionConsumerUrl);
         SignAssertion(assertion, validSignature);
         if (encrypted) {
-            EncryptedAssertion encryptedAssertion = encryptAssertion(assertion, validCert);
+            EncryptedAssertion encryptedAssertion = encryptAssertion(assertion, validCert, dataAlgorithm, keyTransportAlgorithm);
             response.getEncryptedAssertions().add(encryptedAssertion);
         }
         else {
@@ -235,17 +253,17 @@ public class IdpUtil {
         return outgoingLR;
     }
 
-    private static EncryptedAssertion encryptAssertion(Assertion assertion, boolean validCert) throws Exception {
+    private static EncryptedAssertion encryptAssertion(Assertion assertion, boolean validCert, String dataAlgorithm, String keyTransportAlgorithm) throws Exception {
         X509Certificate certificate = getSPCertificate(validCert);
 
         Credential keyEncryptionCredential = new BasicX509Credential(certificate);
         DataEncryptionParameters encParams = new DataEncryptionParameters();
 
-        encParams.setAlgorithm(EncryptionConstants.ALGO_ID_BLOCKCIPHER_AES256);
+        encParams.setAlgorithm(dataAlgorithm);
 
         KeyEncryptionParameters kekParams = new KeyEncryptionParameters();
         kekParams.setEncryptionCredential(keyEncryptionCredential);
-        kekParams.setAlgorithm(EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSAOAEP);
+        kekParams.setAlgorithm(keyTransportAlgorithm);
 
         Encrypter samlEncrypter = new Encrypter(encParams, kekParams);
         samlEncrypter.setKeyPlacement(Encrypter.KeyPlacement.PEER);
