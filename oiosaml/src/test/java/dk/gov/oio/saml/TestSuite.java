@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(JUnitPlatform.class)
 @SelectPackages( {
+    "dk.gov.oio.saml.config",
     "dk.gov.oio.saml.filter",
     "dk.gov.oio.saml.oiobpp",
     "dk.gov.oio.saml.service",
