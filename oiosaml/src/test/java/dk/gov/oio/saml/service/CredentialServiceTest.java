@@ -33,7 +33,7 @@ public class CredentialServiceTest {
                 .setSpEntityID(TestConstants.SP_ENTITY_ID)
                 .setBaseUrl(TestConstants.SP_BASE_URL)
                 .setIdpEntityID(TestConstants.IDP_ENTITY_ID)
-                .setIdpMetadataUrl(TestConstants.IDP_METADATA_URL)
+                .setIdpMetadataFile(TestConstants.idpMetadataFile())
                 .setKeystoreLocation(keystoreLocation)
                 .setKeystorePassword("Test1234")
                 .setKeyAlias(ALIAS_IN_DIFFERENT_CASE)

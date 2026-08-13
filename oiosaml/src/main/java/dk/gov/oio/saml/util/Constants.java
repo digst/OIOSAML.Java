@@ -14,7 +14,9 @@ public class Constants {
     public static final String KEY_ALIAS = "oiosaml.servlet.keystore.alias";
     public static final String IDP_ENTITY_ID = "oiosaml.servlet.idp.entityid";
     public static final String IDP_METADATA_FILE = "oiosaml.servlet.idp.metadata.file";
-    public static final String IDP_METADATA_URL = "oiosaml.servlet.idp.metadata.url";
+    // Removed, IdP metadata is deployed as a file. Kept so a configuration still using it is rejected
+    // instead of silently ignored, see DispatcherServlet
+    public static final String REMOVED_IDP_METADATA_URL = "oiosaml.servlet.idp.metadata.url";
 
     // Configuration constants for DispatcherServlet (optional, has default values)
     public static final String EXTERNAL_CONFIGURATION_FILE = "oiosaml.servlet.configurationfile";
@@ -32,7 +34,7 @@ public class Constants {
     public static final String ERROR_PAGE = "oiosaml.servlet.secondary.page.error";
     public static final String LOGOUT_PAGE = "oiosaml.servlet.secondary.page.logout";
     public static final String LOGIN_PAGE = "oiosaml.servlet.secondary.page.login";
-    public static final String SUPPORT_SELF_SIGNED = "oiosaml.servlet.trust.selfsigned.certs";
+    public static final String REMOVED_SUPPORT_SELF_SIGNED = "oiosaml.servlet.trust.selfsigned.certs";
     public static final String SP_ROUTING_BASE = "oiosaml.servlet.routing.path.prefix";
     public static final String SP_ROUTING_ERROR = "oiosaml.servlet.routing.path.suffix.error";
     public static final String SP_ROUTING_METADATA = "oiosaml.servlet.routing.path.suffix.metadata";

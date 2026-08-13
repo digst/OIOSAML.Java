@@ -383,6 +383,14 @@ public class IdpUtil {
         return object;
     }
     
+    /**
+     * Base64 encoded certificate of the IdP signing key, or of the unrelated key used for invalid
+     * signatures, for building metadata variants.
+     */
+    public static String getIdpCertificateBase64(boolean validSignature) throws Exception {
+        return java.util.Base64.getEncoder().encodeToString(getX509Credential(validSignature).getEntityCertificate().getEncoded());
+    }
+
     private static BasicX509Credential getX509Credential(boolean validSignature) throws Exception {
         String resourceName = (validSignature) ? "idp.pfx" : "idp-invalid.pfx";
 

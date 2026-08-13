@@ -13,7 +13,7 @@ class ConfigurationTest {
                 .setSpEntityID("https://sp.example.com")
                 .setBaseUrl("https://sp.example.com")
                 .setIdpEntityID("https://idp.example.com")
-                .setIdpMetadataUrl("https://idp.example.com/metadata")
+                .setIdpMetadataFile("test-metadata.xml")
                 .setKeystoreLocation("keystore.p12")
                 .setKeystorePassword("password")
                 .setKeyAlias("alias")

@@ -278,16 +278,25 @@ public class AssertionValidationService {
     }
 
     private void validateSignature(Assertion assertion) throws ExternalException, InternalException, AssertionValidationException {
-        // Get Signing credential
-        X509Certificate x509Certificate = IdPMetadataService.getInstance().getIdPMetadata().getValidX509Certificate(UsageType.SIGNING);
-        BasicX509Credential credential = new BasicX509Credential(x509Certificate);
+        // Get Signing credentials. The IdP publishes every key that may be in use, so the signature is
+        // accepted when it validates against any of them, not only the first
+        List<X509Certificate> x509Certificates = IdPMetadataService.getInstance().getIdPMetadata().getValidX509Certificates(UsageType.SIGNING);
+        if (x509Certificates.isEmpty()) {
+            throw new InternalException("No valid signing certificate found in IdP metadata");
+        }
 
         // Validate Signature
-        try {
-            SignatureValidator.validate(assertion.getSignature(), credential);
-        } catch (SignatureException e) {
-            throw new AssertionValidationException("Could not validate assertion signature", e);
+        SignatureException lastFailure = null;
+        for (X509Certificate x509Certificate : x509Certificates) {
+            try {
+                SignatureValidator.validate(assertion.getSignature(), new BasicX509Credential(x509Certificate));
+                return;
+            } catch (SignatureException e) {
+                lastFailure = e;
+            }
         }
+
+        throw new AssertionValidationException("Could not validate assertion signature", lastFailure);
     }
 
     private void validateAudienceRestriction(Assertion assertion) throws AssertionValidationException {

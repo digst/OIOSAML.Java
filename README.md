@@ -163,8 +163,7 @@ This chapter describes all the configuration parameters and their default values
 | `oiosaml.servlet.keystore.password` | Yes | | The password to the PKCS#12 keystore given above. |
 | `oiosaml.servlet.keystore.alias` | Yes | | The alias of the key entry in the PKCS#12 keystore given above. |
 | `oiosaml.servlet.idp.entityid` | Yes | | The EntityID of the SAML Identity Provider that is used for login. |
-| `oiosaml.servlet.idp.metadata.file` | Partially | | A FILE reference to the SAML Identity Provider metadata. The file must be located on the classpath of the application. Note that either a FILE or URL reference is required. |
-| `oiosaml.servlet.idp.metadata.url` | Partially | | A URL reference to the SAML Identity Provider metadata. Note that either a FILE or URL reference is required. |
+| `oiosaml.servlet.idp.metadata.file` | Yes | | A FILE reference to the SAML Identity Provider metadata. The file must be located on the classpath of the application. Download the metadata from the Identity Provider and deploy it with the application: NemLog-in does not sign its metadata, so trust in it comes from deploying the file, not from the transport it was fetched over. |
 | `oiosaml.servlet.configurationfile` | No | | A FILE reference to a configuration file. If supplied, the `DispatcherServlet` will read its configuration from that file instead of the `ServletConfig` section. See [DispatcherServlet configuration from file](#dispatcherservlet-configuration-from-file). |
 | `oiosaml.servlet.profile.validation.enabled` | No | `true` | By default, the framework performs OIO SAML 3.0 profile validation. If this is not needed, turn off this setting by setting the value to `false`. |
 | `oiosaml.servlet.profile.validation.assurancelevel.allowed` | No | `false` | The NemLog-in IdP cannot for all authentication provide a NSIS LoA. Therefore the service provider can decide to accept the AssuranceLevel which the NemLog-in IdP provides instead. If this is not acceptable, turn off this setting by omitting it or setting the value to `false`. |
@@ -180,7 +179,6 @@ This chapter describes all the configuration parameters and their default values
 | `oiosaml.servlet.secondary.page.error` | No | | The framework has a built-in error page, which is shown in case of SAML related errors. Set this value to redirect the user to another webpage in case of errors. See [Additional configuration](#additional-configuration) for details on getting error information. |
 | `oiosaml.servlet.secondary.page.logout` | No | | The framework redirects the user to the context root of the web application after a successful logout. Set this value to redirect the user to another webpage instead of the context root. |
 | `oiosaml.servlet.secondary.page.login` | No | | When the login process completes, the framework attempts to redirect the user to the web-resource they tried to access before login started. If this fails, the framework redirects to the page specified by the value. If no value is specified, the context root of the application is used. |
-| `oiosaml.servlet.trust.selfsigned.certs` | No | `false` | By default, the framework performs certificate validation when accessing HTTPS-protected resources like SAML metadata. Set this value to `true` to disable certificate validation. |
 | `oiosaml.servlet.revocation.crl.check.enabled` | No | `true` | By default, the framework performs revocation checking using OCSP and CRL. Set this value to `false` to disable CRL revocation checking. |
 | `oiosaml.servlet.revocation.ocsp.check.enabled` | No | `true` | By default, the framework performs revocation checking using OCSP and CRL. Set this value to `false` to disable OCSP revocation checking. |
 | `oiosaml.servlet.routing.path.prefix` | No | `saml` | Routing configuration: servlet path prefix for the OIO dispatch servlet. Change this to change where the OIOSAML 3 endpoint is mounted in the application context (`oiosaml.servlet.baseurl`). Example: with the default, the logout action is hit at `/{prefix}/{suffix.logout}` = `/saml/logout`. |
@@ -217,7 +215,7 @@ If the `oiosaml.servlet.configurationfile` setting is supplied to the `Dispatche
 
 ```properties
 oiosaml.servlet.idp.entityid=https://saml.test-nemlog-in.dk/
-oiosaml.servlet.idp.metadata.url=https://test-nemlog-in.dk/Testportal/Test-nemlog-in-2.xml
+oiosaml.servlet.idp.metadata.file=test-nemlog-in-idp-metadata.xml
 ```
 
 ### Multiple AuthenticatedFilters and step-up

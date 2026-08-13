@@ -1,9 +1,6 @@
 package dk.gov.oio.saml.model;
 
 import java.io.ByteArrayInputStream;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -12,15 +9,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.net.ssl.SSLContext;
 
 import dk.gov.oio.saml.util.ResourceUtil;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.TrustStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.bouncycastle.util.encoders.Base64;
@@ -30,7 +20,6 @@ import org.opensaml.core.criterion.EntityIdCriterion;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.metadata.resolver.impl.AbstractReloadingMetadataResolver;
 import org.opensaml.saml.metadata.resolver.impl.FilesystemMetadataResolver;
-import org.opensaml.saml.metadata.resolver.impl.HTTPMetadataResolver;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml.saml2.metadata.KeyDescriptor;
@@ -56,11 +45,9 @@ public class IdPMetadata {
     private AbstractReloadingMetadataResolver resolver;
     private DateTime lastCRLCheck;
     private String entityId;
-    private String metadataURL;
 
-    public IdPMetadata(String entityId, String metadataURL, String metadataFilePath) throws ExternalException, InternalException {
+    public IdPMetadata(String entityId, String metadataFilePath) throws ExternalException, InternalException {
         this.entityId = entityId;
-        this.metadataURL = metadataURL;
         this.metadataFilePath = metadataFilePath;
         getEntityDescriptor(); // Fetch metadata first time
     }
@@ -96,27 +83,26 @@ public class IdPMetadata {
         return getEntityDescriptor().getIDPSSODescriptor(SAMLConstants.SAML20P_NS);
     }
 
-    public X509Certificate getValidX509Certificate(UsageType usageType) throws InternalException, ExternalException {
+    /**
+     * All certificates the IdP publishes for the given usage that passed revocation checking.
+     *
+     * <p>An IdP publishes both the outgoing and the incoming certificate while it rotates a key, and either
+     * of them can be the one in use at any moment, so callers have to accept all of them rather than picking
+     * one.</p>
+     */
+    public List<X509Certificate> getValidX509Certificates(UsageType usageType) throws InternalException, ExternalException {
         doRevocationCheck();
 
-        X509Certificate result = null;
+        List<X509Certificate> result = new ArrayList<>();
         if (UsageType.ENCRYPTION.equals(usageType)) {
-            if (validEncryptionCertificates != null && !validEncryptionCertificates.isEmpty()) {
-                result = validEncryptionCertificates.get(0);
-            }
+            result.addAll(validEncryptionCertificates);
         }
         else if (UsageType.SIGNING.equals(usageType)) {
-            if (validSigningCertificates != null && !validSigningCertificates.isEmpty()) {
-                result = validSigningCertificates.get(0);
-            }
+            result.addAll(validSigningCertificates);
         }
 
-        // If certificate is not found yet, try the unspecified
-        if (result == null) {
-            if (validUnspecifiedCertificates != null && !validUnspecifiedCertificates.isEmpty()) {
-                result = validUnspecifiedCertificates.get(0);
-            }
-        }
+        // Certificates published without a usage serve both purposes
+        result.addAll(validUnspecifiedCertificates);
 
         return result;
     }
@@ -245,28 +231,20 @@ public class IdPMetadata {
             try {
                 Configuration config = OIOSAML3Service.getConfig();
 
-                CloseableHttpClient httpClient;
-                if (config.isSupportSelfSigned()) {
-                    TrustStrategy acceptingTrustStrategy = new TrustSelfSignedStrategy();
-                    SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
-                    SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
-                    httpClient = HttpClients.custom().setSSLSocketFactory(csf).build();
-                } else {
-                    httpClient = HttpClients.createDefault();
-                }
-
-                if (metadataFilePath != null) {
-                    log.debug("MetadataFilePath supplied. Using file based metadata resolver");
-                    resolver = new FilesystemMetadataResolver(ResourceUtil.getResourceAsFile(metadataFilePath));
-                } else {
-                    log.debug("MetadataFilePath not supplied. Using URL based metadata resolver");
-                    resolver = new HTTPMetadataResolver(httpClient, metadataURL);
-                }
+                // Metadata is deployed as a file. The IdP does not sign its metadata, so trust in it comes
+                // from the deployment of that file, not from the transport it was fetched over
+                log.debug("Reading IdP metadata from {}", metadataFilePath);
+                resolver = new FilesystemMetadataResolver(ResourceUtil.getResourceAsFile(metadataFilePath));
 
                 resolver.setId(entityId);
+
+                // The file is re-read while the SP runs, so replacing it is enough to publish new keys
                 resolver.setMinRefreshDelay(1000L * 60 * 60 * config.getIdpMetadataMinRefreshDelay());
                 resolver.setMaxRefreshDelay(1000L * 60 * 60 * config.getIdpMetadataMaxRefreshDelay());
-            } catch (ResolverException | KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
+
+                // Metadata that has passed its validUntil is not used
+                resolver.setRequireValidMetadata(true);
+            } catch (ResolverException e) {
                 throw new InternalException("Could not create MetadataResolver", e);
             }
 

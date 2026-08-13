@@ -52,38 +52,19 @@ public class IdpMetadataServiceTest extends BaseServiceTest {
     @DisplayName("Test retrieving metadata")
     @Test
     public void testGetMetadata() throws Exception {
-        // Make sure Mock idp is setup to return correct data
-        idp
-            .when(
-                request()
-                    .withMethod("GET")
-                    .withPath("/saml/metadata"),
-                    Times.exactly(1)
-            )
-            .respond(
-                response()
-                   .withStatusCode(200)
-                   .withBody(TestConstants.IDP_METADATA));
-        
+        Configuration config = OIOSAML3Service.getConfig();
+        config.setIdpMetadataFile(TestConstants.idpMetadataFile());
+
         EntityDescriptor entityDescriptor = IdPMetadataService.getInstance().getIdPMetadata().getEntityDescriptor();
         Assertions.assertNotNull(entityDescriptor);
         Assertions.assertEquals(TestConstants.IDP_ENTITY_ID, entityDescriptor.getEntityID());
     }
-    
+
     @DisplayName("Test retrieving incorrect metadata")
     @Test
     public void testGetIncorrectMetadata() throws Exception {
-        // Make sure Mock idp is setup to return incorrect data
-        idp.when(
-                request()
-                    .withMethod("GET")
-                    .withPath("/saml/metadata"),
-                    Times.exactly(1)
-            )
-            .respond(
-                response()
-                   .withStatusCode(200)
-                   .withBody(TestConstants.BAD_IDP_METADATA));
+        Configuration config = OIOSAML3Service.getConfig();
+        config.setIdpMetadataFile(TestConstants.writeIdpMetadataFile(TestConstants.BAD_IDP_METADATA));
 
         // we should get NULL back, if the EntityId does not match
         EntityDescriptor entityDescriptor = IdPMetadataService.getInstance().getIdPMetadata().getEntityDescriptor();
