@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "https://www.eclipse.org/jetty/configure_9_3.dtd">
+
+<!--
+    HTTPS connector for the demo, run with 'mvn -pl demo jetty:run-war'. The demo SP is configured with
+    an https base URL, so the IdP redirects the user agent back to this connector. Keystore location and
+    password come from system properties set by the jetty-maven-plugin in demo/pom.xml.
+-->
+<Configure id="Server" class="org.eclipse.jetty.server.Server">
+
+    <New id="httpsConfiguration" class="org.eclipse.jetty.server.HttpConfiguration">
+        <Set name="secureScheme">https</Set>
+        <Set name="securePort">8443</Set>
+        <Call name="addCustomizer">
+            <Arg>
+                <New class="org.eclipse.jetty.server.SecureRequestCustomizer"/>
+            </Arg>
+        </Call>
+    </New>
+
+    <New id="sslContextFactory" class="org.eclipse.jetty.util.ssl.SslContextFactory$Server">
+        <Set name="keyStorePath"><SystemProperty name="demo.keystore.path"/></Set>
+        <Set name="keyStoreType">PKCS12</Set>
+        <Set name="keyStorePassword"><SystemProperty name="demo.keystore.password"/></Set>
+        <Set name="keyManagerPassword"><SystemProperty name="demo.keystore.password"/></Set>
+    </New>
+
+    <Call name="addConnector">
+        <Arg>
+            <New class="org.eclipse.jetty.server.ServerConnector">
+                <Arg name="server"><Ref refid="Server"/></Arg>
+                <Arg name="factories">
+                    <Array type="org.eclipse.jetty.server.ConnectionFactory">
+                        <Item>
+                            <New class="org.eclipse.jetty.server.SslConnectionFactory">
+                                <Arg name="next">http/1.1</Arg>
+                                <Arg name="sslContextFactory"><Ref refid="sslContextFactory"/></Arg>
+                            </New>
+                        </Item>
+                        <Item>
+                            <New class="org.eclipse.jetty.server.HttpConnectionFactory">
+                                <Arg name="config"><Ref refid="httpsConfiguration"/></Arg>
+                            </New>
+                        </Item>
+                    </Array>
+                </Arg>
+                <Set name="port">8443</Set>
+            </New>
+        </Arg>
+    </Call>
+
+</Configure>
