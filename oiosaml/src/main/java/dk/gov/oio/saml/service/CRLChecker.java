@@ -2,10 +2,11 @@ package dk.gov.oio.saml.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
-import java.security.Security;
 import java.security.cert.CRLException;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathValidator;
@@ -13,12 +14,14 @@ import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.PKIXParameters;
+import java.security.cert.PKIXRevocationChecker;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CRLEntry;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -51,8 +54,42 @@ import dk.gov.oio.saml.util.InternalException;
 public class CRLChecker {
     private static final Logger log = LoggerFactory.getLogger(CRLChecker.class);
     private static final String AUTH_INFO_ACCESS = Extension.authorityInfoAccess.getId();
+
+    // JDK system property deciding whether the built-in OCSP client may use the RFC 5019 GET form
+    // (request base64-encoded into the URL path) for small requests, see sun.security.provider.certpath.OCSP
+    private static final String JDK_OCSP_USE_GET_PROPERTY = "com.sun.security.ocsp.useget";
+
     private static Map<String, X509Certificate> certificateMap = new HashMap<String, X509Certificate>();
-    
+
+    /**
+     * Make the JDK OCSP client POST its requests instead of using the RFC 5019 GET form.
+     *
+     * JDK 12 and later default to GET for requests that fit in 255 characters, but the NemLog-in OCSP
+     * responders answer HTTP 404 to that form. The resulting UNDETERMINED_REVOCATION_STATUS makes every
+     * OCSP check fail, which silently degrades the SP to the CRL fallback, or drops the IdP certificates
+     * entirely when CRL checking is disabled as well. POST is mandatory for responders (RFC 6960), so
+     * forcing it is safe. Java 8 and 11 always POST and are unaffected.
+     *
+     * The JDK reads the property once, when sun.security.provider.certpath.OCSP is initialized, so this
+     * must run before the first OCSP check in the JVM, hence the call from {@link OIOSAML3Service#init}.
+     * An explicit setting made by the deployer (-Dcom.sun.security.ocsp.useget=...) always wins.
+     */
+    static void configureOcspTransport(Configuration configuration) {
+        if (!configuration.isOcspPostEnabled()) {
+            log.info("Leaving '{}' untouched, OCSP POST is disabled in the OIOSAML configuration", JDK_OCSP_USE_GET_PROPERTY);
+            return;
+        }
+
+        String existingValue = System.getProperty(JDK_OCSP_USE_GET_PROPERTY);
+        if (existingValue != null) {
+            log.info("Leaving '{}' at the value set by the deployer: {}", JDK_OCSP_USE_GET_PROPERTY, existingValue);
+            return;
+        }
+
+        System.setProperty(JDK_OCSP_USE_GET_PROPERTY, "false");
+        log.info("Setting '{}' to false, so OCSP requests are sent using POST", JDK_OCSP_USE_GET_PROPERTY);
+    }
+
     public static Set<X509Certificate> checkCertificates(List<X509Certificate> x509Certificates, DateTime lastCRLCheck) throws ExternalException, InternalException, InitializationException {
         Set<X509Certificate> result = new HashSet<>();
         if (x509Certificates == null || x509Certificates.size() == 0) {
@@ -111,7 +148,7 @@ public class CRLChecker {
         return validated;
     }
 
-    private static boolean doOCSPCheck(X509Certificate certificate) throws CertificateException, CertPathValidatorException, InvalidAlgorithmParameterException, NoSuchAlgorithmException {
+    private static boolean doOCSPCheck(X509Certificate certificate) throws CertificateException, CertPathValidatorException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, URISyntaxException {
         log.debug("Starting OCSP validation of certificate {}", certificate.getSubjectDN());
 
         String ocspServer = getOCSPUrl(certificate);
@@ -131,17 +168,26 @@ public class CRLChecker {
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
         CertPath cp = cf.generateCertPath(certList);
 
-        Security.setProperty("ocsp.enable", "true");
-        Security.setProperty("ocsp.responderURL", ocspServer);
-
         boolean revoked;
         try {
             TrustAnchor anchor = new TrustAnchor(issuer, null);
             PKIXParameters params = new PKIXParameters(Collections.singleton(anchor));
-            params.setRevocationEnabled(true);
+
+            CertPathValidator cpv = CertPathValidator.getInstance("PKIX");
+
+            // Configure revocation checking on this validation only. The alternative, the JVM global
+            // "ocsp.enable"/"ocsp.responderURL" security properties, leaks the responder of the certificate
+            // being checked into every other PKIX validation in the JVM, and races with concurrent checks.
+            PKIXRevocationChecker revocationChecker = (PKIXRevocationChecker) cpv.getRevocationChecker();
+            revocationChecker.setOcspResponder(new URI(ocspServer));
+
+            // Fallback to CRL is handled by checkCertificate, according to the OIOSAML configuration
+            revocationChecker.setOptions(EnumSet.of(PKIXRevocationChecker.Option.NO_FALLBACK));
+
+            params.setRevocationEnabled(false);
+            params.addCertPathChecker(revocationChecker);
 
             // Validate and obtain results
-            CertPathValidator cpv = CertPathValidator.getInstance("PKIX");
             cpv.validate(cp, params);
 
             log.debug("Certificate successfully validated during OCSP check.");

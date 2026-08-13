@@ -75,6 +75,11 @@ public class DispatcherServlet extends HttpServlet {
             configuration.setOcspCheckEnabled("true".equals(value));
         }
 
+        value = config.get(Constants.OCSP_POST_ENABLED);
+        if (StringUtil.isNotEmpty(value)) {
+            configuration.setOcspPostEnabled("true".equals(value));
+        }
+
         value = config.get(Constants.METADATA_NAMEID_FORMAT);
         if (StringUtil.isNotEmpty(value)) {
             configuration.setNameIDFormat(value);
