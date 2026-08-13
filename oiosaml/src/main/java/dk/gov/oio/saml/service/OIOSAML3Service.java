@@ -45,6 +45,9 @@ public class OIOSAML3Service {
             OIOSAML3Service.sessionHandlerFactory = new InternalSessionHandlerFactory();
             OIOSAML3Service.sessionHandlerFactory.configure(configuration);
 
+            // Must happen before the first OCSP check is made in this JVM
+            CRLChecker.configureOcspTransport(configuration);
+
             initialized = true;
         } catch (Exception exception) {
             log.error("Unable to initialize OIOSAML",exception);

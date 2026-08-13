@@ -55,6 +55,7 @@ public class Constants {
     // Configuration constants for revocation check settings
     public static final String CRL_CHECK_ENABLED = "oiosaml.servlet.revocation.crl.check.enabled";
     public static final String OCSP_CHECK_ENABLED = "oiosaml.servlet.revocation.ocsp.check.enabled";
+    public static final String OCSP_POST_ENABLED = "oiosaml.servlet.revocation.ocsp.post.enabled";
 
     // Configuration constants for AuthenticationFilter
     public static final String IS_PASSIVE = "oiosaml.filter.ispassive.enabled";

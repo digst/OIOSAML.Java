@@ -62,6 +62,7 @@ public class Configuration {
     // Revocation check settings
     private boolean crlCheckEnabled = true;
     private boolean ocspCheckEnabled = true;
+    private boolean ocspPostEnabled = true;
 
     // AppSwitch return URL settings
     private String appSwitchReturnURLForAndroid;
@@ -325,6 +326,14 @@ public class Configuration {
 
     public void setOcspCheckEnabled(boolean ocspCheckEnabled) {
         this.ocspCheckEnabled = ocspCheckEnabled;
+    }
+
+    public boolean isOcspPostEnabled() {
+        return ocspPostEnabled;
+    }
+
+    public void setOcspPostEnabled(boolean ocspPostEnabled) {
+        this.ocspPostEnabled = ocspPostEnabled;
     }
 
     public String getAuditLoggerClassName() {
