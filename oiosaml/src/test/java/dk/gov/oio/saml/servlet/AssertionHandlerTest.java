@@ -20,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.opensaml.core.xml.util.XMLObjectSupport;
 import org.opensaml.messaging.context.MessageContext;
@@ -85,6 +86,47 @@ public class AssertionHandlerTest {
         Assertions.assertEquals(assertionWrapperArgumentCaptor.getValue().getNsisLevel(), NSISLevel.SUBSTANTIAL);
     }
     
+    @DisplayName("Test that handler changes the session id when the assertion is accepted")
+    @Test
+    public void testPostWithValidAssertionChangesSessionId() throws Exception {
+        // Create MessageContext, Response and Assertion
+        String nameID = "https://data.gov.dk/model/core/eid/person/uuid/37a5a1aa-67ce-4f70-b7c0-b8e678d585f7";
+        String inResponseToId = UUID.randomUUID().toString();
+        MessageContext<SAMLObject> messageContext = IdpUtil.createMessageWithAssertion(true, true, true, nameID, TestConstants.SP_ENTITY_ID, TestConstants.SP_ASSERTION_CONSUMER_URL, inResponseToId);
+
+        Element marshalledMessage = XMLObjectSupport.marshall(messageContext.getMessage());
+        String base64EncodedMessage = Base64Support.encode(SerializeSupport.nodeToString(marshalledMessage).getBytes("UTF-8"), Base64Support.UNCHUNKED);
+
+        // Create AuthnRequest
+        AuthnRequestService authnRequestService = new AuthnRequestService();
+        MessageContext<SAMLObject> authnRequestMessageContext = authnRequestService.createMessageWithAuthnRequest(false, false, NSISLevel.SUBSTANTIAL, null, null);
+        AuthnRequest authnRequest = (AuthnRequest) authnRequestMessageContext.getMessage();
+        authnRequest.setID(inResponseToId);
+        AuthnRequestWrapper wrapper = new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL, "");
+
+        SessionHandler sessionHandler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
+        Mockito.when(sessionHandler.getAuthnRequest(session)).thenReturn(wrapper);
+
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getRequestURL()).thenReturn(new StringBuffer(TestConstants.SP_ASSERTION_CONSUMER_URL));
+        Mockito.when(request.getSession()).thenReturn(session);
+        Mockito.when(request.getMethod()).thenReturn("POST");
+        Mockito.when(request.getParameter("RelayState")).thenReturn(null);
+        Mockito.when(request.getParameter("SAMLResponse")).thenReturn(base64EncodedMessage);
+
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+
+        new AssertionHandler().handlePost(request, response);
+
+        Mockito.verify(request).changeSessionId();
+
+        // Session state is keyed on the container session id, so the AuthnRequest follows the session
+        InOrder inOrder = Mockito.inOrder(request, sessionHandler);
+        inOrder.verify(request).changeSessionId();
+        inOrder.verify(sessionHandler).storeAuthnRequest(session, wrapper);
+        inOrder.verify(sessionHandler).storeAssertion(Mockito.eq(session), Mockito.any(AssertionWrapper.class));
+    }
+
     @DisplayName("Test that handler will reject am invalid assertion")
     @Test
     public void testPostWithInvalidAssertion() throws Exception {

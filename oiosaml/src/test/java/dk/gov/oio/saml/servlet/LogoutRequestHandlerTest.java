@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 
+import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -195,6 +196,21 @@ public class LogoutRequestHandlerTest {
         Mockito.when(request.getInputStream()).thenReturn(new ServletInputStream(){
             public int read() throws IOException {
                 return inputStream.read();
+            }
+
+            @Override
+            public boolean isFinished() {
+                return false;
+            }
+
+            @Override
+            public boolean isReady() {
+                return true;
+            }
+
+            @Override
+            public void setReadListener(ReadListener readListener) {
+                //Do nothing
             }
         });
 
@@ -389,6 +405,21 @@ public class LogoutRequestHandlerTest {
         Mockito.when(request.getInputStream()).thenReturn(new ServletInputStream(){
             public int read() throws IOException {
                 return inputStream.read();
+            }
+
+            @Override
+            public boolean isFinished() {
+                return false;
+            }
+
+            @Override
+            public boolean isReady() {
+                return true;
+            }
+
+            @Override
+            public void setReadListener(ReadListener readListener) {
+                //Do nothing
             }
         });
 

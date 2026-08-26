@@ -2,7 +2,7 @@
 
 OIOSAML.Java is a SAML 2.0 framework for Java, intended for use with NemLog-in3, but it can also be used as a generic SAML framework for Java.
 
-The framework supports the OIO SAML 3.0 profile and can generate `AuthnRequest`s and perform validation on SAML Assertions according to this profile. It works with **Java 11+**.
+The framework supports the OIO SAML 3.0 profile and can generate `AuthnRequest`s and perform validation on SAML Assertions according to this profile. It works with **Java 11+** and requires a **Servlet 3.1** or later container.
 
 This document covers how to use and configure the OIOSAML.Java 3.x framework.
 
@@ -323,10 +323,11 @@ Finally, there are three folders, each containing identical JSP files. These fil
 Compiling and running the demo application is performed with Maven like this:
 
 ```bash
-$ mvn clean install tomcat7:run-war
+$ mvn clean install
+$ mvn -pl demo jetty:run-war
 ```
 
-> Note that Tomcat 7 performs some validation on class files during startup, which has some issues with JAXB. This results in warnings that can safely be ignored. Tomcat 8 does not have these issues.
+> The demo runs on Jetty 9.4, which implements Servlet 3.1 as the library requires. It listens on HTTPS only, using the demo keystore in `misc/ssl-demo.pfx`; the connector is configured in `demo/src/main/jetty/jetty-https.xml`.
 
 Once the application is running, it can be accessed at <https://localhost:8443/oiosaml3-demo.java/>.
 
