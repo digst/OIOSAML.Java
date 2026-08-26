@@ -31,8 +31,10 @@ import org.opensaml.saml.saml2.core.StatusCode;
 import org.opensaml.saml.saml2.core.Subject;
 import org.opensaml.saml.saml2.core.SubjectConfirmation;
 import org.opensaml.saml.saml2.core.SubjectConfirmationData;
+import org.opensaml.saml.security.impl.SAMLSignatureProfileValidator;
 import org.opensaml.security.credential.UsageType;
 import org.opensaml.security.x509.BasicX509Credential;
+import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.opensaml.xmlsec.signature.support.SignatureValidator;
 
@@ -188,11 +190,6 @@ public class AssertionValidationService {
         String nameIDValue = assertion.getSubject().getNameID().getValue();
         validateAttributeStatement(attributeValues, nameIDValue.startsWith("https://data.gov.dk/model/core/eid/professional"));
         validateAssurance(attributeValues, authnRequest);
-
-        // The Assertion within the response MUST be directly signed
-        if (!assertion.isSigned()) {
-            throw new AssertionValidationException("The Assertion within the response MUST be directly signed");
-        }
     }
 
     private void validateAttributeStatement(Map<String, String> attributes, boolean isProfessional) throws AssertionValidationException {
@@ -278,13 +275,27 @@ public class AssertionValidationService {
     }
 
     private void validateSignature(Assertion assertion) throws ExternalException, InternalException, AssertionValidationException {
+        // The assertion MUST be directly signed, an unsigned assertion has no signature to validate
+        Signature signature = assertion.getSignature();
+        if (!assertion.isSigned() || signature == null) {
+            throw new AssertionValidationException("The Assertion within the response MUST be directly signed");
+        }
+
+        // Establishes that the signature is bound to this assertion. Validating it cryptographically only
+        // proves that some element in the document was signed with the IdP key.
+        try {
+            new SAMLSignatureProfileValidator().validate(signature);
+        } catch (SignatureException e) {
+            throw new AssertionValidationException("Assertion signature does not follow the SAML signature profile", e);
+        }
+
         // Get Signing credential
         X509Certificate x509Certificate = IdPMetadataService.getInstance().getIdPMetadata().getValidX509Certificate(UsageType.SIGNING);
         BasicX509Credential credential = new BasicX509Credential(x509Certificate);
 
         // Validate Signature
         try {
-            SignatureValidator.validate(assertion.getSignature(), credential);
+            SignatureValidator.validate(signature, credential);
         } catch (SignatureException e) {
             throw new AssertionValidationException("Could not validate assertion signature", e);
         }
