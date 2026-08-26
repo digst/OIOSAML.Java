@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.Charset;
 import java.util.Base64;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -59,6 +60,11 @@ public class OIOBPPUtil {
     private static SAXParserFactory getSecureSAXParserFactory() throws SAXNotRecognizedException, SAXNotSupportedException, ParserConfigurationException {
         SAXParserFactory spf = SAXParserFactory.newInstance();
         spf.setNamespaceAware(true);
+
+        // Rejecting the document type declaration outright also rules out internal entities, which external
+        // entity handling alone does not cover
+        spf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        spf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
         spf.setFeature("http://xml.org/sax/features/external-general-entities", false);
         spf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
         spf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);

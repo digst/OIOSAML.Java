@@ -167,7 +167,11 @@ public class TestConstants {
             "    </md:IDPSSODescriptor>\n" +
             "</md:EntityDescriptor>";
     public static final String BAD_SP_ASSERTION_CONSUMER_URL = "http://localhost:8080/sso";
-    
+
+    // Value of the specVersion attribute in the OIOSAML Web SSO profiles, see [OIO-ALG-01] chapter 6
+    public static final String SPEC_VERSION_OIOSAML_30 = "OIO-SAML-3.0";
+    public static final String SPEC_VERSION_OIOSAML_40 = "https://data.gov.dk/saml/profile/oio/4.0.0/";
+
     // The DevTest4 NemLog-in IdP signing certificate, taken from
     // demo/src/main/resources/test-devtest4-idp-metadata.xml. The revocation tests validate against the
     // live test CA, so this must be a certificate the CA still knows and has not expired.

@@ -41,6 +41,9 @@ public class LogoutRequestHandler extends SAMLHandler {
         MessageContext<SAMLObject> context = decodeGet(httpServletRequest);
         LogoutRequest logoutRequest = getSamlObject(context, LogoutRequest.class);
 
+        // Nothing on the session may be touched before the request is known to come from the IdP
+        LogoutRequestService.validateLogoutRequest(httpServletRequest, context, logoutRequest);
+
         MessageContext<SAMLObject> outgoingMessage = handleRequest(httpServletRequest, new LogoutRequestWrapper(logoutRequest));
         try {
             sendPost(httpServletResponse, outgoingMessage);
@@ -60,6 +63,9 @@ public class LogoutRequestHandler extends SAMLHandler {
         // IdP Initiated, generate response
         MessageContext<SAMLObject> context = decodeSOAP(httpServletRequest);
         LogoutRequest logoutRequest = getSamlObject(context, LogoutRequest.class);
+
+        // Nothing on the session may be touched before the request is known to come from the IdP
+        LogoutRequestService.validateLogoutRequest(httpServletRequest, context, logoutRequest);
 
         MessageContext<SAMLObject> outgoingMessage = handleRequest(httpServletRequest, new LogoutRequestWrapper(logoutRequest));
         try {

@@ -1,6 +1,10 @@
 package dk.gov.oio.saml.util;
 
 import java.io.FileInputStream;
+import java.net.URL;
+import java.net.URLDecoder;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.security.KeyStore;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -18,6 +22,10 @@ import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.criterion.EntityIdCriterion;
 import org.opensaml.core.xml.XMLObjectBuilderFactory;
 import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.core.xml.util.XMLObjectSupport;
+import org.opensaml.saml.saml2.binding.encoding.impl.HTTPRedirectDeflateEncoder;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.opensaml.core.xml.schema.XSAny;
 import org.opensaml.core.xml.schema.impl.XSAnyBuilder;
 import org.opensaml.messaging.context.MessageContext;
@@ -58,8 +66,20 @@ public class IdpUtil {
             String recipientEntityId,
             String assertionConsumerUrl,
             String inResponseToId) throws Exception {
+        return createMessageWithAssertion(encrypted, validCert, validSignature, subjectNameID, recipientEntityId, assertionConsumerUrl, inResponseToId, TestConstants.SPEC_VERSION_OIOSAML_30);
+    }
+
+    public static MessageContext<SAMLObject> createMessageWithAssertion(
+            boolean encrypted,
+            boolean validCert,
+            boolean validSignature,
+            String subjectNameID,
+            String recipientEntityId,
+            String assertionConsumerUrl,
+            String inResponseToId,
+            String specVersion) throws Exception {
         // Create proxy Response
-        Response response = createResponse(encrypted, validCert, validSignature, subjectNameID, recipientEntityId, assertionConsumerUrl, inResponseToId);
+        Response response = createResponse(encrypted, validCert, validSignature, subjectNameID, recipientEntityId, assertionConsumerUrl, inResponseToId, EncryptionConstants.ALGO_ID_BLOCKCIPHER_AES256, EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSAOAEP, specVersion);
 
         // Build Proxy MessageContext and add response
         MessageContext<SAMLObject> messageContext = new MessageContext<>();
@@ -89,6 +109,25 @@ public class IdpUtil {
             String recipientEntityId,
             String assertionConsumerUrl,
             String inResponseToId) throws Exception {
+        return createResponse(encrypted, validCert, validSignature, subjectNameID, recipientEntityId, assertionConsumerUrl, inResponseToId,
+                EncryptionConstants.ALGO_ID_BLOCKCIPHER_AES256, EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSAOAEP, TestConstants.SPEC_VERSION_OIOSAML_30);
+    }
+
+    /**
+     * @param dataAlgorithm         algorithm the assertion itself is encrypted with
+     * @param keyTransportAlgorithm algorithm the encryption key is wrapped with
+     */
+    public static Response createResponse(
+            boolean encrypted,
+            boolean validCert,
+            boolean validSignature,
+            String subjectNameID,
+            String recipientEntityId,
+            String assertionConsumerUrl,
+            String inResponseToId,
+            String dataAlgorithm,
+            String keyTransportAlgorithm,
+            String specVersion) throws Exception {
 
         DateTime issueInstant = new DateTime();
 
@@ -110,10 +149,10 @@ public class IdpUtil {
         status.setStatusCode(statusCode);
         response.setStatus(status);
 
-        Assertion assertion = createAssertion(issueInstant, subjectNameID, recipientEntityId, assertionConsumerUrl);
+        Assertion assertion = createAssertion(issueInstant, subjectNameID, recipientEntityId, assertionConsumerUrl, specVersion);
         SignAssertion(assertion, validSignature);
         if (encrypted) {
-            EncryptedAssertion encryptedAssertion = encryptAssertion(assertion, validCert);
+            EncryptedAssertion encryptedAssertion = encryptAssertion(assertion, validCert, dataAlgorithm, keyTransportAlgorithm);
             response.getEncryptedAssertions().add(encryptedAssertion);
         }
         else {
@@ -177,11 +216,28 @@ public class IdpUtil {
     }
 
     public static MessageContext<SAMLObject> createMessageWithLogoutRequest(String nameID, String nameIDFormat, String destination) throws Exception {
+        return createMessageWithLogoutRequest(nameID, nameIDFormat, destination, true, true);
+    }
+
+    /**
+     * Create a LogoutRequest as the IdP would send it.
+     *
+     * @param signMessage    sign the LogoutRequest itself, as done for the POST and SOAP bindings
+     * @param validSignature sign with the IdP key from metadata, or with an unrelated key
+     */
+    public static MessageContext<SAMLObject> createMessageWithLogoutRequest(String nameID, String nameIDFormat, String destination, boolean signMessage, boolean validSignature) throws Exception {
+        return createMessageWithLogoutRequest(nameID, nameIDFormat, destination, signMessage, validSignature, TestConstants.IDP_ENTITY_ID);
+    }
+
+    public static MessageContext<SAMLObject> createMessageWithLogoutRequest(String nameID, String nameIDFormat, String destination, boolean signMessage, boolean validSignature, String issuerEntityID) throws Exception {
         // Create message context
         MessageContext<SAMLObject> messageContext = new MessageContext<>();
 
         // Create AuthnRequest
-        LogoutRequest outgoingLogoutRequest = createLogoutRequest(nameID, nameIDFormat, destination);
+        LogoutRequest outgoingLogoutRequest = createLogoutRequest(nameID, nameIDFormat, destination, issuerEntityID);
+        if (signMessage) {
+            signLogoutRequest(outgoingLogoutRequest, validSignature);
+        }
         messageContext.setMessage(outgoingLogoutRequest);
 
         // Destination
@@ -203,7 +259,45 @@ public class IdpUtil {
         return messageContext;
     }
 
+    /**
+     * Encode a message for the HTTP-Redirect binding, signing the query string when the message context
+     * carries signing parameters, and return the redirect URL the IdP would send the user agent to.
+     */
+    public static String encodeAsRedirectUrl(MessageContext<SAMLObject> messageContext) throws Exception {
+        HttpServletResponse httpServletResponse = Mockito.mock(HttpServletResponse.class);
+
+        HTTPRedirectDeflateEncoder encoder = new HTTPRedirectDeflateEncoder();
+        encoder.setMessageContext(messageContext);
+        encoder.setHttpServletResponse(httpServletResponse);
+        encoder.initialize();
+        encoder.encode();
+
+        ArgumentCaptor<String> redirectUrl = ArgumentCaptor.forClass(String.class);
+        Mockito.verify(httpServletResponse).sendRedirect(redirectUrl.capture());
+
+        return redirectUrl.getValue();
+    }
+
+    /**
+     * Stub query string and parameters on a mocked request, as a container would present the redirect URL.
+     */
+    public static void stubRedirectRequest(HttpServletRequest httpServletRequest, String redirectUrl) throws Exception {
+        String queryString = new URL(redirectUrl).getQuery();
+        Mockito.when(httpServletRequest.getQueryString()).thenReturn(queryString);
+
+        for (String parameter : queryString.split("&")) {
+            int separator = parameter.indexOf('=');
+            String name = parameter.substring(0, separator);
+            String value = URLDecoder.decode(parameter.substring(separator + 1), "UTF-8");
+            Mockito.when(httpServletRequest.getParameter(name)).thenReturn(value);
+        }
+    }
+
     public static LogoutRequest createLogoutRequest(String nameID, String nameIDFormat, String destination) throws InitializationException {
+        return createLogoutRequest(nameID, nameIDFormat, destination, OIOSAML3Service.getConfig().getSpEntityID());
+    }
+
+    public static LogoutRequest createLogoutRequest(String nameID, String nameIDFormat, String destination, String issuerEntityID) throws InitializationException {
         LogoutRequest outgoingLR = SamlHelper.build(LogoutRequest.class);
 
         // Set ID
@@ -218,7 +312,7 @@ public class IdpUtil {
         Issuer issuer = SamlHelper.build(Issuer.class);
         outgoingLR.setIssuer(issuer);
 
-        issuer.setValue(OIOSAML3Service.getConfig().getSpEntityID());
+        issuer.setValue(issuerEntityID);
 
         // NameID
         NameID nameIDObj = SamlHelper.build(NameID.class);
@@ -235,17 +329,17 @@ public class IdpUtil {
         return outgoingLR;
     }
 
-    private static EncryptedAssertion encryptAssertion(Assertion assertion, boolean validCert) throws Exception {
+    private static EncryptedAssertion encryptAssertion(Assertion assertion, boolean validCert, String dataAlgorithm, String keyTransportAlgorithm) throws Exception {
         X509Certificate certificate = getSPCertificate(validCert);
 
         Credential keyEncryptionCredential = new BasicX509Credential(certificate);
         DataEncryptionParameters encParams = new DataEncryptionParameters();
 
-        encParams.setAlgorithm(EncryptionConstants.ALGO_ID_BLOCKCIPHER_AES256);
+        encParams.setAlgorithm(dataAlgorithm);
 
         KeyEncryptionParameters kekParams = new KeyEncryptionParameters();
         kekParams.setEncryptionCredential(keyEncryptionCredential);
-        kekParams.setAlgorithm(EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSAOAEP);
+        kekParams.setAlgorithm(keyTransportAlgorithm);
 
         Encrypter samlEncrypter = new Encrypter(encParams, kekParams);
         samlEncrypter.setKeyPlacement(Encrypter.KeyPlacement.PEER);
@@ -261,6 +355,22 @@ public class IdpUtil {
 
         CertificateFactory instance = CertificateFactory.getInstance("X.509");
         return (X509Certificate) instance.generateCertificate(fis);
+    }
+
+    public static void signLogoutRequest(LogoutRequest logoutRequest, boolean validSignature) throws Exception {
+        Signature signature = buildSAMLObject(Signature.class);
+
+        BasicX509Credential x509Credential = getX509Credential(validSignature);
+
+        signature.setSigningCredential(x509Credential);
+        signature.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
+        signature.setSignatureAlgorithm(new SignatureRSASHA256().getURI());
+        signature.setKeyInfo(getPublicKeyInfo(x509Credential));
+
+        logoutRequest.setSignature(signature);
+
+        XMLObjectSupport.marshall(logoutRequest);
+        Signer.signObject(signature);
     }
 
     private static void SignAssertion(Assertion assertion, boolean validSignature) throws Exception {
@@ -282,7 +392,7 @@ public class IdpUtil {
         Signer.signObject(signature);
     }
 
-    private static Assertion createAssertion(DateTime issueInstant, String subjectNameID, String recipientEntityId, String assertionConsumerUrl) {
+    private static Assertion createAssertion(DateTime issueInstant, String subjectNameID, String recipientEntityId, String assertionConsumerUrl, String specVersion) {
         RandomIdentifierGenerationStrategy secureRandomIdGenerator = new RandomIdentifierGenerationStrategy();
         String id = secureRandomIdGenerator.generateIdentifier();
 
@@ -310,7 +420,9 @@ public class IdpUtil {
         AttributeStatement attributeStatement = buildSAMLObject(AttributeStatement.class);
         List<Attribute> attributes = attributeStatement.getAttributes();
 
-        attributes.add(createSimpleAttribute("https://data.gov.dk/model/core/specVersion", "OIO-SAML-3.0"));
+        if (specVersion != null) {
+            attributes.add(createSimpleAttribute(Constants.SPEC_VER, specVersion));
+        }
         attributes.add(createSimpleAttribute("https://data.gov.dk/concept/core/nsis/loa", NSISLevel.SUBSTANTIAL.getName()));
         assertion.getAttributeStatements().add(attributeStatement);
 
