@@ -58,8 +58,20 @@ public class IdpUtil {
             String recipientEntityId,
             String assertionConsumerUrl,
             String inResponseToId) throws Exception {
+        return createMessageWithAssertion(encrypted, validCert, validSignature, subjectNameID, recipientEntityId, assertionConsumerUrl, inResponseToId, TestConstants.SPEC_VERSION_OIOSAML_30);
+    }
+
+    public static MessageContext<SAMLObject> createMessageWithAssertion(
+            boolean encrypted,
+            boolean validCert,
+            boolean validSignature,
+            String subjectNameID,
+            String recipientEntityId,
+            String assertionConsumerUrl,
+            String inResponseToId,
+            String specVersion) throws Exception {
         // Create proxy Response
-        Response response = createResponse(encrypted, validCert, validSignature, subjectNameID, recipientEntityId, assertionConsumerUrl, inResponseToId);
+        Response response = createResponse(encrypted, validCert, validSignature, subjectNameID, recipientEntityId, assertionConsumerUrl, inResponseToId, specVersion);
 
         // Build Proxy MessageContext and add response
         MessageContext<SAMLObject> messageContext = new MessageContext<>();
@@ -89,6 +101,18 @@ public class IdpUtil {
             String recipientEntityId,
             String assertionConsumerUrl,
             String inResponseToId) throws Exception {
+        return createResponse(encrypted, validCert, validSignature, subjectNameID, recipientEntityId, assertionConsumerUrl, inResponseToId, TestConstants.SPEC_VERSION_OIOSAML_30);
+    }
+
+    public static Response createResponse(
+            boolean encrypted,
+            boolean validCert,
+            boolean validSignature,
+            String subjectNameID,
+            String recipientEntityId,
+            String assertionConsumerUrl,
+            String inResponseToId,
+            String specVersion) throws Exception {
 
         DateTime issueInstant = new DateTime();
 
@@ -110,7 +134,7 @@ public class IdpUtil {
         status.setStatusCode(statusCode);
         response.setStatus(status);
 
-        Assertion assertion = createAssertion(issueInstant, subjectNameID, recipientEntityId, assertionConsumerUrl);
+        Assertion assertion = createAssertion(issueInstant, subjectNameID, recipientEntityId, assertionConsumerUrl, specVersion);
         SignAssertion(assertion, validSignature);
         if (encrypted) {
             EncryptedAssertion encryptedAssertion = encryptAssertion(assertion, validCert);
@@ -282,7 +306,7 @@ public class IdpUtil {
         Signer.signObject(signature);
     }
 
-    private static Assertion createAssertion(DateTime issueInstant, String subjectNameID, String recipientEntityId, String assertionConsumerUrl) {
+    private static Assertion createAssertion(DateTime issueInstant, String subjectNameID, String recipientEntityId, String assertionConsumerUrl, String specVersion) {
         RandomIdentifierGenerationStrategy secureRandomIdGenerator = new RandomIdentifierGenerationStrategy();
         String id = secureRandomIdGenerator.generateIdentifier();
 
@@ -310,7 +334,9 @@ public class IdpUtil {
         AttributeStatement attributeStatement = buildSAMLObject(AttributeStatement.class);
         List<Attribute> attributes = attributeStatement.getAttributes();
 
-        attributes.add(createSimpleAttribute("https://data.gov.dk/model/core/specVersion", "OIO-SAML-3.0"));
+        if (specVersion != null) {
+            attributes.add(createSimpleAttribute(Constants.SPEC_VER, specVersion));
+        }
         attributes.add(createSimpleAttribute("https://data.gov.dk/concept/core/nsis/loa", NSISLevel.SUBSTANTIAL.getName()));
         assertion.getAttributeStatements().add(attributeStatement);
 

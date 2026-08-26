@@ -69,7 +69,6 @@ public class Constants {
     
     // SAML Attributes constants
     public static final String SPEC_VER = "https://data.gov.dk/model/core/specVersion";
-    public static final String SPEC_VER_VAL = "OIO-SAML-3.0";
     public static final String PRIVILEGE_ATTRIBUTE = "https://data.gov.dk/model/core/eid/privilegesIntermediate";
     public static final String LOA = "https://data.gov.dk/concept/core/nsis/loa";
     public static final String CVR_NUMBER = "https://data.gov.dk/model/core/eid/professional/cvr";

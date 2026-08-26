@@ -69,6 +69,60 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
         validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL, ""));
     }
 
+    @DisplayName("Test that validator will pass an assertion issued under a newer OIOSAML profile version")
+    @Test
+    public void testValidateAssertionWithNewerSpecVersion() throws Exception {
+        AssertionValidationService validationService = new AssertionValidationService();
+
+        // Mock HttpServletRequest
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getRequestURL()).thenReturn(new StringBuffer(TestConstants.SP_ASSERTION_CONSUMER_URL));
+
+        // Create AuthnRequest
+        AuthnRequestService authnRequestService = AuthnRequestService.getInstance();
+        AuthnRequest authnRequest = getAuthnRequest(authnRequestService);
+        String inResponseToId = authnRequest.getID();
+
+        // Create MessageContext, Response and Assertion, with the specVersion value used by OIOSAML 4.0.0
+        String nameID = "https://data.gov.dk/model/core/eid/person/uuid/37a5a1aa-67ce-4f70-b7c0-b8e678d585f7";
+        MessageContext<SAMLObject> messageContext = IdpUtil.createMessageWithAssertion(true, true, true, nameID, TestConstants.SP_ENTITY_ID, TestConstants.SP_ASSERTION_CONSUMER_URL, inResponseToId, TestConstants.SPEC_VERSION_OIOSAML_40);
+        Response response = (Response) messageContext.getMessage();
+
+        AssertionService assertionService = new AssertionService();
+        Assertion assertion = assertionService.getAssertion(response);
+
+        // Validate
+        validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL, ""));
+    }
+
+    @DisplayName("Test that validator will fail an assertion without a specVersion attribute")
+    @Test
+    public void testFailAssertionWithoutSpecVersion() throws Exception {
+        AssertionValidationService validationService = new AssertionValidationService();
+
+        // Mock HttpServletRequest
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getRequestURL()).thenReturn(new StringBuffer(TestConstants.SP_ASSERTION_CONSUMER_URL));
+
+        // Create AuthnRequest
+        AuthnRequestService authnRequestService = AuthnRequestService.getInstance();
+        AuthnRequest authnRequest = getAuthnRequest(authnRequestService);
+        String inResponseToId = authnRequest.getID();
+
+        // Create MessageContext, Response and Assertion, without the mandatory specVersion attribute
+        String nameID = "https://data.gov.dk/model/core/eid/person/uuid/37a5a1aa-67ce-4f70-b7c0-b8e678d585f7";
+        MessageContext<SAMLObject> messageContext = IdpUtil.createMessageWithAssertion(true, true, true, nameID, TestConstants.SP_ENTITY_ID, TestConstants.SP_ASSERTION_CONSUMER_URL, inResponseToId, null);
+        Response response = (Response) messageContext.getMessage();
+
+        AssertionService assertionService = new AssertionService();
+        Assertion assertion = assertionService.getAssertion(response);
+
+        // Validate, should fail, specVersion is mandatory
+        Assertions.assertThrows(AssertionValidationException.class, () -> {
+            validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL, ""));
+        });
+    }
+
     @DisplayName("Test that validator will fail an assertion with the wrong destination")
     @Test
     public void testFailAssertionWithWrongDestination() throws Exception {

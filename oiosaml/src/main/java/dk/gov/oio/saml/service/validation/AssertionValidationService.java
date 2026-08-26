@@ -193,11 +193,14 @@ public class AssertionValidationService {
     }
 
     private void validateAttributeStatement(Map<String, String> attributes, boolean isProfessional) throws AssertionValidationException {
-        // SpecVer
+        // SpecVer is mandatory in the OIOSAML attribute profiles, but its value identifies the profile
+        // version the assertion was issued under and changes between profile versions, so only the
+        // presence of the attribute is required here
         String specVersion = attributes.get(Constants.SPEC_VER);
-        if (!Constants.SPEC_VER_VAL.equals(specVersion)) {
-            throw new AssertionValidationException("specVersion Was: " + specVersion + " Expected: " + Constants.SPEC_VER_VAL);
+        if (specVersion == null || specVersion.isEmpty()) {
+            throw new AssertionValidationException("Assertions MUST contain the specVersion attribute " + Constants.SPEC_VER);
         }
+        log.debug("Assertion issued under OIOSAML profile version '{}'", specVersion);
 
         // Professional
         if (isProfessional) {
