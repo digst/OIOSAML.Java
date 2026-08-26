@@ -171,8 +171,9 @@ public class LogoutRequestHandlerTest {
 
         // Marshall and serialize
         Element marshalledMessage = XMLObjectSupport.marshall(messageContext.getMessage());
+        // Serialized as is: indenting or otherwise reformatting the message would break its signature
         final String soapXml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"><soapenv:Body>" +
-                StringUtil.elementToString(marshalledMessage) + "</soapenv:Body></soapenv:Envelope>";
+                SerializeSupport.nodeToString(marshalledMessage).replaceFirst("^<\\?xml[^>]*\\?>", "") + "</soapenv:Body></soapenv:Envelope>";
 
         InputStream inputStream = new ByteArrayInputStream(soapXml.getBytes("UTF-8"));
 
@@ -229,6 +230,103 @@ public class LogoutRequestHandlerTest {
         Assertions.assertEquals(TestConstants.IDP_LOGOUT_RESPONSE_URL, logoutResponse.getDestination());
     }
     
+    @DisplayName("Test that an IdP can request a logout with a signature on the query string")
+    @Test
+    public void testIdPLogoutRequestSignedOnQueryString() throws Exception {
+        HttpSession session = Mockito.mock(HttpSession.class);
+        AssertionWrapper assertionWrapper = Mockito.mock(AssertionWrapper.class);
+        SessionHandler sessionHandler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
+
+        // Create LogoutRequest without a signature on the message itself, the HTTP-Redirect binding signs
+        // the query string instead
+        String nameID = "https://data.gov.dk/model/core/eid/person/uuid/37a5a1aa-67ce-4f70-b7c0-b8e678d585f7";
+        MessageContext<SAMLObject> messageContext = IdpUtil.createMessageWithLogoutRequest(nameID, NameID.PERSISTENT, TestConstants.SP_LOGOUT_REQUEST_URL, false, true);
+        String sessionIndex = ((LogoutRequest) messageContext.getMessage()).getSessionIndexes().get(0).getSessionIndex();
+        String redirectUrl = IdpUtil.encodeAsRedirectUrl(messageContext);
+
+        Mockito.when(sessionHandler.getAssertion(sessionIndex)).thenReturn(assertionWrapper);
+        Mockito.when(sessionHandler.isAuthenticated(session)).thenReturn(true);
+        Mockito.when(sessionHandler.getAuthnRequest(session)).thenReturn(null);
+
+        // Mock HttpServletRequest
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getRequestURL()).thenReturn(new StringBuffer(TestConstants.SP_ASSERTION_CONSUMER_URL));
+        Mockito.when(request.getSession()).thenReturn(session);
+        Mockito.when(request.getMethod()).thenReturn("GET");
+        IdpUtil.stubRedirectRequest(request, redirectUrl);
+
+        // Mock HttpServletResponse
+        ServletOutputStream outputStreamMock = Mockito.mock(ServletOutputStream.class);
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        Mockito.when(response.getOutputStream()).thenReturn(outputStreamMock);
+
+        new LogoutRequestHandler().handleGet(request, response);
+
+        Mockito.verify(sessionHandler).logout(session, assertionWrapper);
+        Mockito.verify(session).invalidate();
+    }
+
+    @DisplayName("Test that a LogoutRequest without a signature is rejected")
+    @Test
+    public void testRejectUnsignedLogoutRequest() throws Exception {
+        assertLogoutRequestRejected(IdpUtil.createMessageWithLogoutRequest(
+                "https://data.gov.dk/model/core/eid/person/uuid/37a5a1aa-67ce-4f70-b7c0-b8e678d585f7",
+                NameID.PERSISTENT, TestConstants.SP_LOGOUT_REQUEST_URL, false, true));
+    }
+
+    @DisplayName("Test that a LogoutRequest signed with an unknown key is rejected")
+    @Test
+    public void testRejectLogoutRequestSignedWithUnknownKey() throws Exception {
+        assertLogoutRequestRejected(IdpUtil.createMessageWithLogoutRequest(
+                "https://data.gov.dk/model/core/eid/person/uuid/37a5a1aa-67ce-4f70-b7c0-b8e678d585f7",
+                NameID.PERSISTENT, TestConstants.SP_LOGOUT_REQUEST_URL, true, false));
+    }
+
+    @DisplayName("Test that a LogoutRequest from another issuer is rejected")
+    @Test
+    public void testRejectLogoutRequestFromUnknownIssuer() throws Exception {
+        assertLogoutRequestRejected(IdpUtil.createMessageWithLogoutRequest(
+                "https://data.gov.dk/model/core/eid/person/uuid/37a5a1aa-67ce-4f70-b7c0-b8e678d585f7",
+                NameID.PERSISTENT, TestConstants.SP_LOGOUT_REQUEST_URL, true, true, "https://not-the-configured-idp"));
+    }
+
+    /**
+     * Send the LogoutRequest to the handler and require that it is refused without any session being touched.
+     */
+    private void assertLogoutRequestRejected(MessageContext<SAMLObject> messageContext) throws Exception {
+        HttpSession session = Mockito.mock(HttpSession.class);
+        AssertionWrapper assertionWrapper = Mockito.mock(AssertionWrapper.class);
+        SessionHandler sessionHandler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
+
+        String sessionIndex = ((LogoutRequest) messageContext.getMessage()).getSessionIndexes().get(0).getSessionIndex();
+        Mockito.when(sessionHandler.getAssertion(sessionIndex)).thenReturn(assertionWrapper);
+        Mockito.when(sessionHandler.isAuthenticated(session)).thenReturn(true);
+        Mockito.when(sessionHandler.getAuthnRequest(session)).thenReturn(null);
+
+        // Marshall, deflate and base64 encode as the HTTP-Redirect binding does
+        Element marshalledMessage = XMLObjectSupport.marshall(messageContext.getMessage());
+        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+        DeflaterOutputStream deflaterStream = new DeflaterOutputStream(bytesOut, new Deflater(8, true));
+        deflaterStream.write(SerializeSupport.nodeToString(marshalledMessage).getBytes("UTF-8"));
+        deflaterStream.finish();
+
+        // Mock HttpServletRequest
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getRequestURL()).thenReturn(new StringBuffer(TestConstants.SP_ASSERTION_CONSUMER_URL));
+        Mockito.when(request.getSession()).thenReturn(session);
+        Mockito.when(request.getMethod()).thenReturn("GET");
+        Mockito.when(request.getParameter("RelayState")).thenReturn(null);
+        Mockito.when(request.getParameter("SAMLRequest")).thenReturn(Base64Support.encode(bytesOut.toByteArray(), Base64Support.UNCHUNKED));
+
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+
+        Assertions.assertThrows(ExternalException.class, () -> new LogoutRequestHandler().handleGet(request, response));
+
+        // The session handler mock is shared between tests, so verify against this tests own session
+        Mockito.verify(sessionHandler, Mockito.never()).logout(Mockito.eq(session), Mockito.any(AssertionWrapper.class));
+        Mockito.verify(session, Mockito.never()).invalidate();
+    }
+
     @DisplayName("Test that a user that is not logged in can safely attempt a logout")
     @Test
     public void testLogoutRequestWhenNotLoggedIn() throws InternalException, IOException, ExternalException {
@@ -268,8 +366,9 @@ public class LogoutRequestHandlerTest {
 
         // Marshall and serialize
         Element marshalledMessage = XMLObjectSupport.marshall(messageContext.getMessage());
+        // Serialized as is: indenting or otherwise reformatting the message would break its signature
         final String soapXml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"><soapenv:Body>" +
-                StringUtil.elementToString(marshalledMessage) + "</soapenv:Body></soapenv:Envelope>";
+                SerializeSupport.nodeToString(marshalledMessage).replaceFirst("^<\\?xml[^>]*\\?>", "") + "</soapenv:Body></soapenv:Envelope>";
 
         InputStream inputStream = new ByteArrayInputStream(soapXml.getBytes("UTF-8"));
 
