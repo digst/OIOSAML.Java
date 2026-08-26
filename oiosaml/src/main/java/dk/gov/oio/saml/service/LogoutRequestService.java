@@ -1,5 +1,7 @@
 package dk.gov.oio.saml.service;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.joda.time.DateTime;
@@ -19,20 +21,19 @@ import org.opensaml.saml.saml2.core.SessionIndex;
 import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml.saml2.metadata.SingleSignOnService;
 import org.opensaml.saml.security.impl.SAMLSignatureProfileValidator;
-import org.opensaml.security.credential.UsageType;
+import org.opensaml.security.credential.Credential;
 import org.opensaml.security.credential.impl.StaticCredentialResolver;
-import org.opensaml.security.x509.BasicX509Credential;
 import org.opensaml.xmlsec.SignatureSigningParameters;
 import org.opensaml.xmlsec.SignatureValidationParameters;
 import org.opensaml.xmlsec.context.SecurityParametersContext;
 import org.opensaml.xmlsec.keyinfo.impl.StaticKeyInfoCredentialResolver;
 import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.support.SignatureException;
-import org.opensaml.xmlsec.signature.support.SignatureValidator;
 import org.opensaml.xmlsec.signature.support.impl.ExplicitKeySignatureTrustEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dk.gov.oio.saml.service.validation.IdPSignatureValidationService;
 import dk.gov.oio.saml.util.ExternalException;
 import dk.gov.oio.saml.util.InternalException;
 import dk.gov.oio.saml.util.SamlHelper;
@@ -78,7 +79,8 @@ public class LogoutRequestService {
         try {
             // Establishes that the signature is bound to this message, see SAMLSignatureProfileValidator
             new SAMLSignatureProfileValidator().validate(signature);
-            SignatureValidator.validate(signature, getIdPSigningCredential());
+
+            IdPSignatureValidationService.validateSignedByIdP(signature);
         }
         catch (SignatureException e) {
             throw new ExternalException("LogoutRequest signature could not be validated", e);
@@ -92,10 +94,11 @@ public class LogoutRequestService {
 
         messageContext.getSubcontext(SAMLProtocolContext.class, true).setProtocol(SAMLConstants.SAML20P_NS);
 
+        List<Credential> idPSigningCredentials = IdPSignatureValidationService.getIdPSigningCredentials();
         SignatureValidationParameters validationParameters = new SignatureValidationParameters();
         validationParameters.setSignatureTrustEngine(new ExplicitKeySignatureTrustEngine(
-                new StaticCredentialResolver(getIdPSigningCredential()),
-                new StaticKeyInfoCredentialResolver(getIdPSigningCredential())));
+                new StaticCredentialResolver(idPSigningCredentials),
+                new StaticKeyInfoCredentialResolver(idPSigningCredentials)));
         messageContext.getSubcontext(SecurityParametersContext.class, true).setSignatureValidationParameters(validationParameters);
 
         SAML2HTTPRedirectDeflateSignatureSecurityHandler signatureHandler = new SAML2HTTPRedirectDeflateSignatureSecurityHandler();
@@ -121,10 +124,6 @@ public class LogoutRequestService {
         if (!peerEntityContext.isAuthenticated()) {
             throw new ExternalException("LogoutRequest signature was not verified");
         }
-    }
-
-    private static BasicX509Credential getIdPSigningCredential() throws ExternalException, InternalException {
-        return new BasicX509Credential(IdPMetadataService.getInstance().getIdPMetadata().getValidX509Certificate(UsageType.SIGNING));
     }
 
     public static MessageContext<SAMLObject> createMessageWithLogoutRequest(String nameID, String nameIDFormat, String destination, String index) throws InitializationException, InternalException {

@@ -35,7 +35,6 @@ public class Configuration {
 
     // Metadata configuration
     private String idpEntityID; // This IdP's EntityID
-    private String idpMetadataUrl; // The URL for the IdP Metadata
     private String idpMetadataFile; // The file path for a metadata file
     private int idpMetadataMinRefreshDelay = 1; // The minimum refresh delay in hours
     private int idpMetadataMaxRefreshDelay = 12; // The maximum refresh delay in hours
@@ -57,7 +56,6 @@ public class Configuration {
     private String logoutPage;
     private String loginPage;
     private String nameIDFormat = "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent";
-    private boolean supportSelfSigned = false;
 
     // Revocation check settings
     private boolean crlCheckEnabled = true;
@@ -118,14 +116,6 @@ public class Configuration {
 
     public void setIdpEntityID(String idpEntityID) {
         this.idpEntityID = idpEntityID;
-    }
-
-    public String getIdpMetadataUrl() {
-        return idpMetadataUrl;
-    }
-
-    public void setIdpMetadataUrl(String idpMetadataUrl) {
-        this.idpMetadataUrl = idpMetadataUrl;
     }
 
     public String getIdpMetadataFile() {
@@ -206,14 +196,6 @@ public class Configuration {
 
     public void setSignatureAlgorithm(String signatureAlgorithm) {
         this.signatureAlgorithm = signatureAlgorithm;
-    }
-
-    public boolean isSupportSelfSigned() {
-        return supportSelfSigned;
-    }
-
-    public void setSupportSelfSigned(boolean supportSelfSigned) {
-        this.supportSelfSigned = supportSelfSigned;
     }
 
     public int getClockSkew() {
@@ -453,7 +435,6 @@ public class Configuration {
         private String spEntityID;
         private String baseUrl;
         private String idpEntityID;
-        private String idpMetadataUrl;
         private String idpMetadataFile;
         private String keystoreLocation;
         private String keystorePassword;
@@ -489,8 +470,8 @@ public class Configuration {
                 throw new InternalException("Cannot create configuration without IdP's entityID");
             }
 
-            if (StringUtil.isEmpty(idpMetadataUrl) && StringUtil.isEmpty(idpMetadataFile)) {
-                throw new InternalException("Cannot create configuration without IdP Metadata URL or File location");
+            if (StringUtil.isEmpty(idpMetadataFile)) {
+                throw new InternalException("Cannot create configuration without the location of the IdP metadata file");
             }
 
             if (StringUtil.isEmpty(keystoreLocation)) {
@@ -510,7 +491,6 @@ public class Configuration {
             configuration.spEntityID = this.spEntityID;
             configuration.baseUrl = this.baseUrl;
             configuration.idpEntityID = this.idpEntityID;
-            configuration.idpMetadataUrl = this.idpMetadataUrl;
             configuration.idpMetadataFile = this.idpMetadataFile;
             configuration.keystoreLocation = this.keystoreLocation;
             configuration.keystorePassword = this.keystorePassword;
@@ -551,11 +531,6 @@ public class Configuration {
             return this;
         }
 
-        public Builder setIdpMetadataUrl(String idpMetadataUrl) {
-            this.idpMetadataUrl = idpMetadataUrl;
-            return this;
-        }
-        
         public Builder setIdpMetadataFile(String idpMetadataFile) {
             this.idpMetadataFile = idpMetadataFile;
             return this;

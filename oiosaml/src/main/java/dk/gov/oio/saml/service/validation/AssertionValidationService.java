@@ -1,6 +1,5 @@
 package dk.gov.oio.saml.service.validation;
 
-import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -8,6 +7,8 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.opensaml.saml.security.impl.SAMLSignatureProfileValidator;
+import org.opensaml.xmlsec.signature.Signature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
@@ -32,11 +33,8 @@ import org.opensaml.saml.saml2.core.Subject;
 import org.opensaml.saml.saml2.core.SubjectConfirmation;
 import org.opensaml.saml.saml2.core.SubjectConfirmationData;
 import org.opensaml.saml.security.impl.SAMLSignatureProfileValidator;
-import org.opensaml.security.credential.UsageType;
-import org.opensaml.security.x509.BasicX509Credential;
 import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.support.SignatureException;
-import org.opensaml.xmlsec.signature.support.SignatureValidator;
 
 import dk.gov.oio.saml.config.Configuration;
 import dk.gov.oio.saml.model.NSISLevel;
@@ -292,13 +290,8 @@ public class AssertionValidationService {
             throw new AssertionValidationException("Assertion signature does not follow the SAML signature profile", e);
         }
 
-        // Get Signing credential
-        X509Certificate x509Certificate = IdPMetadataService.getInstance().getIdPMetadata().getValidX509Certificate(UsageType.SIGNING);
-        BasicX509Credential credential = new BasicX509Credential(x509Certificate);
-
-        // Validate Signature
         try {
-            SignatureValidator.validate(signature, credential);
+            IdPSignatureValidationService.validateSignedByIdP(signature);
         } catch (SignatureException e) {
             throw new AssertionValidationException("Could not validate assertion signature", e);
         }

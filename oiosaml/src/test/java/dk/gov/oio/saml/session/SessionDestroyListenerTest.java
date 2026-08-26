@@ -26,7 +26,7 @@ class SessionDestroyListenerTest {
                 .setServletRoutingPathSuffixLogoutResponse(TestConstants.SP_ROUTING_LOGOUT_RESPONSE)
                 .setServletRoutingPathSuffixAssertion(TestConstants.SP_ROUTING_ASSERTION)
                 .setIdpEntityID(TestConstants.IDP_ENTITY_ID)
-                .setIdpMetadataUrl(TestConstants.IDP_METADATA_URL)
+                .setIdpMetadataFile(TestConstants.idpMetadataFile())
                 .setSessionHandlerFactoryClassName(TestSessionHandlerFactory.class.getName())
                 .setKeystoreLocation("sp.pfx")
                 .setKeystorePassword("Test1234")

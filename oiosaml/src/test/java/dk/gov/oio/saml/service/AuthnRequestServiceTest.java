@@ -50,7 +50,7 @@ public class AuthnRequestServiceTest {
                 .setServletRoutingPathSuffixLogoutResponse(TestConstants.SP_ROUTING_LOGOUT_RESPONSE)
                 .setServletRoutingPathSuffixAssertion(TestConstants.SP_ROUTING_ASSERTION)
                 .setIdpEntityID(TestConstants.IDP_ENTITY_ID)
-                .setIdpMetadataUrl(TestConstants.IDP_METADATA_URL)
+                .setIdpMetadataFile(TestConstants.idpMetadataFile())
                 .setSessionHandlerFactoryClassName(TestSessionHandlerFactory.class.getName())
                 .setKeystoreLocation(TestConstants.SP_KEYSTORE_LOCATION)
                 .setKeystorePassword(TestConstants.SP_KEYSTORE_PASSWORD)

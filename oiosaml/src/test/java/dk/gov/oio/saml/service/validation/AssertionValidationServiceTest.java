@@ -5,6 +5,7 @@ import dk.gov.oio.saml.service.AssertionService;
 import dk.gov.oio.saml.service.AuthnRequestService;
 import dk.gov.oio.saml.service.BaseServiceTest;
 import dk.gov.oio.saml.service.IdPMetadataService;
+import dk.gov.oio.saml.service.OIOSAML3Service;
 import dk.gov.oio.saml.session.AuthnRequestWrapper;
 import dk.gov.oio.saml.util.ExternalException;
 import dk.gov.oio.saml.util.IdpUtil;
@@ -121,6 +122,48 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
         Assertions.assertThrows(AssertionValidationException.class, () -> {
             validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL, ""));
         });
+    }
+
+    @DisplayName("Test that validator accepts a signature made with any of the signing certificates in metadata")
+    @Test
+    public void testValidateAssertionSignedWithSecondCertificateInMetadata() throws Exception {
+        AssertionValidationService validationService = new AssertionValidationService();
+
+        // Metadata where the certificate actually used for signing is preceded by another one, as it is
+        // while the IdP rotates its signing key
+        String otherCertificate = IdpUtil.getIdpCertificateBase64(false);
+        String metadata = TestConstants.IDP_METADATA.replaceFirst("<md:KeyDescriptor use=\"signing\">",
+                "<md:KeyDescriptor use=\"signing\"><ds:KeyInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><ds:X509Data><ds:X509Certificate>"
+                        + otherCertificate + "</ds:X509Certificate></ds:X509Data></ds:KeyInfo></md:KeyDescriptor><md:KeyDescriptor use=\"signing\">");
+
+        String originalMetadataFile = OIOSAML3Service.getConfig().getIdpMetadataFile();
+        OIOSAML3Service.getConfig().setIdpMetadataFile(TestConstants.writeIdpMetadataFile(metadata));
+        IdPMetadataService.getInstance().clear(TestConstants.IDP_ENTITY_ID);
+
+        try {
+            // Mock HttpServletRequest
+            HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+            Mockito.when(request.getRequestURL()).thenReturn(new StringBuffer(TestConstants.SP_ASSERTION_CONSUMER_URL));
+
+            // Create AuthnRequest
+            AuthnRequestService authnRequestService = AuthnRequestService.getInstance();
+            AuthnRequest authnRequest = getAuthnRequest(authnRequestService);
+            String inResponseToId = authnRequest.getID();
+
+            // Create MessageContext, Response and Assertion
+            String nameID = "https://data.gov.dk/model/core/eid/person/uuid/37a5a1aa-67ce-4f70-b7c0-b8e678d585f7";
+            MessageContext<SAMLObject> messageContext = IdpUtil.createMessageWithAssertion(true, true, true, nameID, TestConstants.SP_ENTITY_ID, TestConstants.SP_ASSERTION_CONSUMER_URL, inResponseToId);
+            Response response = (Response) messageContext.getMessage();
+
+            Assertion assertion = new AssertionService().getAssertion(response);
+
+            // Validate
+            validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL, ""));
+        }
+        finally {
+            OIOSAML3Service.getConfig().setIdpMetadataFile(originalMetadataFile);
+            IdPMetadataService.getInstance().clear(TestConstants.IDP_ENTITY_ID);
+        }
     }
 
     @DisplayName("Test that validator will fail an assertion with the wrong destination")
@@ -418,8 +461,8 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
 
         // Only interesting while the signature itself still verifies, otherwise the test would pass for the
         // wrong reason
-        X509Certificate idpCertificate = IdPMetadataService.getInstance().getIdPMetadata().getValidX509Certificate(UsageType.SIGNING);
-        SignatureValidator.validate(unboundAssertion.getSignature(), new BasicX509Credential(idpCertificate));
+        List<X509Certificate> idpCertificates = IdPMetadataService.getInstance().getIdPMetadata().getValidX509Certificates(UsageType.SIGNING);
+        SignatureValidator.validate(unboundAssertion.getSignature(), new BasicX509Credential(idpCertificates.get(0)));
 
         // Validate, should fail because the signature is not bound to the assertion being consumed
         AssertionValidationException exception = Assertions.assertThrows(AssertionValidationException.class, () -> {

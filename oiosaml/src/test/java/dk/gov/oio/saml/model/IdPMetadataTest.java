@@ -29,7 +29,7 @@ public class IdPMetadataTest {
     private void testSingleLogoutResponseLocation(String idpMetadataFileLocation, String expectedUri) throws ExternalException, InternalException {
         ClassLoader classLoader = IdpMetadataServiceTest.class.getClassLoader();
         String fileLocation = classLoader.getResource(idpMetadataFileLocation).getFile();
-        IdPMetadata idpMetadata = new IdPMetadata("http://mockidp.localhost", null, fileLocation);
+        IdPMetadata idpMetadata = new IdPMetadata("http://mockidp.localhost", fileLocation);
 
         String responseLocation = idpMetadata.getLogoutResponseEndpoint();
 
