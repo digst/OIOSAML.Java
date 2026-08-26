@@ -1,6 +1,5 @@
 package dk.gov.oio.saml.service.validation;
 
-import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -34,11 +33,8 @@ import org.opensaml.saml.saml2.core.Subject;
 import org.opensaml.saml.saml2.core.SubjectConfirmation;
 import org.opensaml.saml.saml2.core.SubjectConfirmationData;
 import org.opensaml.saml.security.impl.SAMLSignatureProfileValidator;
-import org.opensaml.security.credential.UsageType;
-import org.opensaml.security.x509.BasicX509Credential;
 import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.support.SignatureException;
-import org.opensaml.xmlsec.signature.support.SignatureValidator;
 
 import dk.gov.oio.saml.config.Configuration;
 import dk.gov.oio.saml.model.NSISLevel;
@@ -294,25 +290,11 @@ public class AssertionValidationService {
             throw new AssertionValidationException("Assertion signature does not follow the SAML signature profile", e);
         }
 
-        // Get Signing credentials. The IdP publishes every key that may be in use, so the signature is
-        // accepted when it validates against any of them, not only the first
-        List<X509Certificate> x509Certificates = IdPMetadataService.getInstance().getIdPMetadata().getValidX509Certificates(UsageType.SIGNING);
-        if (x509Certificates.isEmpty()) {
-            throw new InternalException("No valid signing certificate found in IdP metadata");
+        try {
+            IdPSignatureValidationService.validateSignedByIdP(signature);
+        } catch (SignatureException e) {
+            throw new AssertionValidationException("Could not validate assertion signature", e);
         }
-
-        // Validate Signature
-        SignatureException lastFailure = null;
-        for (X509Certificate x509Certificate : x509Certificates) {
-            try {
-                SignatureValidator.validate(assertion.getSignature(), new BasicX509Credential(x509Certificate));
-                return;
-            } catch (SignatureException e) {
-                lastFailure = e;
-            }
-        }
-
-        throw new AssertionValidationException("Could not validate assertion signature", lastFailure);
     }
 
     private void validateAudienceRestriction(Assertion assertion) throws AssertionValidationException {

@@ -461,8 +461,8 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
 
         // Only interesting while the signature itself still verifies, otherwise the test would pass for the
         // wrong reason
-        X509Certificate idpCertificate = IdPMetadataService.getInstance().getIdPMetadata().getValidX509Certificate(UsageType.SIGNING);
-        SignatureValidator.validate(unboundAssertion.getSignature(), new BasicX509Credential(idpCertificate));
+        List<X509Certificate> idpCertificates = IdPMetadataService.getInstance().getIdPMetadata().getValidX509Certificates(UsageType.SIGNING);
+        SignatureValidator.validate(unboundAssertion.getSignature(), new BasicX509Credential(idpCertificates.get(0)));
 
         // Validate, should fail because the signature is not bound to the assertion being consumed
         AssertionValidationException exception = Assertions.assertThrows(AssertionValidationException.class, () -> {
