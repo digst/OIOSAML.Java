@@ -263,8 +263,13 @@ public class DispatcherServlet extends HttpServlet {
     }
     
     /**
-     * Refuse to start on configuration that is no longer supported, rather than starting with the setting
-     * silently ignored and a different trust model than the deployment expects.
+     * Do not start on if not supported configuration is provided:
+     * <p>
+     * We no longer allow 'oiosaml.servlet.idp.metadata.url' to be specified - IdP metadata must be downloaded and deployed
+     * as it provides the only trust anchor.
+     * <p>
+     * Configuration 'oiosaml.servlet.trust.selfsigned.certs' is also removed which was used for relaxing TLS trust
+     * when retrieving IdP metadata over TLS.
      */
     private void rejectRemovedConfiguration(Map<String, String> config) throws ServletException {
         String metadataUrl = config.get(Constants.REMOVED_IDP_METADATA_URL);
