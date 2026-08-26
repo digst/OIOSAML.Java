@@ -79,7 +79,7 @@ public class IdpUtil {
             String inResponseToId,
             String specVersion) throws Exception {
         // Create proxy Response
-        Response response = createResponse(encrypted, validCert, validSignature, subjectNameID, recipientEntityId, assertionConsumerUrl, inResponseToId, specVersion);
+        Response response = createResponse(encrypted, validCert, validSignature, subjectNameID, recipientEntityId, assertionConsumerUrl, inResponseToId, EncryptionConstants.ALGO_ID_BLOCKCIPHER_AES256, EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSAOAEP, specVersion);
 
         // Build Proxy MessageContext and add response
         MessageContext<SAMLObject> messageContext = new MessageContext<>();
@@ -110,7 +110,7 @@ public class IdpUtil {
             String assertionConsumerUrl,
             String inResponseToId) throws Exception {
         return createResponse(encrypted, validCert, validSignature, subjectNameID, recipientEntityId, assertionConsumerUrl, inResponseToId,
-                EncryptionConstants.ALGO_ID_BLOCKCIPHER_AES256, EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSAOAEP, TestConstants.SPEC_VERSION);
+                EncryptionConstants.ALGO_ID_BLOCKCIPHER_AES256, EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSAOAEP, TestConstants.SPEC_VERSION_OIOSAML_30);
     }
 
     /**
@@ -126,7 +126,7 @@ public class IdpUtil {
             String assertionConsumerUrl,
             String inResponseToId,
             String dataAlgorithm,
-            String keyTransportAlgorithm
+            String keyTransportAlgorithm,
             String specVersion) throws Exception {
 
         DateTime issueInstant = new DateTime();

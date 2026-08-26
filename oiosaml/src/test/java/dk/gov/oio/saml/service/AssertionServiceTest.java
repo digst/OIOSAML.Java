@@ -45,7 +45,7 @@ public class AssertionServiceTest extends BaseServiceTest {
 
         AssertionService assertionService = new AssertionService();
         Assertion assertion = assertionService.getAssertion(IdpUtil.createResponse(true, true, true, nameID, TestConstants.SP_ENTITY_ID, TestConstants.SP_ASSERTION_CONSUMER_URL, UUID.randomUUID().toString(),
-                EncryptionConstants.ALGO_ID_BLOCKCIPHER_AES256_GCM, EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSAOAEP));
+                EncryptionConstants.ALGO_ID_BLOCKCIPHER_AES256_GCM, EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSAOAEP, TestConstants.SPEC_VERSION_OIOSAML_30));
 
         Assertions.assertNotNull(assertion);
         Assertions.assertEquals(nameID, assertion.getSubject().getNameID().getValue());
@@ -59,7 +59,7 @@ public class AssertionServiceTest extends BaseServiceTest {
         // RSA 1.5 key transport is not one of the algorithms allowed by [OIO-ALG-01]
         Assertions.assertThrows(ExternalException.class, () -> {
             assertionService.getAssertion(IdpUtil.createResponse(true, true, true, "NAMEID", TestConstants.SP_ENTITY_ID, TestConstants.SP_ASSERTION_CONSUMER_URL, UUID.randomUUID().toString(),
-                    EncryptionConstants.ALGO_ID_BLOCKCIPHER_AES256, EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSA15));
+                    EncryptionConstants.ALGO_ID_BLOCKCIPHER_AES256, EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSA15, TestConstants.SPEC_VERSION_OIOSAML_30));
         });
     }
 
@@ -71,7 +71,7 @@ public class AssertionServiceTest extends BaseServiceTest {
         // Triple DES block encryption is not one of the algorithms allowed by [OIO-ALG-01]
         Assertions.assertThrows(ExternalException.class, () -> {
             assertionService.getAssertion(IdpUtil.createResponse(true, true, true, "NAMEID", TestConstants.SP_ENTITY_ID, TestConstants.SP_ASSERTION_CONSUMER_URL, UUID.randomUUID().toString(),
-                    EncryptionConstants.ALGO_ID_BLOCKCIPHER_TRIPLEDES, EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSAOAEP));
+                    EncryptionConstants.ALGO_ID_BLOCKCIPHER_TRIPLEDES, EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSAOAEP, TestConstants.SPEC_VERSION_OIOSAML_30));
         });
     }
 
