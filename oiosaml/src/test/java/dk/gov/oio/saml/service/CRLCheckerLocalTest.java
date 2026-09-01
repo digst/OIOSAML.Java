@@ -212,7 +212,7 @@ public class CRLCheckerLocalTest extends BaseServiceTest {
     private Set<X509Certificate> checkCertificate() throws Exception {
         List<X509Certificate> certificates = Collections.singletonList(certificate);
 
-        return CRLChecker.checkCertificates(certificates, null);
+        return CRLChecker.checkCertificates(certificates);
     }
 
     private static String url(String path) {

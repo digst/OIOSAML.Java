@@ -179,22 +179,22 @@ public class IdPMetadata {
             if (lastCRLCheck == null || (lastUpdate != null && lastUpdate.isAfter(lastCRLCheck))) {
                 try {
                     // Encryption
-                    Set<X509Certificate> validEncryptionCertificates = CRLChecker.checkCertificates(getAllX509CertificatesWithUsageType(UsageType.ENCRYPTION), getLastCRLCheck());
+                    Set<X509Certificate> validEncryptionCertificates = CRLChecker.checkCertificates(getAllX509CertificatesWithUsageType(UsageType.ENCRYPTION));
                     this.validEncryptionCertificates.clear();
                     if (validEncryptionCertificates != null) {
                         this.validEncryptionCertificates.addAll(validEncryptionCertificates);
                     }
 
                     // Signing
-                    Set<X509Certificate> validSigningCertificates = CRLChecker.checkCertificates(getAllX509CertificatesWithUsageType(UsageType.SIGNING), getLastCRLCheck());
+                    Set<X509Certificate> validSigningCertificates = CRLChecker.checkCertificates(getAllX509CertificatesWithUsageType(UsageType.SIGNING));
                     this.validSigningCertificates.clear();
                     if (validSigningCertificates != null) {
                         this.validSigningCertificates.addAll(validSigningCertificates);
                     }
 
                     // Unspecified
-                    Set<X509Certificate> validUnspecifiedCertificates = CRLChecker.checkCertificates(getAllX509CertificatesWithUsageType(UsageType.UNSPECIFIED), getLastCRLCheck());
-                    Set<X509Certificate> validNullCertificates = CRLChecker.checkCertificates(getAllX509CertificatesWithUsageType(null), getLastCRLCheck());
+                    Set<X509Certificate> validUnspecifiedCertificates = CRLChecker.checkCertificates(getAllX509CertificatesWithUsageType(UsageType.UNSPECIFIED));
+                    Set<X509Certificate> validNullCertificates = CRLChecker.checkCertificates(getAllX509CertificatesWithUsageType(null));
                     this.validUnspecifiedCertificates.clear();
 
                     if (validUnspecifiedCertificates != null) {

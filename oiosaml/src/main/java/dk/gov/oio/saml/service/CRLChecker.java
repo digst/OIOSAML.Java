@@ -49,7 +49,6 @@ import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.i18n.filter.UntrustedUrlInput;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
-import org.joda.time.DateTime;
 import org.opensaml.core.config.InitializationException;
 
 import dk.gov.oio.saml.config.Configuration;
@@ -104,7 +103,7 @@ public class CRLChecker {
         log.info("Setting '{}' to false, so OCSP requests are sent using POST", JDK_OCSP_USE_GET_PROPERTY);
     }
 
-    public static Set<X509Certificate> checkCertificates(List<X509Certificate> x509Certificates, DateTime lastCRLCheck) throws ExternalException, InternalException, InitializationException {
+    public static Set<X509Certificate> checkCertificates(List<X509Certificate> x509Certificates) throws ExternalException, InternalException, InitializationException {
         Set<X509Certificate> result = new HashSet<>();
         if (x509Certificates == null || x509Certificates.isEmpty()) {
             return result;
