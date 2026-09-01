@@ -1,6 +1,5 @@
 package dk.gov.oio.saml.service.validation;
 
-import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -8,6 +7,8 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.opensaml.saml.security.impl.SAMLSignatureProfileValidator;
+import org.opensaml.xmlsec.signature.Signature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
@@ -31,10 +32,9 @@ import org.opensaml.saml.saml2.core.StatusCode;
 import org.opensaml.saml.saml2.core.Subject;
 import org.opensaml.saml.saml2.core.SubjectConfirmation;
 import org.opensaml.saml.saml2.core.SubjectConfirmationData;
-import org.opensaml.security.credential.UsageType;
-import org.opensaml.security.x509.BasicX509Credential;
+import org.opensaml.saml.security.impl.SAMLSignatureProfileValidator;
+import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.support.SignatureException;
-import org.opensaml.xmlsec.signature.support.SignatureValidator;
 
 import dk.gov.oio.saml.config.Configuration;
 import dk.gov.oio.saml.model.NSISLevel;
@@ -188,19 +188,17 @@ public class AssertionValidationService {
         String nameIDValue = assertion.getSubject().getNameID().getValue();
         validateAttributeStatement(attributeValues, nameIDValue.startsWith("https://data.gov.dk/model/core/eid/professional"));
         validateAssurance(attributeValues, authnRequest);
-
-        // The Assertion within the response MUST be directly signed
-        if (!assertion.isSigned()) {
-            throw new AssertionValidationException("The Assertion within the response MUST be directly signed");
-        }
     }
 
     private void validateAttributeStatement(Map<String, String> attributes, boolean isProfessional) throws AssertionValidationException {
-        // SpecVer
+        // SpecVer is mandatory in the OIOSAML attribute profiles, but its value identifies the profile
+        // version the assertion was issued under and changes between profile versions, so only the
+        // presence of the attribute is required here
         String specVersion = attributes.get(Constants.SPEC_VER);
-        if (!Constants.SPEC_VER_VAL.equals(specVersion)) {
-            throw new AssertionValidationException("specVersion Was: " + specVersion + " Expected: " + Constants.SPEC_VER_VAL);
+        if (specVersion == null || specVersion.isEmpty()) {
+            throw new AssertionValidationException("Assertions MUST contain the specVersion attribute " + Constants.SPEC_VER);
         }
+        log.debug("Assertion issued under OIOSAML profile version '{}'", specVersion);
 
         // Professional
         if (isProfessional) {
@@ -278,13 +276,22 @@ public class AssertionValidationService {
     }
 
     private void validateSignature(Assertion assertion) throws ExternalException, InternalException, AssertionValidationException {
-        // Get Signing credential
-        X509Certificate x509Certificate = IdPMetadataService.getInstance().getIdPMetadata().getValidX509Certificate(UsageType.SIGNING);
-        BasicX509Credential credential = new BasicX509Credential(x509Certificate);
+        // The assertion MUST be directly signed, an unsigned assertion has no signature to validate
+        Signature signature = assertion.getSignature();
+        if (!assertion.isSigned() || signature == null) {
+            throw new AssertionValidationException("The Assertion within the response MUST be directly signed");
+        }
 
-        // Validate Signature
+        // Establishes that the signature is bound to this assertion. Validating it cryptographically only
+        // proves that some element in the document was signed with the IdP key.
         try {
-            SignatureValidator.validate(assertion.getSignature(), credential);
+            new SAMLSignatureProfileValidator().validate(signature);
+        } catch (SignatureException e) {
+            throw new AssertionValidationException("Assertion signature does not follow the SAML signature profile", e);
+        }
+
+        try {
+            IdPSignatureValidationService.validateSignedByIdP(signature);
         } catch (SignatureException e) {
             throw new AssertionValidationException("Could not validate assertion signature", e);
         }

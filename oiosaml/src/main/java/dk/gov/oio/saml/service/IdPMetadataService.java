@@ -34,7 +34,7 @@ public class IdPMetadataService {
         // This method is needed since we only have one IdP functionality for now.
         Configuration config = OIOSAML3Service.getConfig();
         
-        return getIdPMetadata(config.getIdpEntityID(), config.getIdpMetadataUrl(), config.getIdpMetadataFile());
+        return getIdPMetadata(config.getIdpEntityID(), config.getIdpMetadataFile());
     }
 
     public SingleLogoutService getLogoutEndpoint() throws InternalException, ExternalException {
@@ -45,12 +45,12 @@ public class IdPMetadataService {
         return getIdPMetadata().getLogoutResponseEndpoint();
     }
 
-    private IdPMetadata getIdPMetadata(String idpEntityID, String idpMetadataURL, String idpMetadataFilePath) throws InternalException, ExternalException {
+    private IdPMetadata getIdPMetadata(String idpEntityID, String idpMetadataFilePath) throws InternalException, ExternalException {
         IdPMetadata idPMetadata = identityProviders.get(idpEntityID);
 
         // If IdP Metadata has not been fetched before, create object
         if (idPMetadata == null) {
-            idPMetadata = new IdPMetadata(idpEntityID, idpMetadataURL, idpMetadataFilePath);
+            idPMetadata = new IdPMetadata(idpEntityID, idpMetadataFilePath);
             identityProviders.put(idpEntityID, idPMetadata);
         }
 

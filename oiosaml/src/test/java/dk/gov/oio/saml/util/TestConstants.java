@@ -18,6 +18,26 @@ public class TestConstants {
 
     public static final String IDP_ENTITY_ID = "http://mockidp.localhost";
     public static final String IDP_METADATA_URL = "http://localhost:8081/saml/metadata";
+
+    /**
+     * IdP metadata is deployed as a file, so tests hand the library a file rather than a URL.
+     */
+    public static String idpMetadataFile() {
+        return writeIdpMetadataFile(IDP_METADATA);
+    }
+
+    public static String writeIdpMetadataFile(String metadata) {
+        try {
+            java.io.File file = java.io.File.createTempFile("oiosaml-test-idp-metadata", ".xml");
+            file.deleteOnExit();
+            java.nio.file.Files.write(file.toPath(), metadata.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+            return file.getAbsolutePath();
+        }
+        catch (java.io.IOException e) {
+            throw new IllegalStateException("Could not write test metadata file", e);
+        }
+    }
     public static final String IDP_LOGOUT_REQUEST_URL = "http://localhost:8081/saml/logout";
     public static final String IDP_LOGOUT_RESPONSE_URL = "http://localhost:8081/saml/logout/response";
 
@@ -147,6 +167,10 @@ public class TestConstants {
             "    </md:IDPSSODescriptor>\n" +
             "</md:EntityDescriptor>";
     public static final String BAD_SP_ASSERTION_CONSUMER_URL = "http://localhost:8080/sso";
+
+    // Value of the specVersion attribute in the OIOSAML Web SSO profiles, see [OIO-ALG-01] chapter 6
+    public static final String SPEC_VERSION_OIOSAML_30 = "OIO-SAML-3.0";
+    public static final String SPEC_VERSION_OIOSAML_40 = "https://data.gov.dk/saml/profile/oio/4.0.0/";
 
     // The DevTest4 NemLog-in IdP signing certificate, taken from
     // demo/src/main/resources/test-devtest4-idp-metadata.xml. The revocation tests validate against the

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -108,6 +109,16 @@ public class LogoutResponseHandlerTest {
     private class DummyOutputStream extends ServletOutputStream {
         @Override
         public void write(int i) throws IOException {
+            //Do nothing
+        }
+
+        @Override
+        public boolean isReady() {
+            return true;
+        }
+
+        @Override
+        public void setWriteListener(WriteListener writeListener) {
             //Do nothing
         }
     }

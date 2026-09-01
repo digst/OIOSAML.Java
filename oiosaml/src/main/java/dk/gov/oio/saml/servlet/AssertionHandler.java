@@ -142,6 +142,9 @@ public class AssertionHandler extends SAMLHandler {
 
         AssertionWrapper assertionWrapper = new AssertionWrapper(assertion);
 
+        // The session is authenticated from here, so it must not keep the id it had before login
+        rotateSessionId(httpServletRequest, sessionHandler, authnRequest);
+
         sessionHandler.storeAssertion(session, assertionWrapper);
 
         OIOSAML3Service.getAuditService().auditLog(AuditRequestUtil
@@ -158,5 +161,18 @@ public class AssertionHandler extends SAMLHandler {
                 .withAuthnAttribute("URL_REDIRECT",url));
 
         httpServletResponse.sendRedirect(url);
+    }
+
+    /**
+     * Give the session a new id now that it carries an authenticated user, so an id planted in the browser
+     * before login cannot be used afterwards.
+     *
+     * <p>Session state is keyed on the container session id, so the in-flight AuthnRequest is stored again
+     * under the new id.</p>
+     */
+    private void rotateSessionId(HttpServletRequest httpServletRequest, SessionHandler sessionHandler, AuthnRequestWrapper authnRequest) throws InternalException {
+        httpServletRequest.changeSessionId();
+
+        sessionHandler.storeAuthnRequest(httpServletRequest.getSession(), authnRequest);
     }
 }

@@ -60,11 +60,6 @@ public class DispatcherServlet extends HttpServlet {
             }
         }
         
-        value = config.get(Constants.SUPPORT_SELF_SIGNED);
-        if (StringUtil.isNotEmpty(value)) {
-            configuration.setSupportSelfSigned("true".equals(value));
-        }
-        
         value = config.get(Constants.CRL_CHECK_ENABLED);
         if (StringUtil.isNotEmpty(value)) {
             configuration.setCRLCheckEnabled("true".equals(value));
@@ -267,11 +262,43 @@ public class DispatcherServlet extends HttpServlet {
         return configMap;
     }
     
+    /**
+     * Do not start on if not supported configuration is provided:
+     * <p>
+     * We no longer allow 'oiosaml.servlet.idp.metadata.url' to be specified - IdP metadata must be downloaded and deployed
+     * as it provides the only trust anchor.
+     * <p>
+     * Configuration 'oiosaml.servlet.trust.selfsigned.certs' is also removed which was used for relaxing TLS trust
+     * when retrieving IdP metadata over TLS.
+     */
+    private void rejectRemovedConfiguration(Map<String, String> config) throws ServletException {
+        String metadataUrl = config.get(Constants.REMOVED_IDP_METADATA_URL);
+        if (StringUtil.isNotEmpty(metadataUrl)) {
+            if (StringUtil.isNotEmpty(config.get(Constants.IDP_METADATA_FILE))) {
+                log.warn("'{}' is no longer supported and is ignored, IdP metadata is read from '{}'",
+                        Constants.REMOVED_IDP_METADATA_URL, Constants.IDP_METADATA_FILE);
+            }
+            else {
+                throw new ServletException(String.format(
+                        "'%s' is no longer supported. The IdP does not sign its metadata, so trust in it comes from deploying the metadata file. Download the metadata and point '%s' at it",
+                        Constants.REMOVED_IDP_METADATA_URL, Constants.IDP_METADATA_FILE));
+            }
+        }
+
+        if ("true".equals(config.get(Constants.REMOVED_SUPPORT_SELF_SIGNED))) {
+            throw new ServletException(String.format(
+                    "'%s' is no longer supported. It only relaxed TLS validation for fetching IdP metadata, which is now read from a file",
+                    Constants.REMOVED_SUPPORT_SELF_SIGNED));
+        }
+    }
+
     // Should make sure all handlers are initialized and added to the list
     private void initServlet() throws ServletException {
         if (!initialized) {
             // convert to more useful map
             Map<String, String> config = getInitConfig();
+
+            rejectRemovedConfiguration(config);
 
             try {
 
@@ -283,7 +310,6 @@ public class DispatcherServlet extends HttpServlet {
                         .setKeystorePassword(config.get(Constants.KEYSTORE_PASSWORD))
                         .setKeyAlias(config.get(Constants.KEY_ALIAS))
                         .setIdpEntityID(config.get(Constants.IDP_ENTITY_ID))
-                        .setIdpMetadataUrl(config.get(Constants.IDP_METADATA_URL))
                         .setIdpMetadataFile(config.get(Constants.IDP_METADATA_FILE))
                         .setServletRoutingPathPrefix(config.get(Constants.SP_ROUTING_BASE))
                         .setServletRoutingPathSuffixError(config.get(Constants.SP_ROUTING_ERROR))
