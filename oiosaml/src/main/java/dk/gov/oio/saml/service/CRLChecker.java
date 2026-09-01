@@ -15,6 +15,7 @@ import java.security.cert.CertPathValidator;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.CertPathValidatorException.BasicReason;
 import java.security.cert.PKIXParameters;
 import java.security.cert.PKIXRevocationChecker;
 import java.security.cert.TrustAnchor;
@@ -68,17 +69,20 @@ public class CRLChecker {
     private static final int CONNECT_TIMEOUT_MILLIS = 10000;
     private static final int READ_TIMEOUT_MILLIS = 10000;
 
-    private static Map<String, X509Certificate> certificateMap = new HashMap<String, X509Certificate>();
+    private static final Map<String, X509Certificate> certificateMap = new HashMap<String, X509Certificate>();
+    // Indexes of the keyCertSign and cRLSign bits in the KeyUsage extension, see RFC 5280 section 4.2.1.3
+    private static final int KEY_CERT_SIGN = 5;
+    private static final int CRL_SIGN = 6;
 
     /**
      * Make the JDK OCSP client POST its requests instead of using the RFC 5019 GET form.
-     *
+     * <p>
      * JDK 12 and later default to GET for requests that fit in 255 characters, but the NemLog-in OCSP
      * responders answer HTTP 404 to that form. The resulting UNDETERMINED_REVOCATION_STATUS makes every
      * OCSP check fail, which silently degrades the SP to the CRL fallback, or drops the IdP certificates
      * entirely when CRL checking is disabled as well. POST is mandatory for responders (RFC 6960), so
      * forcing it is safe. Java 8 and 11 always POST and are unaffected.
-     *
+     * <p>
      * The JDK reads the property once, when sun.security.provider.certpath.OCSP is initialized, so this
      * must run before the first OCSP check in the JVM, hence the call from {@link OIOSAML3Service#init}.
      * An explicit setting made by the deployer (-Dcom.sun.security.ocsp.useget=...) always wins.
@@ -101,7 +105,7 @@ public class CRLChecker {
 
     public static Set<X509Certificate> checkCertificates(List<X509Certificate> x509Certificates, DateTime lastCRLCheck) throws ExternalException, InternalException, InitializationException {
         Set<X509Certificate> result = new HashSet<>();
-        if (x509Certificates == null || x509Certificates.size() == 0) {
+        if (x509Certificates == null || x509Certificates.isEmpty()) {
             return result;
         }
 
@@ -110,8 +114,7 @@ public class CRLChecker {
             if (checkCertificate(certificate)) {
                 result.add(certificate);
                 log.debug("Certificate validated successfully: {}", certificate.getSubjectDN());
-            }
-            else {
+            } else {
                 log.warn("Certificate did not validate: {}", certificate.getSubjectDN());
             }
         }
@@ -121,35 +124,40 @@ public class CRLChecker {
 
     // OCSP first if configured, with fallback to CRL if configured
     private static boolean checkCertificate(X509Certificate certificate) {
+        if (!isWithinValidityPeriod(certificate)) {
+            log.warn("Certificate is outside its validity period: {}", certificate.getSubjectDN());
+            return false;
+        }
+
         boolean validated = false;
 
         Configuration config = OIOSAML3Service.getConfig();
         if (config.isOcspCheckEnabled()) {
             try {
                 validated = doOCSPCheck(certificate);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
+                if (!isRevocationDataUnavailable(e)) {
+                    log.warn("Certificate rejected while validating it using OCSP: {}", certificate.getSubjectDN(), e);
+                    return false;
+                }
+
                 log.warn("Unexpected error while validating certificate using OCSP.", e);
 
                 if (config.isCRLCheckEnabled()) {
                     try {
                         validated = doCRLCheck(certificate);
-                    }
-                    catch (Exception ex) {
+                    } catch (Exception ex) {
                         log.warn("Unexpected error while validating certificate using CRL.", ex);
-                    }                
+                    }
                 }
             }
-        }
-        else if (config.isCRLCheckEnabled()) {
+        } else if (config.isCRLCheckEnabled()) {
             try {
                 validated = doCRLCheck(certificate);
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 log.warn("Unexpected error while validating certificate using CRL.", ex);
-            }                
-        }
-        else {
+            }
+        } else {
             log.warn("checkCertificate called, but both OCSP and CRL checking is disabled");
             validated = true;
         }
@@ -203,19 +211,33 @@ public class CRLChecker {
 
             log.debug("Certificate successfully validated during OCSP check.");
             revoked = false;
-        }
-        catch (CertPathValidatorException cpve) {
-            if (cpve.getMessage() != null && cpve.getMessage().contains("Certificate has been revoked")) {
+        } catch (CertPathValidatorException cpve) {
+            if (BasicReason.REVOKED == cpve.getReason()) {
                 revoked = true;
                 log.info("Certificate revoked, cert[{}] : {}", cpve.getIndex(), cpve.getMessage());
-            }
-            else {
+            } else {
                 log.warn("Validation failure, cert[{}] : {}", cpve.getIndex(), cpve.getMessage());
                 throw cpve;
             }
         }
 
         return (!revoked);
+    }
+
+    /**
+     * Whether the OCSP check failed because the revocation status could not be obtained, rather than because
+     * the certificate itself failed validation. Only the former is a reason to ask the CRL instead: the CRL
+     * says nothing about the validity of a certificate, so letting it answer for a rejected certificate
+     * would turn that rejection into an acceptance.
+     */
+    private static boolean isRevocationDataUnavailable(Exception e) {
+        if (e instanceof CertPathValidatorException) {
+            return BasicReason.UNDETERMINED_REVOCATION_STATUS == ((CertPathValidatorException) e).getReason();
+        }
+
+        // Everything else is a failure, such as a certificate naming no responder
+        // or an issuer certificate that could not be fetched
+        return true;
     }
 
     private static X509Certificate getIssuingCertificate(X509Certificate certificate) {
@@ -228,17 +250,16 @@ public class CRLChecker {
 
             try (ASN1InputStream aIn = new ASN1InputStream(bytes)) {
                 ASN1OctetString octs = (ASN1OctetString) aIn.readObject();
-    
+
                 try (ASN1InputStream aIn2 = new ASN1InputStream(octs.getOctets())) {
                     ASN1Primitive auth_info_acc = aIn2.readObject();
-        
+
                     if (auth_info_acc != null) {
                         authInfoAcc = AuthorityInformationAccess.getInstance(auth_info_acc);
                     }
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.debug("Cannot extract access location of issuing ca.", e);
             return null;
         }
@@ -252,12 +273,12 @@ public class CRLChecker {
             // A cached certificate is only reused while it still is the issuer, so that a CA replaced at the
             // same location is picked up instead of failing every check until the process restarts
             X509Certificate cached = certificateMap.get(url);
-            if (cached != null && isIssuerOf(cached, certificate)) {
+            if (cached != null && isIssuedBy(cached, certificate)) {
                 return cached;
             }
 
             X509Certificate issuer = downloadCertificate(url);
-            if (issuer == null || !isIssuerOf(issuer, certificate)) {
+            if (issuer == null || !isIssuedBy(issuer, certificate)) {
                 return null;
             }
 
@@ -271,19 +292,35 @@ public class CRLChecker {
 
     /**
      * The AIA location is named by the certificate being checked, so the certificate downloaded from it can
-     * only serve as trust anchor or CRL signer once it is known to be the CA that issued that certificate.
+     * only serve as trust anchor or CRL signer once it is known to be a CA allowed to issue certificates,
+     * and to be the one that issued that certificate.
      */
-    private static boolean isIssuerOf(X509Certificate issuer, X509Certificate certificate) {
+    private static boolean isIssuedBy(X509Certificate issuer, X509Certificate certificate) {
         if (!certificate.getIssuerX500Principal().equals(issuer.getSubjectX500Principal())) {
             log.warn("Certificate fetched from the issuer location of {} is issued to somebody else", certificate.getSubjectDN());
+            return false;
+        }
+
+        // Below zero means the basic constraints deny the certificate the CA role, or say nothing at all
+        if (issuer.getBasicConstraints() < 0) {
+            log.warn("Certificate fetched from the issuer location of {} is not a CA certificate", certificate.getSubjectDN());
+            return false;
+        }
+
+        if (!hasKeyUsage(issuer, KEY_CERT_SIGN)) {
+            log.warn("Certificate fetched from the issuer location of {} is not allowed to sign certificates", certificate.getSubjectDN());
+            return false;
+        }
+
+        if (!isWithinValidityPeriod(issuer)) {
+            log.warn("Certificate fetched from the issuer location of {} is outside its validity period", certificate.getSubjectDN());
             return false;
         }
 
         try {
             certificate.verify(issuer.getPublicKey());
             return true;
-        }
-        catch (GeneralSecurityException e) {
+        } catch (GeneralSecurityException e) {
             log.warn("Certificate fetched from the issuer location of {} did not issue it", certificate.getSubjectDN(), e);
             return false;
         }
@@ -321,7 +358,29 @@ public class CRLChecker {
 
         return uri;
     }
-    
+
+    /**
+     * Whether the certificate is within its validity period, allowing for the configured clock skew the way
+     * the freshness check on a CRL does.
+     */
+    private static boolean isWithinValidityPeriod(X509Certificate certificate) {
+        long clockSkewMillis = 1000L * 60 * OIOSAML3Service.getConfig().getClockSkew();
+        long now = System.currentTimeMillis();
+
+        return certificate.getNotBefore().getTime() - clockSkewMillis <= now
+                && certificate.getNotAfter().getTime() + clockSkewMillis >= now;
+    }
+
+    /**
+     * A key is only usable for the purposes its certificate grants it, and a certificate stating no key
+     * usage at all grants none of them.
+     */
+    private static boolean hasKeyUsage(X509Certificate certificate, int keyUsageBit) {
+        boolean[] keyUsage = certificate.getKeyUsage();
+
+        return keyUsage != null && keyUsage.length > keyUsageBit && keyUsage[keyUsageBit];
+    }
+
     private static X509Certificate downloadCertificate(String url) {
         try {
             CertificateFactory factory = CertificateFactory.getInstance("X.509");
@@ -332,12 +391,10 @@ public class CRLChecker {
                 }
 
                 log.warn("Failed to parse certificate from {}", url);
-            }
-            catch (IOException ex) {
+            } catch (IOException ex) {
                 log.warn("Failed to download intermediate CA certificate from {}", url);
             }
-        }
-        catch (CertificateException ex) {
+        } catch (CertificateException ex) {
             log.warn("Failed to generate certificate factory", ex);
         }
 
@@ -353,17 +410,16 @@ public class CRLChecker {
             byte[] bytes = certificate.getExtensionValue(AUTH_INFO_ACCESS);
             try (ASN1InputStream aIn = new ASN1InputStream(bytes)) {
                 ASN1OctetString octs = (ASN1OctetString) aIn.readObject();
-    
+
                 try (ASN1InputStream aIn2 = new ASN1InputStream(octs.getOctets())) {
                     ASN1Primitive auth_info_acc = aIn2.readObject();
-        
+
                     if (auth_info_acc != null) {
                         authInfoAcc = AuthorityInformationAccess.getInstance(auth_info_acc);
                     }
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.debug("Cannot extract access location of OCSP responder.", e);
             return null;
         }
@@ -419,7 +475,7 @@ public class CRLChecker {
     }
 
     private static boolean doCRLCheck(X509Certificate certificate) throws IOException, GeneralSecurityException, InitializationException {
-        boolean revoked = true;
+        boolean revoked;
 
         String url = getCRLUrl(certificate);
         if (url == null) {
@@ -443,8 +499,7 @@ public class CRLChecker {
             if (revokedCertificate != null) {
                 log.warn("Certificate found in revocation list " + certificate.getSubjectDN());
                 revoked = true;
-            }
-            else {
+            } else {
                 revoked = false;
             }
         }
@@ -459,6 +514,11 @@ public class CRLChecker {
     private static void validateCRL(X509CRL crl, X509Certificate certificate, X509Certificate issuer) throws GeneralSecurityException {
         if (!crl.getIssuerX500Principal().equals(certificate.getIssuerX500Principal())) {
             throw new CRLException("CRL was not issued by the CA that issued the certificate");
+        }
+
+        // A CA that is not allowed to sign CRLs cannot vouch for this list however well the signature verifies
+        if (!hasKeyUsage(issuer, CRL_SIGN)) {
+            throw new CRLException("CRL issuer is not allowed to sign CRLs, its key usage does not include cRLSign");
         }
 
         crl.verify(issuer.getPublicKey());
