@@ -9,6 +9,9 @@
     <properties>
         <java.version>11</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Overrides the 1.18.16 of the Spring Boot parent, which predates the JDK 16 encapsulation of the
+             compiler internals it reaches into and so generates nothing on a current JDK -->
+        <lombok.version>1.18.46</lombok.version>
     </properties>
 
     <parent>
@@ -96,6 +99,22 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <!-- Names the processor explicitly, because a JDK 23 and later javac no longer runs the
+                         annotation processors it finds on the classpath -->
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
