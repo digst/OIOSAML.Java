@@ -26,13 +26,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +69,8 @@ public class CRLChecker {
     private static final int CONNECT_TIMEOUT_MILLIS = 10000;
     private static final int READ_TIMEOUT_MILLIS = 10000;
 
-    private static final Map<String, X509Certificate> certificateMap = new HashMap<String, X509Certificate>();
+    private static final Map<String, X509Certificate> issuingCACertificatesByUrl = new ConcurrentHashMap<String, X509Certificate>();
+
     // Indexes of the keyCertSign and cRLSign bits in the KeyUsage extension, see RFC 5280 section 4.2.1.3
     private static final int KEY_CERT_SIGN = 5;
     private static final int CRL_SIGN = 6;
@@ -272,7 +273,7 @@ public class CRLChecker {
 
             // A cached certificate is only reused while it still is the issuer, so that a CA replaced at the
             // same location is picked up instead of failing every check until the process restarts
-            X509Certificate cached = certificateMap.get(url);
+            X509Certificate cached = issuingCACertificatesByUrl.get(url);
             if (cached != null && isIssuedBy(cached, certificate)) {
                 return cached;
             }
@@ -282,7 +283,7 @@ public class CRLChecker {
                 return null;
             }
 
-            certificateMap.put(url, issuer);
+            issuingCACertificatesByUrl.put(url, issuer);
 
             return issuer;
         }
