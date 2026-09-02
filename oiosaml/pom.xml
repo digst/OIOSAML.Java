@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>dk.digst</groupId>
     <artifactId>oiosaml3.java</artifactId>
@@ -37,30 +37,29 @@
         <java.version>1.8.0</java.version>
         <maven.deploy.skip>false</maven.deploy.skip>
     </properties>
-    
-    <profiles>
-                <profile>
-                        <id>sign</id>
-                        <build>
-                                <plugins>
-                                        <plugin>
-                                                <groupId>org.apache.maven.plugins</groupId>
-                                                <artifactId>maven-gpg-plugin</artifactId>
-                                                <version>1.5</version>
-                                                <executions>
-                                                        <execution>
-                                                                <id>sign-artifacts</id>
-                                                                <phase>verify</phase>
-                                                                <goals>
-                                                                        <goal>sign</goal>
-                                                                </goals>
-                                                        </execution>
-                                                </executions>
-                                        </plugin>
-                                </plugins>
-                        </build>
 
-                </profile>
+    <profiles>
+        <profile>
+            <id>sign</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.5</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
 
@@ -87,7 +86,7 @@
                     <downloadJavadocs>true</downloadJavadocs>
                 </configuration>
             </plugin>
-            
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -101,7 +100,7 @@
                     </execution>
                 </executions>
             </plugin>
-            
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -173,6 +172,14 @@
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
             <version>2.3.9</version>
+        </dependency>
+
+        <!-- Used by the tests to mint a CA, certificates and CRLs, bcprov itself comes in through OpenSAML -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>1.59</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>

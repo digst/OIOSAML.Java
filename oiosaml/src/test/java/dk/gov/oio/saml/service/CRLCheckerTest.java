@@ -30,7 +30,7 @@ public class CRLCheckerTest extends BaseServiceTest {
         X509Certificate certificate = (X509Certificate) factory.generateCertificate(bis);
         
         List<X509Certificate> x509Certificates = Collections.singletonList(certificate);
-        Set<X509Certificate> validCertificates = CRLChecker.checkCertificates(x509Certificates, null);
+        Set<X509Certificate> validCertificates = CRLChecker.checkCertificates(x509Certificates);
         
         Assertions.assertEquals(1, validCertificates.size());
     }
@@ -47,7 +47,7 @@ public class CRLCheckerTest extends BaseServiceTest {
         X509Certificate certificate = (X509Certificate) factory.generateCertificate(bis);
         
         List<X509Certificate> x509Certificates = Collections.singletonList(certificate);
-        Set<X509Certificate> validCertificates = CRLChecker.checkCertificates(x509Certificates, null);
+        Set<X509Certificate> validCertificates = CRLChecker.checkCertificates(x509Certificates);
         
         Assertions.assertEquals(1, validCertificates.size());
     }
@@ -68,7 +68,7 @@ public class CRLCheckerTest extends BaseServiceTest {
         X509Certificate certificate = (X509Certificate) factory.generateCertificate(bis);
         
         List<X509Certificate> x509Certificates = Collections.singletonList(certificate);
-        Set<X509Certificate> validCertificates = CRLChecker.checkCertificates(x509Certificates, null);
+        Set<X509Certificate> validCertificates = CRLChecker.checkCertificates(x509Certificates);
         
         Assertions.assertNotNull(validCertificates);
         Assertions.assertEquals(0, validCertificates.size());
@@ -90,7 +90,7 @@ public class CRLCheckerTest extends BaseServiceTest {
         X509Certificate certificate = (X509Certificate) factory.generateCertificate(bis);
         
         List<X509Certificate> x509Certificates = Collections.singletonList(certificate);
-        Set<X509Certificate> validCertificates = CRLChecker.checkCertificates(x509Certificates, null);
+        Set<X509Certificate> validCertificates = CRLChecker.checkCertificates(x509Certificates);
         
         Assertions.assertNotNull(validCertificates);
         Assertions.assertEquals(0, validCertificates.size());
