@@ -358,12 +358,12 @@ public class AssertionValidationService {
         String shouldStartWith = null;
         for (String authnContextClassRef : authnRequest.getAuthnContextClassRefValues()) {
             if (Constants.ATTRIBUTE_PROFILE_PERSON.equals(authnContextClassRef)) {
-                shouldStartWith = "https://data.gov.dk/model/core/eid/person";
+                shouldStartWith = "https://data.gov.dk/model/core/eid/person/";
                 break;
             }
 
-            if (Constants.ATTRIBUTE_PROFILE_PERSON.equals(authnContextClassRef)) {
-                shouldStartWith = "https://data.gov.dk/model/core/eid/professional";
+            if (Constants.ATTRIBUTE_PROFILE_PROFESSIONAL.equals(authnContextClassRef)) {
+                shouldStartWith = "https://data.gov.dk/model/core/eid/professional/";
                 break;
             }
         }
