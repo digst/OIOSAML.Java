@@ -1,5 +1,6 @@
 package dk.gov.oio.saml.session.inmemory;
 
+import dk.gov.oio.saml.service.BaseServiceTest;
 import dk.gov.oio.saml.model.NSISLevel;
 import dk.gov.oio.saml.service.AssertionService;
 import dk.gov.oio.saml.service.AuthnRequestService;
@@ -22,7 +23,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class InMemorySessionHandlerTest {
+class InMemorySessionHandlerTest extends BaseServiceTest {
     private static int TRACKED_SESSION_IDS = 2;
     private static NSISLevel NSIS_LEVEL = NSISLevel.SUBSTANTIAL;
     private static String SESSION_ID = "SESSION_ID";

@@ -1,5 +1,6 @@
 package dk.gov.oio.saml.servlet;
 
+import dk.gov.oio.saml.service.BaseServiceTest;
 import dk.gov.oio.saml.util.InternalException;
 import dk.gov.oio.saml.util.TestConstants;
 import java.io.IOException;
@@ -23,7 +24,7 @@ import org.opensaml.saml.saml2.metadata.impl.EntityDescriptorUnmarshaller;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-public class MetadataHandlerTest {
+public class MetadataHandlerTest extends BaseServiceTest {
 
     @DisplayName("Test that SP returns valid metadata from handler endpoint")
     @Test

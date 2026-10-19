@@ -1,5 +1,6 @@
 package dk.gov.oio.saml.servlet;
 
+import dk.gov.oio.saml.service.BaseServiceTest;
 import dk.gov.oio.saml.model.NSISLevel;
 import dk.gov.oio.saml.service.AuthnRequestService;
 import dk.gov.oio.saml.service.OIOSAML3Service;
@@ -28,7 +29,7 @@ import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.w3c.dom.Element;
 
-public class AssertionHandlerTest {
+public class AssertionHandlerTest extends BaseServiceTest {
 
     private HttpSession session;
 
