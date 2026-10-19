@@ -150,7 +150,7 @@ public class IdpUtil {
         status.setStatusCode(statusCode);
         response.setStatus(status);
 
-        Assertion assertion = createAssertion(issueInstant, subjectNameID, recipientEntityId, assertionConsumerUrl, specVersion);
+        Assertion assertion = createAssertion(issueInstant, subjectNameID, recipientEntityId, assertionConsumerUrl, inResponseToId, specVersion);
         SignAssertion(assertion, validSignature);
         if (encrypted) {
             EncryptedAssertion encryptedAssertion = encryptAssertion(assertion, validCert, dataAlgorithm, keyTransportAlgorithm);
@@ -444,7 +444,7 @@ public class IdpUtil {
         Signer.signObject(signature);
     }
 
-    private static Assertion createAssertion(DateTime issueInstant, String subjectNameID, String recipientEntityId, String assertionConsumerUrl, String specVersion) {
+    private static Assertion createAssertion(DateTime issueInstant, String subjectNameID, String recipientEntityId, String assertionConsumerUrl, String inResponseToId, String specVersion) {
         RandomIdentifierGenerationStrategy secureRandomIdGenerator = new RandomIdentifierGenerationStrategy();
         String id = secureRandomIdGenerator.generateIdentifier();
 
@@ -494,6 +494,7 @@ public class IdpUtil {
 
         SubjectConfirmationData subjectConfirmationData = buildSAMLObject(SubjectConfirmationData.class);
         subjectConfirmationData.setRecipient(assertionConsumerUrl);
+        subjectConfirmationData.setInResponseTo(inResponseToId);
         subjectConfirmationData.setNotOnOrAfter(new DateTime(issueInstant).plusMinutes(5));
 
         subjectConfirmation.setSubjectConfirmationData(subjectConfirmationData);
