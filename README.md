@@ -2,7 +2,7 @@
 
 OIOSAML.Java is a SAML 2.0 framework for Java, intended for use with NemLog-in3, but it can also be used as a generic SAML framework for Java.
 
-The framework supports the OIO SAML 3.0 profile and can generate `AuthnRequest`s and perform validation on SAML Assertions according to this profile. It works with **Java 11+** and requires a **Servlet 3.1** or later container.
+The framework supports the OIO SAML 3.0 profile and can generate `AuthnRequest`s and perform validation on SAML Assertions according to this profile. It runs on **Java 8** or later and requires a **Servlet 3.1** or later container. Building it from source requires JDK 11 or later.
 
 This document covers how to use and configure the OIOSAML.Java 3.x framework.
 
