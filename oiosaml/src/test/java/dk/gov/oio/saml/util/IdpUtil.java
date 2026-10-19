@@ -1,5 +1,6 @@
 package dk.gov.oio.saml.util;
 
+import org.opensaml.saml.common.SignableSAMLObject;
 import java.io.FileInputStream;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -187,6 +188,57 @@ public class IdpUtil {
         messageContext.getSubcontext(SecurityParametersContext.class, true).setSignatureSigningParameters(signatureSigningParameters);
 
         return messageContext;
+    }
+
+    /**
+     * Create a LogoutResponse as the IdP would send it.
+     *
+     * @param inResponseTo   ID of the LogoutRequest being answered
+     * @param signMessage    sign the LogoutResponse itself, as done for the POST binding
+     * @param validSignature sign with the IdP key from metadata, or with an unrelated key
+     */
+    public static LogoutResponse createIdpLogoutResponse(String inResponseTo, String destination, String statusCodeValue, String statusMessage, String issuerEntityID, boolean signMessage, boolean validSignature) throws Exception {
+        LogoutResponse logoutResponse = SamlHelper.build(LogoutResponse.class);
+        logoutResponse.setID(new RandomIdentifierGenerationStrategy().generateIdentifier());
+        logoutResponse.setDestination(destination);
+        logoutResponse.setIssueInstant(new DateTime());
+        logoutResponse.setInResponseTo(inResponseTo);
+
+        Issuer issuer = SamlHelper.build(Issuer.class);
+        issuer.setValue(issuerEntityID);
+        logoutResponse.setIssuer(issuer);
+
+        Status status = SamlHelper.build(Status.class);
+        StatusCode statusCode = SamlHelper.build(StatusCode.class);
+        statusCode.setValue(statusCodeValue);
+        status.setStatusCode(statusCode);
+        if (statusMessage != null) {
+            StatusMessage message = SamlHelper.build(StatusMessage.class);
+            message.setMessage(statusMessage);
+            status.setStatusMessage(message);
+        }
+        logoutResponse.setStatus(status);
+
+        if (signMessage) {
+            signMessage(logoutResponse, validSignature);
+        }
+        return logoutResponse;
+    }
+
+    private static void signMessage(SignableSAMLObject message, boolean validSignature) throws Exception {
+        Signature signature = buildSAMLObject(Signature.class);
+
+        BasicX509Credential x509Credential = getX509Credential(validSignature);
+
+        signature.setSigningCredential(x509Credential);
+        signature.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
+        signature.setSignatureAlgorithm(new SignatureRSASHA256().getURI());
+        signature.setKeyInfo(getPublicKeyInfo(x509Credential));
+
+        message.setSignature(signature);
+
+        XMLObjectSupport.marshall(message);
+        Signer.signObject(signature);
     }
 
     private static LogoutResponse createLogoutResponse(String destination, LogoutRequest logoutRequest, String statusCodeValue) throws InitializationException {
