@@ -48,7 +48,7 @@ public class AssertionWrapper implements Serializable {
     private String authnContextClassRef;
     private PrivilegeList privilegeList;
     private Map<String, String> attributeValues;
-    private boolean sessionExpired;
+    private DateTime sessionNotOnOrAfter;
     private DateTime confirmationTime;
     private DateTime conditionTimeNotBefore;
     private DateTime conditionTimeNotOnOrAfter;
@@ -127,11 +127,8 @@ public class AssertionWrapper implements Serializable {
                 AuthnStatement authnStatement = assertion.getAuthnStatements().get(0);
 
                 // isSessionExpired()
-                boolean sessionExpired = false;
-                if (authnStatement.getSessionNotOnOrAfter() != null) {
-                    sessionExpired = authnStatement.getSessionNotOnOrAfter().isBeforeNow();
-                }
-                this.sessionExpired = sessionExpired;
+                // Evaluated on each call, as the wrapper may be kept for the whole session
+                this.sessionNotOnOrAfter = authnStatement.getSessionNotOnOrAfter();
 
                 // getAuthnContextClassRef()
                 AuthnContext authnContext = authnStatement.getAuthnContext();
@@ -255,7 +252,7 @@ public class AssertionWrapper implements Serializable {
     }
 
     public boolean isSessionExpired() {
-        return sessionExpired;
+        return sessionNotOnOrAfter != null && !sessionNotOnOrAfter.isAfterNow();
     }
 
     public DateTime getConfirmationTime() {
