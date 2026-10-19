@@ -30,6 +30,7 @@ A security-hardening release. It is **not a drop-in replacement for 3.2.x**; rea
 - REF-18: Updated NemLog-in DevTest4 IdP metadata in the demo.
 - REF-27: The value of the `SpecVer` attribute is no longer validated, only its presence, so assertions issued under OIOSAML 4.0 are accepted.
 - REF-65: Unit tests no longer depend on the order in which test classes run.
+- REF-65: The demo SP uses a current OCES3 test certificate (`OIOSAML.Java SP and WSC`, valid until 2029-09-01); the previous one expired on 2026-08-17.
 
 ### Upgrading from 3.2.x
 - **IdP metadata must be a deployed file.** `oiosaml.servlet.idp.metadata.url` is no longer supported: download the IdP metadata, deploy it, and point `oiosaml.servlet.idp.metadata.file` at it. If only the URL is configured, the servlet refuses to start; if both are configured, the URL is ignored with a warning. Use an absolute filesystem path, so a replaced file takes effect without a redeploy.
