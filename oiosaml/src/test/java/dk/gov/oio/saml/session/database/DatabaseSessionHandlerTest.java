@@ -1,5 +1,6 @@
 package dk.gov.oio.saml.session.database;
 
+import dk.gov.oio.saml.service.BaseServiceTest;
 import dk.gov.oio.saml.model.NSISLevel;
 import dk.gov.oio.saml.service.AssertionService;
 import dk.gov.oio.saml.service.AuthnRequestService;
@@ -33,7 +34,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class DatabaseSessionHandlerTest {
+class DatabaseSessionHandlerTest extends BaseServiceTest {
     private static final Logger log = LoggerFactory.getLogger(DatabaseSessionHandlerTest.class);
     private static final NSISLevel NSIS_LEVEL = NSISLevel.SUBSTANTIAL;
     private static final String SESSION_ID = "SESSION_ID";
@@ -262,6 +263,19 @@ class DatabaseSessionHandlerTest {
             sessionHandler.storeAssertion(session, assertionWrapperInput);
         });
         Assertions.assertEquals(String.format("Assertion with id '%s' and session index '%s' is already registered",assertionWrapperInput.getID(), assertionWrapperInput.getSessionIndex()), exception.getMessage());
+    }
+
+    @DisplayName("Test that an Assertion already registered for one session leaves no assertion on another")
+    @Test
+    void testStoreAssertionReplayInOtherSession() throws Exception {
+        AssertionWrapper assertionWrapperInput = new AssertionWrapper(createAssertion());
+        sessionHandler.storeAssertion(session, assertionWrapperInput);
+
+        HttpSession otherSession = Mockito.mock(HttpSession.class);
+        Mockito.when(otherSession.getId()).thenReturn(SESSION_ID + "-other");
+
+        assertThrows(IllegalArgumentException.class, () -> sessionHandler.storeAssertion(otherSession, assertionWrapperInput));
+        Assertions.assertNull(sessionHandler.getAssertion(otherSession));
     }
 
     @DisplayName("Test stored missing LogoutRequest will exit")
