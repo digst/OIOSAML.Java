@@ -363,9 +363,9 @@ public class CRLChecker {
      * Whether the certificate is within its validity period, allowing for the configured clock skew the way
      * the freshness check on a CRL does.
      */
-    private static boolean isWithinValidityPeriod(X509Certificate certificate) {
+    public static boolean isWithinValidityPeriod(X509Certificate certificate) {
         long clockSkewMillis = 1000L * 60 * OIOSAML3Service.getConfig().getClockSkew();
-        long now = System.currentTimeMillis();
+        long now = org.joda.time.DateTimeUtils.currentTimeMillis();
 
         return certificate.getNotBefore().getTime() - clockSkewMillis <= now
                 && certificate.getNotAfter().getTime() + clockSkewMillis >= now;
