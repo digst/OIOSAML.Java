@@ -531,3 +531,9 @@ Run the script `misc/setup_prerequisites.ps1` from an elevated PowerShell. This 
 ### Running the integration test
 
 To run the integration test you need to have a `chromedriver.exe` executable in the folder `C:\tools\`.
+
+The integration test is skipped by default. Start the test IdP and the demo, then run it with:
+
+```
+mvn -pl integrationtest test -DskipIntegrationTest=false
+```
