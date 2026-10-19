@@ -29,8 +29,9 @@ public class ErrorHandler extends SAMLHandler {
 
         httpServletResponse.setContentType("text/html");
         
-        String page = errorPage.replace("{TYPE}", (String) httpServletRequest.getSession().getAttribute(Constants.SESSION_ERROR_TYPE))
-                                .replace("{MESSAGE}", (String) httpServletRequest.getSession().getAttribute(Constants.SESSION_ERROR_MESSAGE));
+        // The message can carry values from the request or from a SAML message, so it is never trusted as markup
+        String page = errorPage.replace("{TYPE}", StringUtil.htmlEscape((String) httpServletRequest.getSession().getAttribute(Constants.SESSION_ERROR_TYPE)))
+                                .replace("{MESSAGE}", StringUtil.htmlEscape((String) httpServletRequest.getSession().getAttribute(Constants.SESSION_ERROR_MESSAGE)));
 
         httpServletResponse.getWriter().print(page);
     }

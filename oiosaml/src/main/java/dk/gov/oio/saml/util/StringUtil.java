@@ -164,6 +164,29 @@ public class StringUtil {
         return sb.toString();
     }
 
+    /**
+     * Return a value that can be placed in HTML element content or a quoted attribute value.
+     * @param value input value
+     * @return HTML escaped output value, an empty string if value is null.
+     */
+    public static String htmlEscape(String value) {
+        if (null == value) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder(value.length());
+        for (char ch : value.toCharArray()) {
+            switch (ch) {
+                case '&': sb.append("&amp;"); break;
+                case '<': sb.append("&lt;"); break;
+                case '>': sb.append("&gt;"); break;
+                case '"': sb.append("&quot;"); break;
+                case '\'': sb.append("&#39;"); break;
+                default: sb.append(ch);
+            }
+        }
+        return sb.toString();
+    }
+
    /**
      * Check if input string is empty
      * @param input any string
