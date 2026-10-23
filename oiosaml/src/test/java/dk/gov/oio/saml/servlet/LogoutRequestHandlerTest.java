@@ -1,5 +1,6 @@
 package dk.gov.oio.saml.servlet;
 
+import dk.gov.oio.saml.service.BaseServiceTest;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -37,7 +38,7 @@ import dk.gov.oio.saml.service.OIOSAML3Service;
 import net.shibboleth.utilities.java.support.codec.Base64Support;
 import net.shibboleth.utilities.java.support.xml.SerializeSupport;
 
-public class LogoutRequestHandlerTest {
+public class LogoutRequestHandlerTest extends BaseServiceTest {
 
     private static final String NAME_ID = "https://data.gov.dk/model/core/eid/person/uuid/37a5a1aa-67ce-4f70-b7c0-b8e678d585f7";
 

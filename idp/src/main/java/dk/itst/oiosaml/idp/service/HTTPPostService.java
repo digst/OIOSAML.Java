@@ -244,6 +244,7 @@ public class HTTPPostService {
 
         SubjectConfirmationData subjectConfirmationData = samlBuilder.buildSAMLObject(SubjectConfirmationData.class);
         subjectConfirmationData.setRecipient(authnRequest.getAssertionConsumerServiceURL()); //i think this should be verified against metadata
+        subjectConfirmationData.setInResponseTo(authnRequest.getID());
         subjectConfirmationData.setNotOnOrAfter(new DateTime(issueInstant).plusMinutes(5));
 
         subjectConfirmation.setSubjectConfirmationData(subjectConfirmationData);

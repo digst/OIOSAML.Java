@@ -8,8 +8,25 @@
     <parent>
         <artifactId>oiosaml3-parent</artifactId>
         <groupId>dk.digst</groupId>
-        <version>3.2.3-SNAPSHOT</version>
+        <version>3.3.0-SNAPSHOT</version>
     </parent>
+
+    <properties>
+        <!-- The browser test needs ChromeDriver and the running demo and IdP, so it only runs when asked for -->
+        <skipIntegrationTest>true</skipIntegrationTest>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>${skipIntegrationTest}</skipTests>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <dependencies>
 

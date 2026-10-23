@@ -5,9 +5,9 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 
 import dk.gov.oio.saml.util.ResourceUtil;
@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.bouncycastle.util.encoders.Base64;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.criterion.EntityIdCriterion;
 import org.opensaml.saml.common.xml.SAMLConstants;
@@ -38,12 +39,15 @@ import net.shibboleth.utilities.java.support.xml.BasicParserPool;
 
 public class IdPMetadata {
     private static final Logger log = LoggerFactory.getLogger(IdPMetadata.class);
-    private List<X509Certificate> validEncryptionCertificates = new ArrayList<>();
-    private List<X509Certificate> validSigningCertificates = new ArrayList<>();
-    private List<X509Certificate> validUnspecifiedCertificates = new ArrayList<>();
+    // Revocation is checked again after this long, so a certificate revoked while the SP runs is dropped
+    private static final Duration RECHECK_INTERVAL = Duration.standardHours(1);
+    // Retry soon when a check validated nothing, so a short outage of OCSP/CRL does not block login for an hour
+    private static final Duration RETRY_INTERVAL = Duration.standardMinutes(1);
+
+    private volatile ValidCertificates validCertificates;
     private String metadataFilePath;
     private AbstractReloadingMetadataResolver resolver;
-    private DateTime lastCRLCheck;
+    private volatile DateTime lastCRLCheck;
     private String entityId;
 
     public IdPMetadata(String entityId, String metadataFilePath) throws ExternalException, InternalException {
@@ -92,17 +96,21 @@ public class IdPMetadata {
      */
     public List<X509Certificate> getValidX509Certificates(UsageType usageType) throws InternalException, ExternalException {
         doRevocationCheck();
+        ValidCertificates valid = validCertificates;
 
         List<X509Certificate> result = new ArrayList<>();
         if (UsageType.ENCRYPTION.equals(usageType)) {
-            result.addAll(validEncryptionCertificates);
+            result.addAll(valid.encryption);
         }
         else if (UsageType.SIGNING.equals(usageType)) {
-            result.addAll(validSigningCertificates);
+            result.addAll(valid.signing);
         }
 
         // Certificates published without a usage serve both purposes
-        result.addAll(validUnspecifiedCertificates);
+        result.addAll(valid.unspecified);
+
+        // A certificate that expires while the SP runs must stop being trusted at once, not at the next check
+        result.removeIf(certificate -> !CRLChecker.isWithinValidityPeriod(certificate));
 
         return result;
     }
@@ -172,55 +180,88 @@ public class IdPMetadata {
     }
 
     private void doRevocationCheck() throws ExternalException, InternalException {
-        Configuration config = OIOSAML3Service.getConfig();
-        if (config.isCRLCheckEnabled() || config.isOcspCheckEnabled()) {
-            DateTime lastUpdate = resolver.getLastUpdate();
+        if (!isRevocationCheckDue()) {
+            return;
+        }
 
-            if (lastCRLCheck == null || (lastUpdate != null && lastUpdate.isAfter(lastCRLCheck))) {
-                try {
-                    // Encryption
-                    Set<X509Certificate> validEncryptionCertificates = CRLChecker.checkCertificates(getAllX509CertificatesWithUsageType(UsageType.ENCRYPTION));
-                    this.validEncryptionCertificates.clear();
-                    if (validEncryptionCertificates != null) {
-                        this.validEncryptionCertificates.addAll(validEncryptionCertificates);
-                    }
+        synchronized (this) {
+            if (!isRevocationCheckDue()) {
+                return;
+            }
 
-                    // Signing
-                    Set<X509Certificate> validSigningCertificates = CRLChecker.checkCertificates(getAllX509CertificatesWithUsageType(UsageType.SIGNING));
-                    this.validSigningCertificates.clear();
-                    if (validSigningCertificates != null) {
-                        this.validSigningCertificates.addAll(validSigningCertificates);
-                    }
-
-                    // Unspecified
-                    Set<X509Certificate> validUnspecifiedCertificates = CRLChecker.checkCertificates(getAllX509CertificatesWithUsageType(UsageType.UNSPECIFIED));
-                    Set<X509Certificate> validNullCertificates = CRLChecker.checkCertificates(getAllX509CertificatesWithUsageType(null));
-                    this.validUnspecifiedCertificates.clear();
-
-                    if (validUnspecifiedCertificates != null) {
-                        this.validUnspecifiedCertificates.addAll(validUnspecifiedCertificates);
-                    }
-
-                    if (validNullCertificates != null) {
-                        this.validUnspecifiedCertificates.addAll(validNullCertificates);
-                    }
-
-                    lastCRLCheck = DateTime.now();
+            DateTime now = DateTime.now();
+            Configuration config = OIOSAML3Service.getConfig();
+            ValidCertificates checked;
+            try {
+                if (config.isCRLCheckEnabled() || config.isOcspCheckEnabled()) {
+                    List<X509Certificate> unspecified = new ArrayList<>(CRLChecker.checkCertificates(getAllX509CertificatesWithUsageType(UsageType.UNSPECIFIED)));
+                    unspecified.addAll(CRLChecker.checkCertificates(getAllX509CertificatesWithUsageType(null)));
+                    checked = new ValidCertificates(
+                            new ArrayList<>(CRLChecker.checkCertificates(getAllX509CertificatesWithUsageType(UsageType.ENCRYPTION))),
+                            new ArrayList<>(CRLChecker.checkCertificates(getAllX509CertificatesWithUsageType(UsageType.SIGNING))),
+                            unspecified,
+                            now.plus(RECHECK_INTERVAL));
                 }
-                catch (ExternalException | InternalException | InitializationException e) {
-                    log.warn("CRL check failed", e);
-                    return;
+                else {
+                    // Without revocation checking, every certificate in the metadata within its validity period is valid
+                    log.warn("Revocation checking of IdP certificates is disabled");
+                    List<X509Certificate> unspecified = getAllX509CertificatesWithUsageType(UsageType.UNSPECIFIED);
+                    unspecified.addAll(getAllX509CertificatesWithUsageType(null));
+                    checked = new ValidCertificates(getAllX509CertificatesWithUsageType(UsageType.ENCRYPTION),
+                            getAllX509CertificatesWithUsageType(UsageType.SIGNING), unspecified, now.plus(RECHECK_INTERVAL));
                 }
             }
-        }
-        else {
-            // If revocation is disabled, all certificates from the metadata is treated as valid
-            validEncryptionCertificates = getAllX509CertificatesWithUsageType(UsageType.ENCRYPTION);
-            validSigningCertificates = getAllX509CertificatesWithUsageType(UsageType.SIGNING);
+            catch (ExternalException | InternalException | InitializationException e) {
+                log.warn("Revocation check of IdP certificates failed, retrying in {}", RETRY_INTERVAL, e);
+                ValidCertificates previous = validCertificates;
+                validCertificates = (previous != null) ? previous.retryAt(now.plus(RETRY_INTERVAL)) : ValidCertificates.none(now.plus(RETRY_INTERVAL));
+                return;
+            }
 
-            List<X509Certificate> validUnspecified = getAllX509CertificatesWithUsageType(UsageType.UNSPECIFIED);
-            validUnspecified.addAll(getAllX509CertificatesWithUsageType(null));
-            validUnspecifiedCertificates = validUnspecified;
+            if (checked.signing.isEmpty() && checked.unspecified.isEmpty()) {
+                log.warn("No IdP signing certificate passed revocation checking, retrying in {}", RETRY_INTERVAL);
+                checked = checked.retryAt(now.plus(RETRY_INTERVAL));
+            }
+
+            validCertificates = checked;
+            lastCRLCheck = now;
+        }
+    }
+
+    private boolean isRevocationCheckDue() {
+        ValidCertificates valid = validCertificates;
+        if (valid == null || !valid.nextCheck.isAfterNow()) {
+            return true;
+        }
+
+        // A replaced metadata file is checked at once
+        DateTime lastUpdate = resolver.getLastUpdate();
+        return lastUpdate != null && lastCRLCheck != null && lastUpdate.isAfter(lastCRLCheck);
+    }
+
+    /**
+     * The certificates that passed the last revocation check, replaced as a whole so readers never see a
+     * partly updated set.
+     */
+    private static final class ValidCertificates {
+        private final List<X509Certificate> encryption;
+        private final List<X509Certificate> signing;
+        private final List<X509Certificate> unspecified;
+        private final DateTime nextCheck;
+
+        private ValidCertificates(List<X509Certificate> encryption, List<X509Certificate> signing, List<X509Certificate> unspecified, DateTime nextCheck) {
+            this.encryption = Collections.unmodifiableList(new ArrayList<>(encryption));
+            this.signing = Collections.unmodifiableList(new ArrayList<>(signing));
+            this.unspecified = Collections.unmodifiableList(new ArrayList<>(unspecified));
+            this.nextCheck = nextCheck;
+        }
+
+        private ValidCertificates retryAt(DateTime retry) {
+            return new ValidCertificates(encryption, signing, unspecified, retry);
+        }
+
+        private static ValidCertificates none(DateTime retry) {
+            return new ValidCertificates(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), retry);
         }
     }
 

@@ -159,6 +159,8 @@ public class AssertionValidationService {
 
         validateIssuer(assertion);
 
+        validateSubjectConfirmationInResponseTo(assertion, authnRequest);
+
         // specific OIOSAML 3.0 validation is configurable, and can be disabled
         Configuration config = OIOSAML3Service.getConfig();
         if (config.isValidationEnabled()) {
@@ -318,6 +320,34 @@ public class AssertionValidationService {
 
         if (!found) {
             throw new AssertionValidationException("The assertion MUST contain an AudienceRestriction including the ServiceProvider's unique identifier as an Audience");
+        }
+    }
+
+    /**
+     * The Response's own InResponseTo is not signed, so it does not tie the assertion to the AuthnRequest. The
+     * bearer SubjectConfirmationData inside the signed assertion does (SAML profiles 4.1.4.2), and is required
+     * whether or not the configurable OIOSAML validation is enabled.
+     */
+    private void validateSubjectConfirmationInResponseTo(Assertion assertion, AuthnRequestWrapper authnRequest) throws AssertionValidationException {
+        Subject subject = assertion.getSubject();
+        boolean bearerFound = false;
+
+        if (subject != null) {
+            for (SubjectConfirmation subjectConfirmation : subject.getSubjectConfirmations()) {
+                if (!SubjectConfirmation.METHOD_BEARER.equals(subjectConfirmation.getMethod())) {
+                    continue;
+                }
+                bearerFound = true;
+
+                SubjectConfirmationData data = subjectConfirmation.getSubjectConfirmationData();
+                if (data == null || !java.util.Objects.equals(authnRequest.getId(), data.getInResponseTo())) {
+                    throw new AssertionValidationException("SubjectConfirmationData InResponseTo does not match the AuthnRequest ID");
+                }
+            }
+        }
+
+        if (!bearerFound) {
+            throw new AssertionValidationException("The Subject element MUST contain a SubjectConfirmation with confirmation method urn:oasis:names:tc:SAML:2.0:cm:bearer");
         }
     }
 

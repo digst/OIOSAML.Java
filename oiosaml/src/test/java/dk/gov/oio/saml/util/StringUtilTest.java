@@ -1,5 +1,6 @@
 package dk.gov.oio.saml.util;
 
+import dk.gov.oio.saml.service.BaseServiceTest;
 import dk.gov.oio.saml.model.NSISLevel;
 import dk.gov.oio.saml.service.AssertionService;
 import dk.gov.oio.saml.service.AuthnRequestService;
@@ -17,7 +18,7 @@ import org.w3c.dom.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.UUID;
 
-class StringUtilTest {
+class StringUtilTest extends BaseServiceTest {
 
     @DisplayName("Test that URL consist of servlet context + page input")
     @Test

@@ -116,13 +116,19 @@ public class DatabaseSessionHandler implements SessionHandler {
         try (Connection connection=ds.getConnection()){
             connection.setAutoCommit(true);
 
-            try(PreparedStatement ps = connection.prepareStatement("SELECT '1' FROM replay_tbl WHERE assertion_id = ?")) {
+            // Claiming the assertion ID comes first and relies on the primary key, so that of two concurrent
+            // requests with the same assertion exactly one gets past this point
+            log.debug("Add replay entry for assertion '{}'", assertion.getID());
+            try(PreparedStatement ps = connection.prepareStatement("INSERT INTO replay_tbl (assertion_id, access_time) VALUES (?,?)")) {
                 ps.setString(1, assertion.getID());
-                try(ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        throw new IllegalArgumentException(String.format("Assertion with id '%s' and session index '%s' is already registered", assertion.getID(), assertion.getSessionIndex()));
-                    }
+                ps.setTimestamp(2, Timestamp.valueOf(java.time.LocalDateTime.now(Clock.systemDefaultZone())));
+                ps.executeUpdate();
+            }
+            catch (SQLException e) {
+                if (e instanceof SQLIntegrityConstraintViolationException || (e.getSQLState() != null && e.getSQLState().startsWith("23"))) {
+                    throw new IllegalArgumentException(String.format("Assertion with id '%s' and session index '%s' is already registered", assertion.getID(), assertion.getSessionIndex()));
                 }
+                throw e;
             }
 
             AssertionWrapper existingAssertion = getAssertion(session);
@@ -147,13 +153,6 @@ public class DatabaseSessionHandler implements SessionHandler {
                 ps.setString(4, assertion.getSubjectNameId());
                 ps.setTimestamp(5, Timestamp.valueOf(java.time.LocalDateTime.now(Clock.systemDefaultZone())));
                 ps.setClob(6, new StringReader(assertion.getAssertionAsBase64()));
-                ps.executeUpdate();
-            }
-
-            log.debug("Add replay entry for assertion '{}'", assertion.getID());
-            try(PreparedStatement ps = connection.prepareStatement("INSERT INTO replay_tbl (assertion_id, access_time) VALUES (?,?)")) {
-                ps.setString(1, assertion.getID());
-                ps.setTimestamp(2, Timestamp.valueOf(java.time.LocalDateTime.now(Clock.systemDefaultZone())));
                 ps.executeUpdate();
             }
 

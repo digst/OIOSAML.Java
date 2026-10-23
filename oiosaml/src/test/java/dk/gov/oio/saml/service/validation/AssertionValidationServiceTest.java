@@ -96,6 +96,32 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
         validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL, ""));
     }
 
+    @DisplayName("Test that validator fails an assertion whose SubjectConfirmationData answers another AuthnRequest")
+    @Test
+    public void testFailAssertionIssuedForOtherAuthnRequest() throws Exception {
+        AssertionValidationService validationService = new AssertionValidationService();
+
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getRequestURL()).thenReturn(new StringBuffer(TestConstants.SP_ASSERTION_CONSUMER_URL));
+
+        AuthnRequestService authnRequestService = AuthnRequestService.getInstance();
+        AuthnRequest issuedFor = getAuthnRequest(authnRequestService);
+        AuthnRequest pending = getAuthnRequest(authnRequestService);
+
+        String nameID = "https://data.gov.dk/model/core/eid/person/uuid/37a5a1aa-67ce-4f70-b7c0-b8e678d585f7";
+        MessageContext<SAMLObject> messageContext = IdpUtil.createMessageWithAssertion(true, true, true, nameID, TestConstants.SP_ENTITY_ID, TestConstants.SP_ASSERTION_CONSUMER_URL, issuedFor.getID());
+        Response response = (Response) messageContext.getMessage();
+
+        // The Response element is not signed, so its InResponseTo alone does not bind the assertion
+        response.setInResponseTo(pending.getID());
+
+        Assertion assertion = new AssertionService().getAssertion(response);
+
+        Assertions.assertThrows(AssertionValidationException.class, () -> {
+            validationService.validate(request, messageContext, response, assertion, new AuthnRequestWrapper(pending, NSISLevel.SUBSTANTIAL, ""));
+        });
+    }
+
     @DisplayName("Test that validator will fail an assertion without a specVersion attribute")
     @Test
     public void testFailAssertionWithoutSpecVersion() throws Exception {

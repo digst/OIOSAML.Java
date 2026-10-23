@@ -13,7 +13,10 @@ import org.opensaml.saml.saml2.core.LogoutResponse;
 import org.opensaml.saml.saml2.core.StatusCode;
 
 import dk.gov.oio.saml.config.Configuration;
+import dk.gov.oio.saml.service.LogoutResponseService;
 import dk.gov.oio.saml.service.OIOSAML3Service;
+import dk.gov.oio.saml.session.LogoutRequestWrapper;
+import dk.gov.oio.saml.session.SessionHandler;
 import dk.gov.oio.saml.servlet.ErrorHandler.ERROR_TYPE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +41,17 @@ public class LogoutResponseHandler extends SAMLHandler {
     
     private void handle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, MessageContext<SAMLObject> context) throws IOException, ExternalException, InternalException {
         LogoutResponse logoutResponse = getSamlObject(context, LogoutResponse.class);
+
+        // Nothing in the response may be acted on before it is known to answer our request and to come from the IdP
+        SessionHandler sessionHandler = OIOSAML3Service.getSessionHandlerFactory().getHandler();
+        LogoutRequestWrapper sentLogoutRequest = sessionHandler.getLogoutRequest(httpServletRequest.getSession());
+        try {
+            LogoutResponseService.validateLogoutResponse(httpServletRequest, context, logoutResponse, sentLogoutRequest);
+        }
+        finally {
+            // The session only existed to carry the LogoutRequest; a response is accepted at most once
+            httpServletRequest.getSession().invalidate();
+        }
 
         String statusCode = null;
         String statusMessage = null;

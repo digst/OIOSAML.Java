@@ -14,7 +14,3 @@ mem.lobs
 mem.log
 mem.properties
 mem.script
-
-# Local-only working notes (not for the shared repo)
-CLAUDE.md
-TODO.md

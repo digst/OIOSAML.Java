@@ -121,6 +121,9 @@ public class LogoutRequestHandler extends SAMLHandler {
             MessageContext<SAMLObject> messageContext = LogoutRequestService.createMessageWithLogoutRequest(assertion.getSubjectNameId(), assertion.getSubjectNameIdFormat(), location, assertion.getSessionIndex());
             LogoutRequestWrapper logoutRequest = new LogoutRequestWrapper(getSamlObject(messageContext, LogoutRequest.class));
 
+            // Kept on a fresh session so the IdP's LogoutResponse can be matched to this request
+            sessionHandler.storeLogoutRequest(httpServletRequest.getSession(true), logoutRequest);
+
             OIOSAML3Service.getAuditService().auditLog(AuditRequestUtil
                     .createBasicAuditBuilder(httpServletRequest, "SLO2", "OutgoingLogoutRequest")
                     .withAuthnAttribute("SP_SESSION_ID", sessionId)
