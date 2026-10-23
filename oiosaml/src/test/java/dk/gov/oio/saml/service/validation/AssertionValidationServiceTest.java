@@ -10,6 +10,7 @@ import dk.gov.oio.saml.session.AuthnRequestWrapper;
 import dk.gov.oio.saml.util.ExternalException;
 import dk.gov.oio.saml.util.IdpUtil;
 import dk.gov.oio.saml.util.SamlHelper;
+import dk.gov.oio.saml.util.Constants;
 import dk.gov.oio.saml.util.TestConstants;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -528,6 +529,38 @@ public class AssertionValidationServiceTest extends BaseServiceTest {
             validationService.validate(request, messageContext, response, unboundAssertion, new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL, ""));
         });
         Assertions.assertTrue(exception.getMessage().toLowerCase().contains("signature"), "Expected the signature validation to reject the assertion, but failed with: " + exception.getMessage());
+    }
+
+    @DisplayName("Test that validator will pass a professional NameID when the professional profile was requested")
+    @Test
+    public void testValidateRequestedProfessionalProfile() throws Exception {
+        validateWithRequestedProfile(Constants.ATTRIBUTE_PROFILE_PROFESSIONAL, "https://data.gov.dk/model/core/eid/professional/uuid/37a5a1aa-67ce-4f70-b7c0-b8e678d585f7");
+    }
+
+    @DisplayName("Test that validator will fail a person NameID when the professional profile was requested")
+    @Test
+    public void testFailPersonWhenProfessionalProfileRequested() {
+        Assertions.assertThrows(AssertionValidationException.class, () ->
+                validateWithRequestedProfile(Constants.ATTRIBUTE_PROFILE_PROFESSIONAL, "https://data.gov.dk/model/core/eid/person/uuid/37a5a1aa-67ce-4f70-b7c0-b8e678d585f7"));
+    }
+
+    @DisplayName("Test that validator will fail a professional NameID when the person profile was requested")
+    @Test
+    public void testFailProfessionalWhenPersonProfileRequested() {
+        Assertions.assertThrows(AssertionValidationException.class, () ->
+                validateWithRequestedProfile(Constants.ATTRIBUTE_PROFILE_PERSON, "https://data.gov.dk/model/core/eid/professional/uuid/37a5a1aa-67ce-4f70-b7c0-b8e678d585f7"));
+    }
+
+    private static void validateWithRequestedProfile(String attributeProfile, String nameID) throws Exception {
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getRequestURL()).thenReturn(new StringBuffer(TestConstants.SP_ASSERTION_CONSUMER_URL));
+
+        AuthnRequest authnRequest = AuthnRequestService.getInstance().createAuthnRequest(TestConstants.SP_ASSERTION_CONSUMER_URL, false, false, NSISLevel.SUBSTANTIAL, attributeProfile, null);
+        MessageContext<SAMLObject> messageContext = IdpUtil.createMessageWithAssertion(true, true, true, nameID, TestConstants.SP_ENTITY_ID, TestConstants.SP_ASSERTION_CONSUMER_URL, authnRequest.getID());
+        Response response = (Response) messageContext.getMessage();
+        Assertion assertion = new AssertionService().getAssertion(response);
+
+        new AssertionValidationService().validate(request, messageContext, response, assertion, new AuthnRequestWrapper(authnRequest, NSISLevel.SUBSTANTIAL, ""));
     }
 
     /**

@@ -476,6 +476,10 @@ public class IdpUtil {
             attributes.add(createSimpleAttribute(Constants.SPEC_VER, specVersion));
         }
         attributes.add(createSimpleAttribute("https://data.gov.dk/concept/core/nsis/loa", NSISLevel.SUBSTANTIAL.getName()));
+        if (subjectNameID.startsWith("https://data.gov.dk/model/core/eid/professional/")) {
+            attributes.add(createSimpleAttribute(Constants.CVR_NUMBER, "12345678"));
+            attributes.add(createSimpleAttribute(Constants.ORGANIZATION_NAME, "Test Organisation"));
+        }
         assertion.getAttributeStatements().add(attributeStatement);
 
         Issuer issuer = buildSAMLObject(Issuer.class);
