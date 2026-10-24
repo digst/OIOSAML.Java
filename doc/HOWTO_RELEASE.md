@@ -7,7 +7,7 @@ Only the library module, `oiosaml` (artifact `dk.digst:oiosaml3.java`), is publi
 ### Central Portal access
 
 1. Sign in at https://central.sonatype.com. Sonatype's old OSSRH accounts at `issues.sonatype.org` are retired.
-2. Have an existing publisher for the `dk.digst` namespace give your account publishing rights.
+2. Get publishing rights for the `dk.digst` namespace. The Central Portal has no self-service invite: an existing `dk.digst` publisher asks Central Support (https://central.sonatype.org/pages/support/) to add your Portal username, writing from the email address of their own publisher account. The namespace is verified, so Sonatype reviews the request by hand; allow a few days.
 3. Generate a **Portal user token** (https://central.sonatype.com/usertoken) and add it to `~/.m2/settings.xml`. The server id must be `ossrh`, as in `distributionManagement` in `oiosaml/pom.xml`:
 
 ```xml
@@ -78,14 +78,14 @@ cd oiosaml
 mvn -B deploy -Psign -DskipTests     # tests ran in the previous step
 ```
 
-`-Psign` signs the jar, sources jar, javadoc jar and POM. Make sure the version is not a `-SNAPSHOT`: snapshots go to the snapshot repository without any review.
+`-Psign` signs the jar, sources jar, javadoc jar and POM. Make sure the version is not a `-SNAPSHOT`: snapshots go to the snapshot repository without any review (if snapshots are enabled for `dk.digst` in the Central Portal; otherwise the deploy fails).
 
 ### 4. Publish on Sonatype
 
 The deploy leaves the artifacts in a staging repository. The manual endpoints authenticate with the Portal user token as a bearer token:
 
 ```bash
-TOKEN=$(printf '%s:%s' '<token username>' '<token password>' | base64)
+TOKEN=$(printf '%s:%s' '<token username>' '<token password>' | base64 | tr -d '\n')
 ```
 
 1. Find the repository key:
@@ -115,7 +115,7 @@ The release reaches Maven Central within minutes to hours; https://mvnrepository
 If the staging repository holds the wrong content, drop it before publishing:
 
 ```bash
-curl -H "Authorization: Bearer $TOKEN" -X DELETE "https://ossrh-staging-api.central.sonatype.com/manual/upload/repository/<REPO KEY>"
+curl -H "Authorization: Bearer $TOKEN" -X DELETE "https://ossrh-staging-api.central.sonatype.com/manual/drop/repository/<REPO KEY>"
 ```
 
 ### 5. After the release

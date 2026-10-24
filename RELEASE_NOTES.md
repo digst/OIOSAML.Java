@@ -11,6 +11,7 @@ A security-hardening release. It is **not a drop-in replacement for 3.2.x**; rea
 - REF-31: CRLs and OCSP responses are verified before they are trusted, and an issuing CA certificate fetched for revocation checking must have issued the certificate being checked.
 - REF-32: Document type declarations are rejected when parsing OIOBPP privileges, and the JAXB runtime is replaced.
 - REF-33: IdP metadata is read from a deployed file, and a signature made with any signing certificate published in it is accepted, so the IdP can rotate its signing key without an SP outage.
+- REF-47: When a professional identity is requested (`oiosaml.filter.attribute.profile`), the assertion's NameID must be a professional identifier. Previously only a person request had its NameID checked.
 - REF-65:
   - Incoming LogoutResponses must answer the LogoutRequest sent from the session, come from the configured IdP, be signed by it and name this SP's logout response endpoint as Destination.
   - The assertion must be bound to the AuthnRequest by the signed `SubjectConfirmationData/@InResponseTo` (SAML profiles 4.1.4.2); the unsigned `Response/@InResponseTo` alone is no longer sufficient.

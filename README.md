@@ -49,7 +49,7 @@ Available on [Maven Central](https://mvnrepository.com/artifact/dk.digst/oiosaml
 
 | OIO SAML profile | Latest Maven release |
 |------------------|----------------------|
-| 3.0.2            | 3.2.2                |
+| 3.0.2            | 3.3.0                |
 
 Available on [Maven Central](https://mvnrepository.com/artifact/dk.digst/oiosaml3.java).
 
@@ -269,7 +269,7 @@ OIOSAML is released as a publicly available Maven dependency and can be included
 <dependency>
     <groupId>dk.digst</groupId>
     <artifactId>oiosaml3.java</artifactId>
-    <version>3.2.2</version>
+    <version>3.3.0</version>
 </dependency>
 ```
 
