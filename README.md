@@ -49,7 +49,7 @@ Available on [Maven Central](https://mvnrepository.com/artifact/dk.digst/oiosaml
 
 | OIO SAML profile | Latest Maven release |
 |------------------|----------------------|
-| 3.0.2            | 3.3.0                |
+| 3.0.2            | 3.3.1                |
 
 Available on [Maven Central](https://mvnrepository.com/artifact/dk.digst/oiosaml3.java).
 
@@ -269,7 +269,7 @@ OIOSAML is released as a publicly available Maven dependency and can be included
 <dependency>
     <groupId>dk.digst</groupId>
     <artifactId>oiosaml3.java</artifactId>
-    <version>3.3.0</version>
+    <version>3.3.1</version>
 </dependency>
 ```
 
@@ -347,19 +347,19 @@ Bridging JCL and Log4j to SLF4J is done by including these dependencies in the d
 <dependency>
     <groupId>org.slf4j</groupId>
     <artifactId>slf4j-api</artifactId>
-    <version>1.7.32</version>
+    <version>1.7.36</version>
 </dependency>
 
 <dependency>
     <groupId>org.slf4j</groupId>
     <artifactId>jcl-over-slf4j</artifactId>
-    <version>1.7.32</version>
+    <version>1.7.36</version>
 </dependency>
 
 <dependency>
     <groupId>org.slf4j</groupId>
     <artifactId>log4j-over-slf4j</artifactId>
-    <version>1.7.32</version>
+    <version>1.7.36</version>
 </dependency>
 ```
 
@@ -371,7 +371,7 @@ To write logging using Log4j 2 like in the demo project, just add this dependenc
 <dependency>
     <groupId>org.apache.logging.log4j</groupId>
     <artifactId>log4j-slf4j-impl</artifactId>
-    <version>2.14.1</version>
+    <version>2.26.1</version>
 </dependency>
 ```
 
