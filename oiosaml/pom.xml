@@ -6,7 +6,7 @@
     <artifactId>oiosaml3.java</artifactId>
     <name>OIOSAML for Java v3</name>
     <packaging>jar</packaging>
-    <version>3.3.1-SNAPSHOT</version>
+    <version>3.3.1</version>
     <description>SAML 2.0 Service Provider servlet filter for the Danish OIOSAML 3.0 profile</description>
     <url>https://github.com/digst/OIOSAML.Java</url>
 

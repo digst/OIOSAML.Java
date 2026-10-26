@@ -1,6 +1,6 @@
 # OIO SAML 3 (Artifact ID: oiosaml3.java)
 
-## 3.3.1 (unreleased)
+## 3.3.1
 A maintenance release with a fix and updated dependencies. It is a drop-in replacement for 3.3.0; see *Dependencies* for the Bouncy Castle artifact. Login and logout were verified against NemLog-in DevTest4 on 2026-10-26.
 
 ### Fixes
