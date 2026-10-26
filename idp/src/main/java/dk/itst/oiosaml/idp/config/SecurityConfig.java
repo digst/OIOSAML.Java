@@ -15,7 +15,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .mvcMatchers("/saml/**").permitAll()
-                .mvcMatchers("/webjars/**").permitAll()
                 .anyRequest().denyAll();
     }
 }
