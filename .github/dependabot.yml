@@ -19,6 +19,15 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "org.springframework.boot:*"
         update-types: ["version-update:semver-major"]
+      # JUnit 6 needs Java 17; CI builds on JDK 11. The versions come from junit-bom.
+      - dependency-name: "org.junit:*"
+        update-types: ["version-update:semver-major"]
+      # SLF4J 2 finds its binding differently; integrators' SLF4J 1.7 bindings would stop working.
+      - dependency-name: "org.slf4j:*"
+        update-types: ["version-update:semver-major"]
+      # Bootstrap and jQuery for the demo IdP's pages; a major version means reworking the pages.
+      - dependency-name: "org.webjars:*"
+        update-types: ["version-update:semver-major"]
     groups:
       # One PR for all minor and patch updates; major updates and security updates get their own.
       minor-and-patch:
