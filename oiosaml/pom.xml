@@ -69,7 +69,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.16.0</version>
                 <configuration>
                     <!-- Build runs on JDK 11+, but the published artifact must stay
                          runnable on Java 8 consumers. release=8 compiles against the
@@ -81,7 +81,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-eclipse-plugin</artifactId>
-                <version>2.9</version>
+                <version>2.10</version>
                 <configuration>
                     <downloadSources>true</downloadSources>
                     <downloadJavadocs>true</downloadJavadocs>
@@ -91,7 +91,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.1</version>
+                <version>3.4.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -139,7 +139,7 @@
         <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml-core</artifactId>
-            <version>3.4.5</version>
+            <version>3.4.6</version>
             <exclusions>
                 <!-- Replaced by bcprov-jdk18on below -->
                 <exclusion>
@@ -152,7 +152,7 @@
         <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml-saml-impl</artifactId>
-            <version>3.4.5</version>
+            <version>3.4.6</version>
             <exclusions>
                 <!-- Replaced by bcprov-jdk18on below -->
                 <exclusion>
@@ -165,7 +165,7 @@
         <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml-messaging-impl</artifactId>
-            <version>3.4.5</version>
+            <version>3.4.6</version>
             <exclusions>
                 <!-- Replaced by bcprov-jdk18on below -->
                 <exclusion>
@@ -178,7 +178,7 @@
         <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml-security-api</artifactId>
-            <version>3.4.5</version>
+            <version>3.4.6</version>
             <exclusions>
                 <!-- Replaced by bcprov-jdk18on below -->
                 <exclusion>
@@ -206,7 +206,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.32</version>
+            <version>1.7.36</version>
         </dependency>
 
         <dependency>
@@ -267,7 +267,7 @@
         <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
-            <version>2.7.1</version>
+            <version>2.7.4</version>
             <scope>test</scope>
         </dependency>
 
@@ -275,21 +275,21 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-nop</artifactId>
-            <version>1.7.32</version>
+            <version>1.7.36</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
-            <version>1.7.32</version>
+            <version>1.7.36</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>log4j-over-slf4j</artifactId>
-            <version>1.7.32</version>
+            <version>1.7.36</version>
             <scope>test</scope>
         </dependency>
 
