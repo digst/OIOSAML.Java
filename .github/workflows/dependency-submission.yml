@@ -1,0 +1,30 @@
+# Submits the resolved Maven dependency tree, including transitive dependencies, to the GitHub
+# dependency graph. Without it, Dependabot alerts only cover the dependencies declared in the poms.
+name: Dependency submission
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 11 (Temurin)
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '11'
+          cache: maven
+
+      - name: Submit the dependency tree
+        uses: advanced-security/maven-dependency-submission-action@v6

@@ -36,6 +36,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8.0</java.version>
         <maven.deploy.skip>false</maven.deploy.skip>
+        <bouncycastle.version>1.86</bouncycastle.version>
     </properties>
 
     <profiles>
@@ -126,24 +127,60 @@
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml-core</artifactId>
             <version>3.4.5</version>
+            <exclusions>
+                <!-- Replaced by bcprov-jdk18on below -->
+                <exclusion>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>bcprov-jdk15on</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml-saml-impl</artifactId>
             <version>3.4.5</version>
+            <exclusions>
+                <!-- Replaced by bcprov-jdk18on below -->
+                <exclusion>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>bcprov-jdk15on</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml-messaging-impl</artifactId>
             <version>3.4.5</version>
+            <exclusions>
+                <!-- Replaced by bcprov-jdk18on below -->
+                <exclusion>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>bcprov-jdk15on</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml-security-api</artifactId>
             <version>3.4.5</version>
+            <exclusions>
+                <!-- Replaced by bcprov-jdk18on below -->
+                <exclusion>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>bcprov-jdk15on</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- OpenSAML 3.4.5 depends on bcprov-jdk15on 1.59, whose line ended at 1.70. It is excluded from
+             each OpenSAML dependency above and replaced by the current bcprov-jdk18on (same packages, Java 8+) -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>${bouncycastle.version}</version>
         </dependency>
 
         <dependency>
@@ -174,11 +211,11 @@
             <version>2.3.9</version>
         </dependency>
 
-        <!-- Used by the tests to mint a CA, certificates and CRLs, bcprov itself comes in through OpenSAML -->
+        <!-- Used by the tests to mint a CA, certificates and CRLs -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
-            <artifactId>bcpkix-jdk15on</artifactId>
-            <version>1.59</version>
+            <artifactId>bcpkix-jdk18on</artifactId>
+            <version>${bouncycastle.version}</version>
             <scope>test</scope>
         </dependency>
 
