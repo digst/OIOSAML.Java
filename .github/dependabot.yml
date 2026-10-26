@@ -1,0 +1,32 @@
+version: 2
+updates:
+  # The parent pom lists every module, so one job covers oiosaml, demo, integrationtest and idp.
+  - package-ecosystem: maven
+    directory: "/"
+    schedule:
+      interval: weekly
+    ignore:
+      # Newer major versions need Java 11 or Jakarta EE; the library is built for Java 8 and javax.servlet.
+      - dependency-name: "org.opensaml:*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "net.shibboleth.utilities:*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "javax.servlet:javax.servlet-api"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "javax.xml.bind:jaxb-api"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "org.glassfish.jaxb:jaxb-runtime"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "org.springframework.boot:*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      # One PR for all minor and patch updates; major updates and security updates get their own.
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
