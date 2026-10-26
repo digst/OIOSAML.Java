@@ -522,11 +522,15 @@ $ mvn spring-boot:run
 
 When running, the IdP is available on port 7080 (the port can be changed in `application.properties`).
 
+To use it with the demo SP, switch to the "for use with test IdP" lines in `demo/src/main/resources/oiosaml.properties`. The demo IdP's metadata is already in `demo/src/main/resources/test-idp-metadata.xml`.
+
 ## Building and testing
 
 ### Setup Windows SSL/TLS trust
 
-Run the script `misc/setup_prerequisites.ps1` from an elevated PowerShell. This installs the required CA certificate.
+The demo SP and the demo IdP use the same self-signed TLS certificate for `localhost` (`misc/ssl-demo.pfx`). Run the script `misc/setup_prerequisites.ps1` from an elevated PowerShell to trust it on Windows; it installs `misc/ssl-demo.cer` in `LocalMachine\Root`. On other systems, accept the certificate in the browser.
+
+The demo certificates are valid for ten years. `misc/create-demo-certificates.sh` creates new ones; afterwards, save the demo IdP's metadata as `demo/src/main/resources/test-idp-metadata.xml` again.
 
 ### Running the integration test
 

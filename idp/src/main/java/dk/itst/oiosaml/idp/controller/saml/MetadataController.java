@@ -12,9 +12,6 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.common.xml.SAMLConstants;
-import org.opensaml.saml.saml2.metadata.ContactPerson;
-import org.opensaml.saml.saml2.metadata.ContactPersonTypeEnumeration;
-import org.opensaml.saml.saml2.metadata.EmailAddress;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml.saml2.metadata.KeyDescriptor;
@@ -75,16 +72,6 @@ public class MetadataController {
         singleLogoutMetadata.setBinding("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect");
         singleLogoutMetadata.setLocation("https://localhost:7080/saml/slo");
         idpssoDescriptor.getSingleLogoutServices().add(singleLogoutMetadata);
-
-
-        //Contact email for technical support
-        ContactPerson contactPerson = samlHelper.buildSAMLObject(ContactPerson.class);
-        contactPerson.setType(ContactPersonTypeEnumeration.TECHNICAL);
-        EmailAddress email = samlHelper.buildSAMLObject(EmailAddress.class);
-        email.setAddress("TEMPADDR@digital-identity.dk");
-        contactPerson.getEmailAddresses().add(email);
-        idpssoDescriptor.getContactPersons().add(contactPerson);
-
 
         entityDescriptor.getRoleDescriptors().add(idpssoDescriptor);
 
