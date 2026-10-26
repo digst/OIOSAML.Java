@@ -1,9 +1,19 @@
 # OIO SAML 3 (Artifact ID: oiosaml3.java)
 
 ## 3.3.1 (unreleased)
+A maintenance release with a fix and updated dependencies. It is a drop-in replacement for 3.3.0; see *Dependencies* for the Bouncy Castle artifact. Login and logout were verified against NemLog-in DevTest4 on 2026-10-26.
 
 ### Fixes
 - REF-84: OIOBPP privileges are read whichever form the JAXB implementation returns them in. With some JAXB implementations parsing failed with a `ClassCastException`, so `AssertionWrapper.getPrivilegeList()` returned null (issue #68).
+
+### Dependencies
+- REF-83: Bouncy Castle is `org.bouncycastle:bcprov-jdk18on` 1.86 instead of `bcprov-jdk15on` 1.59, which OpenSAML depends on and which is now excluded from each OpenSAML dependency. The `jdk15on` line ended at 1.70 and has published vulnerabilities; `jdk18on` has the same packages and runs on Java 8. The library does not register Bouncy Castle as a security provider. An application that adds `bcprov-jdk15on` itself ends up with both jars on the classpath and should exclude the old one.
+- OpenSAML 3.4.5 → 3.4.6 (with java-support 7.5.2), the last OpenSAML 3 release.
+- SLF4J API 1.7.32 → 1.7.36. The library stays on the SLF4J 1.7 API.
+
+### Other changes
+- REF-83: Dependabot keeps the dependencies up to date, and the build submits the full dependency tree to GitHub so that alerts also cover transitive dependencies. Test and build updates include JUnit 5.14 (through `junit-bom`), Mockito 5, HSQLDB 2.7.4 and current Maven plugins.
+- REF-85: The demo IdP (`idp/`) works again: its configuration placeholders are restored, it shows an error page instead of a 500, and its pages no longer need Bootstrap or jQuery. The demo certificates are renewed and self-signed, valid until 2036: the IdP signing certificate and the TLS certificate of the demo SP and the demo IdP (`misc/ssl-demo.pfx`, created by `misc/create-demo-certificates.sh`). The demo SP includes the demo IdP's metadata, so switching between DevTest4 and the demo IdP only changes `oiosaml.properties`.
 
 ## 3.3.0
 A security-hardening release. It is **not a drop-in replacement for 3.2.x**; read *Upgrading from 3.2.x* below before deploying.
