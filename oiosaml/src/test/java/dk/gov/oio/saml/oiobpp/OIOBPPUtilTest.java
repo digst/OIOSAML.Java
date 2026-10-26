@@ -1,5 +1,9 @@
 package dk.gov.oio.saml.oiobpp;
 
+import java.io.StringReader;
+
+import javax.xml.bind.JAXBContext;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +25,23 @@ public class OIOBPPUtilTest {
         Assertions.assertEquals("urn:dk:some_domain:myPrivilege1C", result.privilegeGroup.get(1).privilege.get(0));
     }
     
+    @DisplayName("Test that the PrivilegeList is read whether JAXB wraps it in a JAXBElement or not")
+    @Test
+    public void testWrappedAndUnwrappedResult() throws Exception {
+        // Through the ObjectFactory the element declaration applies and the result is a JAXBElement; with only the
+        // PrivilegeList class the root element annotation applies and the result is the PrivilegeList itself, as with
+        // some other JAXB implementations
+        Object raw = JAXBContext.newInstance(PrivilegeList.class).createUnmarshaller().unmarshal(new StringReader(validString));
+        Assertions.assertTrue(raw instanceof PrivilegeList, "This context must give an unwrapped PrivilegeList for the test to cover issue #68");
+
+        PrivilegeList wrapped = OIOBPPUtil.unmarshal(JAXBContext.newInstance(ObjectFactory.class), validString);
+        PrivilegeList unwrapped = OIOBPPUtil.unmarshal(JAXBContext.newInstance(PrivilegeList.class), validString);
+
+        Assertions.assertEquals(2, wrapped.privilegeGroup.size());
+        Assertions.assertEquals(2, unwrapped.privilegeGroup.size());
+        Assertions.assertEquals("urn:dk:some_domain:myPrivilege1A", unwrapped.privilegeGroup.get(0).privilege.get(0));
+    }
+
     @DisplayName("Test invalid OIOBPP string")
     @Test
     public void testInvalidString() {
