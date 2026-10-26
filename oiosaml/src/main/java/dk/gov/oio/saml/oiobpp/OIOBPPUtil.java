@@ -6,7 +6,7 @@ import java.util.Base64;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBIntrospector;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.ParserConfigurationException;
@@ -23,7 +23,6 @@ import org.xml.sax.SAXNotSupportedException;
 public class OIOBPPUtil {
     private static final Logger log = LoggerFactory.getLogger(OIOBPPUtil.class);
 
-    @SuppressWarnings("unchecked")
     public static PrivilegeList parse(String object) {
         // we accept both base64 encoded input, and "raw" xml-strings
         try {
@@ -34,11 +33,7 @@ public class OIOBPPUtil {
         }
 
         try {
-            JAXBContext context = JAXBContext.newInstance(ObjectFactory.class);
-            Unmarshaller unmarsheller = context.createUnmarshaller();
-            JAXBElement<PrivilegeList> privilegeList = (JAXBElement<PrivilegeList>) unmarsheller.unmarshal(getSecureSource(object));
-    
-            return privilegeList.getValue();
+            return unmarshal(JAXBContext.newInstance(ObjectFactory.class), object);
         }
         catch (Exception ex) {
             log.warn("Failed to parse input string: {}", object, ex);
@@ -47,6 +42,15 @@ public class OIOBPPUtil {
         return null;
     }
     
+    static PrivilegeList unmarshal(JAXBContext context, String object) throws JAXBException {
+        Unmarshaller unmarshaller = context.createUnmarshaller();
+        Object result = unmarshaller.unmarshal(getSecureSource(object));
+
+        // PrivilegeList is both a root element and declared in the ObjectFactory, so depending on the JAXB
+        // implementation it comes back as the PrivilegeList itself or wrapped in a JAXBElement
+        return (PrivilegeList) JAXBIntrospector.getValue(result);
+    }
+
     private static Source getSecureSource(String object) throws JAXBException {
         try {
             SAXParserFactory spf = getSecureSAXParserFactory();

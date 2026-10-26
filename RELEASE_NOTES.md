@@ -1,5 +1,10 @@
 # OIO SAML 3 (Artifact ID: oiosaml3.java)
 
+## 3.3.1 (unreleased)
+
+### Fixes
+- REF-84: OIOBPP privileges are read whichever form the JAXB implementation returns them in. With some JAXB implementations parsing failed with a `ClassCastException`, so `AssertionWrapper.getPrivilegeList()` returned null (issue #68).
+
 ## 3.3.0
 A security-hardening release. It is **not a drop-in replacement for 3.2.x**; read *Upgrading from 3.2.x* below before deploying.
 
