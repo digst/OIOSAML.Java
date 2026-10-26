@@ -42,9 +42,6 @@ BQaEkY3Ws7Vjxhq0p9ht/0XMFH/ZDE0oxrO7bhMMiEJL</ds:X509Certificate>
                 </ds:X509Data>
             </ds:KeyInfo>
         </md:KeyDescriptor>
-        <md:ContactPerson contactType="technical">
-            <md:EmailAddress>TEMPADDR@digital-identity.dk</md:EmailAddress>
-        </md:ContactPerson>
         <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://localhost:7080/saml/slo"/>
         <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://localhost:7080/saml/sso"/>
     </md:IDPSSODescriptor>
