@@ -22,6 +22,12 @@ updates:
       # JUnit 6 needs Java 17; CI builds on JDK 11. The versions come from junit-bom.
       - dependency-name: "org.junit:*"
         update-types: ["version-update:semver-major"]
+      # MockServer 9 needs Java 17; CI builds on JDK 11.
+      - dependency-name: "org.mock-server:*"
+        update-types: ["version-update:semver-major"]
+      # Selenium 4 changes the API; only integrationtest uses it, and that isn't run at the moment.
+      - dependency-name: "org.seleniumhq.selenium:*"
+        update-types: ["version-update:semver-major"]
       # SLF4J 2 finds its binding differently; integrators' SLF4J 1.7 bindings would stop working.
       - dependency-name: "org.slf4j:*"
         update-types: ["version-update:semver-major"]
